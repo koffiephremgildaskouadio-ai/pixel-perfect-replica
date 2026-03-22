@@ -6,6 +6,7 @@ import { Users, Newspaper, MessageCircle, Shield, ArrowRight } from "lucide-reac
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-district.jpg";
 import aboutImage from "@/assets/about-community.jpg";
+import logo from "@/assets/logo_novalim.png";
 
 const features = [
   {
