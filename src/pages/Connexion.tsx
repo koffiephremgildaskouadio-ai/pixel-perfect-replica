@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { Link } from "react-router-dom";
 import { Mail, Lock, ArrowRight } from "lucide-react";
+import logo from "@/assets/logo_novalim.png";
 
 const Connexion = () => {
   const [email, setEmail] = useState("");
