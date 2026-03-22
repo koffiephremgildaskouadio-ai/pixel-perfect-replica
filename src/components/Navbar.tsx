@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/logo_novalim.png";
 
 const navLinks = [
   { label: "Accueil", path: "/" },
@@ -19,9 +20,7 @@ export const Navbar = () => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50">
       <div className="container flex items-center justify-between h-16">
         <Link to="/" className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-display font-bold text-sm">NC</span>
-          </div>
+          <img src={logo} alt="Logo Novalim-City" className="w-10 h-10 object-contain" />
           <span className="font-display font-bold text-lg text-foreground hidden sm:block">
             Novalim-City
           </span>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import logo from "@/assets/logo_novalim.png";
 
 interface VisitorModalProps {
   open: boolean;
@@ -23,9 +24,7 @@ export const VisitorModal = ({ open, onSubmit }: VisitorModalProps) => {
     <Dialog open={open}>
       <DialogContent className="sm:max-w-md border-none shadow-2xl" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader className="text-center space-y-3">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-            <span className="text-3xl">🏘️</span>
-          </div>
+          <img src={logo} alt="Logo Novalim-City" className="mx-auto w-20 h-20 object-contain" />
           <DialogTitle className="text-2xl font-display">
             Bienvenue à CIE Novalim-City
           </DialogTitle>
