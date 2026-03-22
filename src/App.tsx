@@ -10,6 +10,7 @@ import Membres from "./pages/Membres.tsx";
 import Actualites from "./pages/Actualites.tsx";
 import Chat from "./pages/Chat.tsx";
 import Connexion from "./pages/Connexion.tsx";
+import CarteMembre from "./pages/CarteMembre.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/actualites" element={<Actualites />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/connexion" element={<Connexion />} />
+          <Route path="/carte/:id" element={<CarteMembre />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

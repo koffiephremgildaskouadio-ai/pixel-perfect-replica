@@ -1,8 +1,10 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Menu, X, User } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Menu, X, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo_novalim.png";
+import type { Session } from "@supabase/supabase-js";
 
 const navLinks = [
   { label: "Accueil", path: "/" },
@@ -14,7 +16,22 @@ const navLinks = [
 
 export const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50">
@@ -43,12 +60,19 @@ export const Navbar = () => {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link to="/connexion">
-            <Button variant="outline" size="sm" className="hidden sm:flex gap-2">
-              <User className="w-4 h-4" />
-              Connexion
+          {session ? (
+            <Button variant="outline" size="sm" className="hidden sm:flex gap-2" onClick={handleLogout}>
+              <LogOut className="w-4 h-4" />
+              Déconnexion
             </Button>
-          </Link>
+          ) : (
+            <Link to="/connexion">
+              <Button variant="outline" size="sm" className="hidden sm:flex gap-2">
+                <User className="w-4 h-4" />
+                Connexion
+              </Button>
+            </Link>
+          )}
           <button
             className="lg:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -75,12 +99,19 @@ export const Navbar = () => {
                 {link.label}
               </Link>
             ))}
-            <Link to="/connexion" onClick={() => setMobileOpen(false)}>
-              <Button variant="outline" size="sm" className="mt-2 w-full gap-2">
-                <User className="w-4 h-4" />
-                Connexion
+            {session ? (
+              <Button variant="outline" size="sm" className="mt-2 w-full gap-2" onClick={() => { handleLogout(); setMobileOpen(false); }}>
+                <LogOut className="w-4 h-4" />
+                Déconnexion
               </Button>
-            </Link>
+            ) : (
+              <Link to="/connexion" onClick={() => setMobileOpen(false)}>
+                <Button variant="outline" size="sm" className="mt-2 w-full gap-2">
+                  <User className="w-4 h-4" />
+                  Connexion
+                </Button>
+              </Link>
+            )}
           </nav>
         </div>
       )}
