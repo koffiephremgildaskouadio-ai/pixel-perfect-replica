@@ -197,9 +197,7 @@ const Index = () => {
         <div className="container">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-display font-bold text-xs">NC</span>
-              </div>
+              <img src={logo} alt="Logo Novalim-City" className="w-9 h-9 object-contain" />
               <span className="font-display font-semibold text-foreground">CIE Novalim-City</span>
             </div>
             <p className="text-sm text-muted-foreground">

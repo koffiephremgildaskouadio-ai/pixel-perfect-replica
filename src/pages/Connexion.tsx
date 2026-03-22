@@ -24,9 +24,7 @@ const Connexion = () => {
         <ScrollReveal>
           <div className="bg-card rounded-2xl border border-border/50 shadow-lg p-8 space-y-6">
             <div className="text-center space-y-2">
-              <div className="mx-auto w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-4">
-                <span className="text-primary-foreground font-display font-bold text-lg">NC</span>
-              </div>
+              <img src={logo} alt="Logo Novalim-City" className="mx-auto w-16 h-16 object-contain mb-4" />
               <h1 className="text-2xl font-display font-bold text-foreground">Espace Membre</h1>
               <p className="text-sm text-muted-foreground">Connectez-vous pour accéder à votre espace personnel.</p>
             </div>
