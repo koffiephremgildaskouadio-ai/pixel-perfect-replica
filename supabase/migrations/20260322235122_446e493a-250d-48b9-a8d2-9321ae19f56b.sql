@@ -1,0 +1,3 @@
+
+ALTER TABLE public.members DROP CONSTRAINT members_category_check;
+ALTER TABLE public.members ADD CONSTRAINT members_category_check CHECK (category = ANY (ARRAY['bureau'::text, 'cabinet'::text, 'membre'::text, 'coordonnateur'::text]));

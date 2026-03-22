@@ -27,7 +27,9 @@ export const VirtualCard = ({
       ? "Bureau Exécutif"
       : category === "cabinet"
         ? "Cabinet"
-        : "Membre";
+        : category === "coordonnateur"
+          ? "Coordonnateur"
+          : "Membre";
 
   return (
     <div className="w-full max-w-sm mx-auto">
