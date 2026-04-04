@@ -57,13 +57,26 @@ const ChatRoom = ({ session }: { session: Session }) => {
   const { data: messages = [], isLoading } = useQuery({
     queryKey: ["chat-messages"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: msgs, error } = await supabase
         .from("messages")
-        .select("id, user_id, content, created_at, profiles(nom, prenoms)")
+        .select("id, user_id, content, created_at")
         .order("created_at", { ascending: true })
         .limit(200);
       if (error) throw error;
-      return data as ChatMessage[];
+
+      // Fetch profile names for unique user_ids
+      const userIds = [...new Set(msgs.map((m) => m.user_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, nom, prenoms")
+        .in("id", userIds);
+
+      const profileMap = new Map(profiles?.map((p) => [p.id, p]) ?? []);
+
+      return msgs.map((m) => ({
+        ...m,
+        profiles: profileMap.get(m.user_id) ?? null,
+      })) as ChatMessage[];
     },
   });
 
