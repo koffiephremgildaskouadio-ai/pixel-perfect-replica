@@ -16,7 +16,7 @@ interface Member {
 
 const MemberCard = ({ member, index }: { member: Member; index: number }) => {
   const initials = `${member.nom[0]}${member.prenoms?.[0] || ""}`;
-  const isPresident = member.member_number === "NCV-2024-001";
+  const isPresident = member.member_number === "NCV-2025-001";
 
   return (
     <ScrollReveal delay={index * 80}>
