@@ -125,6 +125,7 @@ const Membres = () => {
                 prenoms={myCard.prenoms}
                 poste={myCard.poste}
                 quartier={myCard.quartier}
+                phone={myCard.phone}
                 category={myCard.category}
               />
             </ScrollReveal>
