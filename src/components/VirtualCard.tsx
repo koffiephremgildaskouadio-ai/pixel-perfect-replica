@@ -12,6 +12,7 @@ interface VirtualCardProps {
   phone: string | null;
   category: string;
   memberId: string;
+  photoUrl?: string | null;
 }
 
 export const VirtualCard = ({
@@ -23,6 +24,7 @@ export const VirtualCard = ({
   phone,
   category,
   memberId,
+  photoUrl,
 }: VirtualCardProps) => {
   const [flipped, setFlipped] = useState(false);
   const cardUrl = `${window.location.origin}/carte/${memberId}`;
@@ -80,9 +82,13 @@ export const VirtualCard = ({
 
               {/* Member info body */}
               <div className="flex-1 px-4 py-3 flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-base font-display font-bold text-primary shrink-0">
-                  {initials}
-                </div>
+                {photoUrl ? (
+                  <img src={photoUrl} alt={`${nom} ${prenoms}`} className="w-12 h-12 rounded-xl object-cover shrink-0" />
+                ) : (
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-base font-display font-bold text-primary shrink-0">
+                    {initials}
+                  </div>
+                )}
                 <div className="min-w-0 flex-1">
                   <h3 className="font-display font-bold text-foreground text-sm leading-tight truncate">
                     {nom} {prenoms}
