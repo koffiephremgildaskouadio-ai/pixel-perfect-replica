@@ -140,6 +140,15 @@ const Connexion = () => {
                   required
                   minLength={6}
                 />
+                {mode === "login" && (
+                  <button
+                    type="button"
+                    onClick={handleResetPassword}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Mot de passe oublié ?
+                  </button>
+                )}
               </div>
               <Button type="submit" variant="hero" size="lg" className="w-full" disabled={isLoading}>
                 {isLoading
