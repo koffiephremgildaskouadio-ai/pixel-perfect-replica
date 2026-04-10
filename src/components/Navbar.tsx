@@ -8,6 +8,7 @@ import type { Session } from "@supabase/supabase-js";
 
 const navLinks = [
   { label: "Accueil", path: "/" },
+  { label: "À propos", path: "/a-propos" },
   { label: "Bureau & Cabinet", path: "/bureau" },
   { label: "Membres", path: "/membres" },
   { label: "Actualités", path: "/actualites" },

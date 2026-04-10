@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { VisitorModal } from "@/components/VisitorModal";
-import { Users, Newspaper, MessageCircle, Shield, ArrowRight } from "lucide-react";
+import { Users, Newspaper, MessageCircle, Shield, ArrowRight, Info } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-district.jpg";
 import aboutImage from "@/assets/about-community.jpg";
 import logo from "@/assets/logo_novalim.png";
+import logoCcjy from "@/assets/logo_ccjy.jpg";
 
 const features = [
   {
@@ -132,8 +133,14 @@ const Index = () => {
         <div className="container">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <ScrollReveal direction="left">
-              <div className="rounded-2xl overflow-hidden shadow-xl">
-                <img src={aboutImage} alt="Communauté Novalim-City" className="w-full h-80 lg:h-96 object-cover" />
+              <div className="space-y-6">
+                <div className="rounded-2xl overflow-hidden shadow-xl">
+                  <img src={aboutImage} alt="Communauté Novalim-City" className="w-full h-80 lg:h-96 object-cover" />
+                </div>
+                <div className="flex items-center justify-center gap-6">
+                  <img src={logo} alt="Logo District" className="w-16 h-16 object-contain" />
+                  <img src={logoCcjy} alt="Logo CCJY" className="w-16 h-16 object-contain rounded-lg" />
+                </div>
               </div>
             </ScrollReveal>
             <ScrollReveal delay={150}>
@@ -143,15 +150,20 @@ const Index = () => {
                   Unir et servir notre communauté
                 </h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  Le District Cité Novalim-CIE rassemble les habitants autour de valeurs communes
-                  de solidarité, d'entraide et de progrès. Notre plateforme digitalise la gestion
-                  communautaire pour une meilleure transparence et efficacité.
+                  Le District Cité Novalim-CIE est l'un des <strong>87 districts</strong> et 11 villages
+                  de la commune de Yopougon, rattaché au <strong>Conseil Communal des Jeunes de Yopougon (CCJY)</strong>.
+                  Composé à 95 % de cités résidentielles, notre district se distingue par une organisation
+                  exemplaire, chaque cité étant dirigée par un président élu.
+                </p>
+                <p className="text-muted-foreground leading-relaxed">
+                  Membre de la <strong>Zone 7</strong>, nous bénéficions d'un réseau de partenaires
+                  sanitaires de qualité et d'acteurs économiques engagés pour le bien-être de nos résidents.
                 </p>
                 <div className="grid grid-cols-3 gap-4 pt-4">
                   {[
                     { value: "250+", label: "Membres" },
-                    { value: "15", label: "Quartiers" },
-                    { value: "2024", label: "Fondé en" },
+                    { value: "Zone 7", label: "CCJY" },
+                    { value: "95%", label: "Cités" },
                   ].map((stat) => (
                     <div key={stat.label} className="text-center p-3 rounded-xl bg-card border border-border/50">
                       <div className="text-2xl font-display font-bold text-primary">{stat.value}</div>
@@ -159,6 +171,12 @@ const Index = () => {
                     </div>
                   ))}
                 </div>
+                <Link to="/a-propos">
+                  <Button variant="outline" size="lg" className="mt-4 gap-2">
+                    <Info className="w-4 h-4" />
+                    En savoir plus
+                  </Button>
+                </Link>
               </div>
             </ScrollReveal>
           </div>
