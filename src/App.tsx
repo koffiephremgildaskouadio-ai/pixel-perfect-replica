@@ -33,6 +33,7 @@ const App = () => (
           <Route path="/connexion" element={<Connexion />} />
           <Route path="/carte/:id" element={<CarteMembre />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/a-propos" element={<APropos />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
