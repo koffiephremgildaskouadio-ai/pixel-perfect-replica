@@ -32,6 +32,25 @@ const Connexion = () => {
     }
   };
 
+  const handleResetPassword = async () => {
+    if (!email.trim()) {
+      toast.error("Veuillez entrer votre adresse email d'abord.");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast.success("Un email de réinitialisation a été envoyé !");
+    } catch (err: any) {
+      toast.error(err.message || "Erreur lors de l'envoi");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nom.trim() || !prenoms.trim()) {
@@ -121,6 +140,15 @@ const Connexion = () => {
                   required
                   minLength={6}
                 />
+                {mode === "login" && (
+                  <button
+                    type="button"
+                    onClick={handleResetPassword}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Mot de passe oublié ?
+                  </button>
+                )}
               </div>
               <Button type="submit" variant="hero" size="lg" className="w-full" disabled={isLoading}>
                 {isLoading

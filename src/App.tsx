@@ -11,6 +11,7 @@ import Actualites from "./pages/Actualites.tsx";
 import Chat from "./pages/Chat.tsx";
 import Connexion from "./pages/Connexion.tsx";
 import CarteMembre from "./pages/CarteMembre.tsx";
+import ResetPassword from "./pages/ResetPassword.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/chat" element={<Chat />} />
           <Route path="/connexion" element={<Connexion />} />
           <Route path="/carte/:id" element={<CarteMembre />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
