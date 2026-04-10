@@ -12,6 +12,7 @@ import Chat from "./pages/Chat.tsx";
 import Connexion from "./pages/Connexion.tsx";
 import CarteMembre from "./pages/CarteMembre.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
+import APropos from "./pages/APropos.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
