@@ -31,6 +31,7 @@ const App = () => (
           <Route path="/chat" element={<Chat />} />
           <Route path="/connexion" element={<Connexion />} />
           <Route path="/carte/:id" element={<CarteMembre />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
