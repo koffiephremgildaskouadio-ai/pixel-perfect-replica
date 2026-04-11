@@ -14,21 +14,25 @@ const features = [
     icon: Users,
     title: "Identification Digitale",
     description: "Cartes virtuelles avec QR code pour chaque membre du district.",
+    link: "/membres",
   },
   {
     icon: Newspaper,
     title: "Actualités Officielles",
     description: "Restez informé des dernières nouvelles et activités du district.",
+    link: "/actualites",
   },
   {
     icon: MessageCircle,
     title: "Chat Communautaire",
-    description: "Posez vos questions et échangez avec l'administration.",
+    description: "Posez vos questions et échangez avec l'assistant IA du district.",
+    link: "/chat",
   },
   {
     icon: Shield,
     title: "Espace Sécurisé",
     description: "Base de données protégée et accès contrôlé par rôle.",
+    link: "/connexion",
   },
 ];
 
@@ -115,13 +119,15 @@ const Index = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, i) => (
               <ScrollReveal key={feature.title} delay={i * 80}>
-                <div className="group p-6 rounded-2xl bg-card border border-border/50 shadow-sm hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 h-full">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/15 transition-colors">
-                    <feature.icon className="w-6 h-6 text-primary" />
+                <Link to={feature.link}>
+                  <div className="group p-6 rounded-2xl bg-card border border-border/50 shadow-sm hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 h-full cursor-pointer">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/15 transition-colors">
+                      <feature.icon className="w-6 h-6 text-primary" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
-                </div>
+                </Link>
               </ScrollReveal>
             ))}
           </div>
@@ -161,7 +167,7 @@ const Index = () => {
                 </p>
                 <div className="grid grid-cols-3 gap-4 pt-4">
                   {[
-                    { value: "250+", label: "Membres" },
+                    { value: "1000+", label: "Membres" },
                     { value: "Zone 7", label: "CCJY" },
                     { value: "95%", label: "Cités" },
                   ].map((stat) => (

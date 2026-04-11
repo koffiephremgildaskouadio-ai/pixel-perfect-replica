@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { Link, useNavigate } from "react-router-dom";
-import { Mail, Lock, ArrowRight, UserPlus } from "lucide-react";
+import { Mail, Lock, ArrowRight, UserPlus, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logo from "@/assets/logo_novalim.png";
@@ -11,6 +11,7 @@ import logo from "@/assets/logo_novalim.png";
 const Connexion = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [nom, setNom] = useState("");
@@ -65,7 +66,7 @@ const Connexion = () => {
         options: { data: { nom: nom.trim(), prenoms: prenoms.trim() } },
       });
       if (error) throw error;
-      toast.success("Inscription réussie ! Vérifiez votre email pour confirmer votre compte.");
+      toast.success("Inscription réussie ! Vous pouvez maintenant vous connecter.");
       setMode("login");
     } catch (err: any) {
       toast.error(err.message || "Erreur lors de l'inscription");
@@ -96,21 +97,11 @@ const Connexion = () => {
                 <>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground">Nom</label>
-                    <Input
-                      placeholder="Votre nom de famille"
-                      value={nom}
-                      onChange={(e) => setNom(e.target.value)}
-                      required
-                    />
+                    <Input placeholder="Votre nom de famille" value={nom} onChange={(e) => setNom(e.target.value)} required />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground">Prénoms</label>
-                    <Input
-                      placeholder="Vos prénoms"
-                      value={prenoms}
-                      onChange={(e) => setPrenoms(e.target.value)}
-                      required
-                    />
+                    <Input placeholder="Vos prénoms" value={prenoms} onChange={(e) => setPrenoms(e.target.value)} required />
                   </div>
                 </>
               )}
@@ -119,51 +110,40 @@ const Connexion = () => {
                   <Mail className="w-4 h-4 text-muted-foreground" />
                   Adresse email
                 </label>
-                <Input
-                  type="email"
-                  placeholder="votre@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
+                <Input type="email" placeholder="votre@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground flex items-center gap-2">
                   <Lock className="w-4 h-4 text-muted-foreground" />
                   Mot de passe
                 </label>
-                <Input
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                />
-                {mode === "login" && (
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    className="pr-10"
+                  />
                   <button
                     type="button"
-                    onClick={handleResetPassword}
-                    className="text-xs text-primary hover:underline"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {mode === "login" && (
+                  <button type="button" onClick={handleResetPassword} className="text-xs text-primary hover:underline">
                     Mot de passe oublié ?
                   </button>
                 )}
               </div>
               <Button type="submit" variant="hero" size="lg" className="w-full" disabled={isLoading}>
-                {isLoading
-                  ? mode === "login"
-                    ? "Connexion..."
-                    : "Inscription..."
-                  : mode === "login"
-                    ? "Se connecter"
-                    : "S'inscrire"}
-                {!isLoading &&
-                  (mode === "login" ? (
-                    <ArrowRight className="w-4 h-4" />
-                  ) : (
-                    <UserPlus className="w-4 h-4" />
-                  ))}
+                {isLoading ? (mode === "login" ? "Connexion..." : "Inscription...") : mode === "login" ? "Se connecter" : "S'inscrire"}
+                {!isLoading && (mode === "login" ? <ArrowRight className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />)}
               </Button>
             </form>
 
@@ -171,24 +151,12 @@ const Connexion = () => {
               {mode === "login" ? (
                 <>
                   Pas encore membre ?{" "}
-                  <button
-                    type="button"
-                    onClick={() => setMode("signup")}
-                    className="text-primary font-medium hover:underline"
-                  >
-                    Créer un compte
-                  </button>
+                  <button type="button" onClick={() => setMode("signup")} className="text-primary font-medium hover:underline">Créer un compte</button>
                 </>
               ) : (
                 <>
                   Déjà un compte ?{" "}
-                  <button
-                    type="button"
-                    onClick={() => setMode("login")}
-                    className="text-primary font-medium hover:underline"
-                  >
-                    Se connecter
-                  </button>
+                  <button type="button" onClick={() => setMode("login")} className="text-primary font-medium hover:underline">Se connecter</button>
                 </>
               )}
             </p>
