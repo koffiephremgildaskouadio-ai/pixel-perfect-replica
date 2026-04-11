@@ -67,7 +67,7 @@ const Bureau = () => {
       const { data, error } = await supabase
         .from("members")
         .select("id, nom, prenoms, poste, member_number, category")
-        .in("category", ["bureau", "cabinet", "coordonnateur"])
+        .in("category", ["bureau", "cabinet", "coordonnateur", "commission"])
         .eq("is_active", true)
         .order("member_number");
       if (error) throw error;
@@ -78,6 +78,7 @@ const Bureau = () => {
   const bureauMembers = members?.filter((m) => m.category === "bureau") ?? [];
   const cabinetMembers = members?.filter((m) => m.category === "cabinet") ?? [];
   const coordMembers = members?.filter((m) => m.category === "coordonnateur") ?? [];
+  const commissionMembers = members?.filter((m) => m.category === "commission") ?? [];
 
   const LoadingSkeleton = () => (
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -161,6 +162,24 @@ const Bureau = () => {
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {coordMembers.map((m, i) => (
+                <MemberCard key={m.id} member={m} index={i} />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="py-16 lg:py-20 bg-secondary/30">
+        <div className="container">
+          <SectionHeader
+            title="Commissions"
+            description="Les présidents et membres des commissions d'assainissement, de sécurité et culturelle."
+          />
+          {isLoading ? (
+            <LoadingSkeleton />
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {commissionMembers.map((m, i) => (
                 <MemberCard key={m.id} member={m} index={i} />
               ))}
             </div>
