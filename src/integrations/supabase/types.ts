@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      actualites: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          image_url: string | null
+          source: string | null
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          source?: string | null
+          title: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          source?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       members: {
         Row: {
           cahier_charges: string | null
