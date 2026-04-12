@@ -1,5 +1,5 @@
 import { ScrollReveal } from "@/components/ScrollReveal";
-import { User as UserIcon, MapPin } from "lucide-react";
+import { User as UserIcon, MapPin, ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
@@ -12,6 +12,7 @@ interface Member {
   poste: string | null;
   member_number: string;
   category: string;
+  photo_url: string | null;
 }
 
 const MemberCard = ({ member, index }: { member: Member; index: number }) => {
