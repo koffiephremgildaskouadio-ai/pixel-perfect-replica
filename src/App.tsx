@@ -13,6 +13,7 @@ import Connexion from "./pages/Connexion.tsx";
 import CarteMembre from "./pages/CarteMembre.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import APropos from "./pages/APropos.tsx";
+import Conference from "./pages/Conference.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/carte/:id" element={<CarteMembre />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/a-propos" element={<APropos />} />
+          <Route path="/conference" element={<Conference />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
