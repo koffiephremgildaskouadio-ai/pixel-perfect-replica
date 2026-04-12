@@ -33,15 +33,19 @@ const MemberCard = ({ member, index }: { member: Member; index: number }) => {
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-accent" />
           )}
           <div className="p-6 text-center space-y-3">
-            <div
-              className={`mx-auto w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-display font-bold ${
-                isPresident
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-secondary text-secondary-foreground"
-              }`}
-            >
-              {initials}
-            </div>
+            {member.photo_url ? (
+              <img src={member.photo_url} alt={`${member.nom} ${member.prenoms}`} className="mx-auto w-16 h-16 rounded-2xl object-cover" />
+            ) : (
+              <div
+                className={`mx-auto w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-display font-bold ${
+                  isPresident
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-secondary-foreground"
+                }`}
+              >
+                {initials}
+              </div>
+            )}
             <div>
               <h3 className="font-semibold text-foreground text-base leading-tight">
                 {member.nom} {member.prenoms}
@@ -67,7 +71,7 @@ const Bureau = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("members")
-        .select("id, nom, prenoms, poste, member_number, category")
+        .select("id, nom, prenoms, poste, member_number, category, photo_url")
         .in("category", ["bureau", "cabinet", "coordonnateur", "commission"])
         .eq("is_active", true)
         .order("member_number");
@@ -102,6 +106,9 @@ const Bureau = () => {
     <div className="pt-16">
       <section className="py-16 lg:py-24 bg-secondary/50">
         <div className="container">
+          <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-6 transition-colors">
+            <ArrowLeft className="w-4 h-4" /> Retour à l'accueil
+          </Link>
           <ScrollReveal className="text-center max-w-2xl mx-auto">
             <span className="text-sm font-semibold text-primary tracking-wide uppercase">
               Organisation
