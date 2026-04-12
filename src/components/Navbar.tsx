@@ -12,7 +12,8 @@ const navLinks = [
   { label: "Bureau & Cabinet", path: "/bureau" },
   { label: "Membres", path: "/membres" },
   { label: "Actualités", path: "/actualites" },
-  { label: "Chat", path: "/chat" },
+  { label: "Chat IA", path: "/chat" },
+  { label: "Conférence", path: "/conference" },
 ];
 
 export const Navbar = () => {
