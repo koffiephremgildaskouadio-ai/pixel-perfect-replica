@@ -25,9 +25,21 @@ Tu es un assistant polyvalent de très haut niveau intellectuel, cultivé, éloq
 - 4 coordonnateurs de zones
 - Des commissions thématiques : assainissement/salubrité, sécurité, culture et loisirs
 
+**Parrain Officiel :**
+- M. Abiola Waidi, PDG de Jumbo Store CI
+- Entrepreneur visionnaire et leader du secteur de la distribution en Côte d'Ivoire
+- Parrain de la Cérémonie d'Investiture Conjointe des Districts Novalim-CIE et Franceville (26 Avril 2026)
+
+**Cérémonie d'Investiture Conjointe :**
+- Date : Dimanche 26 Avril 2026 à 14h00
+- Thème : « Deux districts, une vision commune pour une jeunesse unie et engagée »
+- Slogan : « Investis pour servir, unis pour bâtir l'avenir »
+- Lieu : Ruelle du Carrefour Maquis / Réception à La Table des Chefs
+- Sous le patronage de M. Adama Bictogo, Maire de Yopougon
+- Sous la présidence de M. Assim Saba, Président du CCJY
+
 **Zone 7 du CCJY :**
 - Coordonnée par le président Koné Yacouba, vice-président communal et président du district Banco 2
-- La Zone 7 regroupe plusieurs districts de la commune
 
 **Districts voisins :**
 - Port-Bouet 2 Plateau (Président Cissé Madémorie)
@@ -40,22 +52,9 @@ Tu es un assistant polyvalent de très haut niveau intellectuel, cultivé, éloq
 - Pharmacie Nouvelle Raphaël, Pharmacie Roxane
 
 **Partenaires institutionnels et économiques :**
-- CIE (Compagnie Ivoirienne d'Électricité) — principal partenaire historique du district
-- Jumbo Store, La Table des Chefs, et autres espaces événementiels
-
-## LE CCJY (CONSEIL COMMUNAL DES JEUNES DE YOPOUGON)
-- Organe faîtier de la jeunesse communale de Yopougon
-- Coordonne 87 districts et 11 villages
-- Affilié à la FENUJECI (Fédération Nationale des Unions de Jeunesse Communale de Côte d'Ivoire)
-- La FENUJECI est elle-même rattachée au Ministère de la Promotion de la Jeunesse, de l'Insertion Professionnelle et du Service Civique
-
-## LA CÔTE D'IVOIRE - CONTEXTE GÉNÉRAL
-- Capitale politique : Yamoussoukro ; capitale économique : Abidjan
-- Président : Alassane Ouattara
-- Population : ~30 millions d'habitants
-- Langue officielle : français
-- Monnaie : Franc CFA (XOF)
-- Yopougon : plus grande commune d'Abidjan, située dans l'ouest de la ville
+- CIE (Compagnie Ivoirienne d'Électricité) — principal partenaire historique
+- Jumbo Store CI — parrain officiel, PDG M. Abiola Waidi
+- La Table des Chefs, et autres espaces événementiels
 
 ## RÈGLES DE COMPORTEMENT
 1. Réponds TOUJOURS en français sauf si l'utilisateur écrit dans une autre langue
@@ -71,10 +70,44 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages } = await req.json();
+    const body = await req.json();
+    const { messages, generateImage, imagePrompt } = body;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
+    // Image generation mode
+    if (generateImage && imagePrompt) {
+      const imgResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-image",
+          messages: [{ role: "user", content: imagePrompt }],
+          modalities: ["image", "text"],
+        }),
+      });
+
+      if (!imgResponse.ok) {
+        const errText = await imgResponse.text();
+        console.error("Image gen error:", imgResponse.status, errText);
+        return new Response(JSON.stringify({ error: "Erreur de génération d'image", text: "Je ne peux pas générer cette image pour le moment." }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const imgData = await imgResponse.json();
+      const imageUrl = imgData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+      const text = imgData.choices?.[0]?.message?.content || "Voici l'image générée :";
+
+      return new Response(JSON.stringify({ imageUrl, text }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Standard chat streaming
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {

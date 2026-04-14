@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, User, LogOut } from "lucide-react";
+import { Menu, X, User, LogOut, ShieldCheck, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo_novalim.png";
@@ -14,21 +14,33 @@ const navLinks = [
   { label: "Actualités", path: "/actualites" },
   { label: "Chat IA", path: "/chat" },
   { label: "Conférence", path: "/conference" },
+  { label: "Annuaire", path: "/annuaire" },
 ];
 
 export const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) checkAdmin(session.user.id);
+    });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      if (session) checkAdmin(session.user.id);
+      else setIsAdmin(false);
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  const checkAdmin = async (userId: string) => {
+    const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+    setIsAdmin(!!data?.some(r => ["admin", "moderator"].includes(r.role)));
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -50,7 +62,7 @@ export const Navbar = () => {
             <Link
               key={link.path}
               to={link.path}
-              className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
                 location.pathname === link.path
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:text-foreground hover:bg-secondary"
@@ -59,6 +71,18 @@ export const Navbar = () => {
               {link.label}
             </Link>
           ))}
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-1 ${
+                location.pathname === "/admin"
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5" /> Admin
+            </Link>
+          )}
         </nav>
 
         <div className="flex items-center gap-2">
@@ -101,6 +125,19 @@ export const Navbar = () => {
                 {link.label}
               </Link>
             ))}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                onClick={() => setMobileOpen(false)}
+                className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                  location.pathname === "/admin"
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-secondary"
+                }`}
+              >
+                <ShieldCheck className="w-4 h-4" /> Administration
+              </Link>
+            )}
             {session ? (
               <Button variant="outline" size="sm" className="mt-2 w-full gap-2" onClick={() => { handleLogout(); setMobileOpen(false); }}>
                 <LogOut className="w-4 h-4" />
