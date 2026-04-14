@@ -1,5 +1,5 @@
 import { ScrollReveal } from "@/components/ScrollReveal";
-import { MapPin, Building2, Heart, Users, Shield, Handshake } from "lucide-react";
+import { MapPin, Building2, Heart, Users, Shield, Handshake, Star, Crown } from "lucide-react";
 import logoNovalim from "@/assets/logo_novalim.png";
 import logoCcjy from "@/assets/logo_ccjy.jpg";
 
@@ -21,6 +21,7 @@ const partenaires = {
     "Pharmacie Roxane",
   ],
   autres: [
+    "Jumbo Store CI",
     "La Table des Chefs",
     "Espaces événementiels locaux",
     "Grand CIE et ses cités",
@@ -101,6 +102,77 @@ const APropos = () => {
         </div>
       </section>
 
+      {/* Parrain officiel - Abiola Waidi */}
+      <section className="py-16 lg:py-20 bg-gradient-to-br from-primary/5 to-accent/5">
+        <div className="container">
+          <ScrollReveal className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
+              <Crown className="w-4 h-4" />
+              Parrain Officiel du District
+            </div>
+            <h2 className="text-2xl lg:text-3xl font-display font-bold text-foreground">
+              M. Abiola Waidi — PDG de Jumbo Store CI
+            </h2>
+          </ScrollReveal>
+
+          <div className="grid lg:grid-cols-2 gap-12 items-center max-w-5xl mx-auto">
+            <ScrollReveal direction="left">
+              <div className="flex flex-col items-center gap-6">
+                <div className="rounded-2xl overflow-hidden shadow-2xl border-4 border-primary/30 w-72 h-80">
+                  <img
+                    src="/images/abiola_waidi.jpg"
+                    alt="M. Abiola Waidi, PDG de Jumbo Store CI"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-xl font-display font-bold text-foreground">
+                    Abiola Waidi
+                  </h3>
+                  <p className="text-primary font-semibold text-sm">PDG — Jumbo Store CI</p>
+                  <p className="text-xs text-muted-foreground mt-1">Parrain de la Cérémonie d'Investiture</p>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            <ScrollReveal delay={150}>
+              <div className="space-y-5">
+                <h3 className="text-xl font-display font-bold text-foreground flex items-center gap-2">
+                  <Star className="w-5 h-5 text-primary" />
+                  Un leader visionnaire au service de la communauté
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  <strong>M. Abiola Waidi</strong> est le Président-Directeur Général de <strong>Jumbo Store CI</strong>, 
+                  une enseigne de référence dans le secteur de la distribution et du commerce en Côte d'Ivoire. 
+                  Entrepreneur accompli et homme de cœur, il incarne les valeurs d'excellence, de persévérance 
+                  et d'engagement communautaire.
+                </p>
+                <p className="text-muted-foreground leading-relaxed">
+                  Son parcours exceptionnel, marqué par une ascension fulgurante dans le monde des affaires, 
+                  fait de lui un modèle inspirant pour la jeunesse ivoirienne. En acceptant le <strong>parrainage 
+                  officiel</strong> de la Cérémonie d'Investiture Conjointe des Districts Cité Novalim-CIE et 
+                  Franceville, M. Waidi témoigne de sa profonde conviction en la force de la jeunesse 
+                  organisée et du développement communautaire.
+                </p>
+                <p className="text-muted-foreground leading-relaxed">
+                  <strong>Jumbo Store CI</strong>, sous sa direction éclairée, est bien plus qu'une entreprise 
+                  commerciale : c'est un acteur majeur du tissu économique local, pourvoyeur d'emplois et 
+                  partenaire engagé dans le développement social. Le district Cité Novalim-CIE est 
+                  profondément honoré de compter M. Abiola Waidi parmi ses partenaires stratégiques 
+                  et son parrain officiel.
+                </p>
+                <div className="p-4 rounded-xl bg-primary/5 border border-primary/10">
+                  <p className="text-sm text-primary font-medium italic">
+                    « Le développement d'une communauté commence par l'engagement de ses leaders 
+                    envers sa jeunesse. » — Esprit de M. Abiola Waidi
+                  </p>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
       {/* Identité du district */}
       <section className="py-16 lg:py-20 bg-secondary/30">
         <div className="container">
@@ -111,8 +183,6 @@ const APropos = () => {
             <p className="mt-3 text-muted-foreground leading-relaxed">
               Le District Cité Novalim-CIE se distingue par sa composition à 95 % de cités
               résidentielles, chacune structurée avec son propre bureau et dirigée par un président de cité.
-              Cette organisation exemplaire favorise la cohésion, la transparence et l'entraide entre
-              résidents.
             </p>
           </ScrollReveal>
 
@@ -123,7 +193,7 @@ const APropos = () => {
               { icon: Shield, title: "Zone 7", desc: "Rattaché à la Zone 7, coordonnée par Koné Yacouba, Vice-Président communal." },
               { icon: MapPin, title: "Emplacement stratégique", desc: "Bordé par les districts Port-Bouët 2, Franceville, Terminus 47 et Base CIE." },
               { icon: Heart, title: "Partenaires santé", desc: "Le Grand Centre, Clinique Vie, Clinique Ste Jeanne de Garcia et plusieurs pharmacies." },
-              { icon: Handshake, title: "Partenaires locaux", desc: "La Table des Chefs, le Grand CIE, espaces événementiels et autres acteurs économiques." },
+              { icon: Handshake, title: "Partenaires locaux", desc: "Jumbo Store CI, La Table des Chefs, le Grand CIE, espaces événementiels et autres acteurs économiques." },
             ].map((item, i) => (
               <ScrollReveal key={item.title} delay={i * 80}>
                 <div className="p-6 rounded-2xl bg-card border border-border/50 shadow-sm h-full">
@@ -183,7 +253,7 @@ const APropos = () => {
             {[
               { title: "Santé", items: partenaires.sante, icon: Heart },
               { title: "Pharmacies", items: partenaires.pharmacies, icon: Shield },
-              { title: "Autres partenaires", items: partenaires.autres, icon: Handshake },
+              { title: "Partenaires stratégiques", items: partenaires.autres, icon: Handshake },
             ].map((cat, i) => (
               <ScrollReveal key={cat.title} delay={i * 100}>
                 <div className="p-6 rounded-2xl bg-card border border-border/50 h-full">
