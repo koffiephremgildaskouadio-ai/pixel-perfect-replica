@@ -9,7 +9,6 @@ import { fr } from "date-fns/locale";
 import { useEffect } from "react";
 
 const Actualites = () => {
-  // Trigger AI news generation on page load (idempotent - backend handles dedup)
   useEffect(() => {
     supabase.functions.invoke("generate-news").catch(() => {});
   }, []);
@@ -41,6 +40,7 @@ const Actualites = () => {
       case "ministry": return "Min. Jeunesse";
       case "ccjy": return "CCJY";
       case "mairie": return "Mairie";
+      case "event": return "Événement";
       default: return "Actualité";
     }
   };
@@ -58,7 +58,7 @@ const Actualites = () => {
               Fil d'Actualités
             </h1>
             <p className="mt-4 text-muted-foreground leading-relaxed">
-              Messages quotidiens, informations du ministère de la Promotion de la Jeunesse, du CCJY et de la Mairie de Yopougon.
+              Messages quotidiens, événements, informations du ministère, du CCJY et de la Mairie de Yopougon.
             </p>
           </ScrollReveal>
         </div>
@@ -79,7 +79,7 @@ const Actualites = () => {
               <div className="text-center py-16 px-8 rounded-2xl bg-secondary/50 border border-border/50">
                 <span className="text-4xl mb-4 block">📰</span>
                 <h3 className="text-lg font-semibold text-foreground mb-2">Chargement des actualités...</h3>
-                <p className="text-sm text-muted-foreground">Les publications IA arrivent sous peu. Rafraîchissez la page dans quelques instants.</p>
+                <p className="text-sm text-muted-foreground">Les publications arrivent sous peu.</p>
               </div>
             </ScrollReveal>
           )}
@@ -87,6 +87,9 @@ const Actualites = () => {
           {articles?.map((article, i) => (
             <ScrollReveal key={article.id} delay={i * 60}>
               <article className="rounded-2xl bg-card border border-border/50 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                {article.image_url && (
+                  <img src={article.image_url} alt={article.title} className="w-full h-48 object-cover" />
+                )}
                 <div className="p-6 space-y-3">
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-primary/10 text-primary font-medium">
