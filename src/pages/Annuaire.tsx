@@ -156,9 +156,9 @@ const Annuaire = () => {
               {showAdd && isAdmin && (
                 <form onSubmit={handleAdd} className="bg-card rounded-xl border border-border/50 p-4 mb-6 space-y-3">
                   <Input value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="Nom de l'établissement" required />
-                  <Input value={form.address} onChange={e => setForm({...form, address: e.target.value})} placeholder="Adresse" />
-                  <Input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="Téléphone" />
-                  <Textarea value={form.description} onChange={e => setForm({...form, description: e.target.value})} placeholder="Description" rows={2} />
+                  <Input value={form.address} onChange={e => setForm({...form, address: e.target.value})} placeholder="Adresse / Localisation" />
+                  <Input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="Tél. du propriétaire / gérant" />
+                  <Textarea value={form.description} onChange={e => setForm({...form, description: e.target.value})} placeholder="Nom du propriétaire / gérant et description..." rows={2} />
                   <Button type="submit" size="sm" disabled={isSaving}>
                     {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Enregistrer"}
                   </Button>
