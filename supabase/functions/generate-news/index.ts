@@ -33,10 +33,10 @@ Règles:
 - Inclus des informations pertinentes au calendrier ivoirien (fêtes, événements nationaux, saisons)
 - Mentionne si possible des initiatives liées à la jeunesse, à la mairie de Yopougon, au ministère de la Promotion de la Jeunesse
 - Écris comme un professionnel cultivé, inspirant et bienveillant
-- Chaque publication doit avoir: title (court), content (2-4 paragraphes), type (ai_daily)
+- Chaque publication doit avoir: title (court), content (2-4 paragraphes), type (ai_daily), image_prompt (description en anglais d'une image africaine/ivoirienne illustrant le sujet, style photographique professionnel)
 
 Réponds UNIQUEMENT avec le JSON array, sans markdown ni explication.
-Exemple: [{"title":"...","content":"...","type":"ai_daily"}]`;
+Exemple: [{"title":"...","content":"...","type":"ai_daily","image_prompt":"Professional photo of young African people in Abidjan..."}]`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -58,17 +58,59 @@ Exemple: [{"title":"...","content":"...","type":"ai_daily"}]`;
 
     const data = await response.json();
     let raw = data.choices?.[0]?.message?.content || "[]";
-    // Clean markdown wrapper if present
     raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
     
     const articles = JSON.parse(raw);
 
     for (const article of articles) {
+      let imageUrl: string | null = null;
+
+      // Generate an image for the article
+      if (article.image_prompt) {
+        try {
+          const imgResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${LOVABLE_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: "google/gemini-2.5-flash-image",
+              messages: [{ role: "user", content: article.image_prompt }],
+              modalities: ["image", "text"],
+            }),
+          });
+
+          if (imgResponse.ok) {
+            const imgData = await imgResponse.json();
+            const base64Url = imgData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+            if (base64Url) {
+              // Upload to storage
+              const base64Data = base64Url.split(",")[1];
+              const binaryData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+              const filename = `news/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
+              
+              const { error: uploadError } = await supabase.storage
+                .from("member-photos")
+                .upload(filename, binaryData, { contentType: "image/png" });
+              
+              if (!uploadError) {
+                const { data: urlData } = supabase.storage.from("member-photos").getPublicUrl(filename);
+                imageUrl = urlData.publicUrl;
+              }
+            }
+          }
+        } catch (imgErr) {
+          console.error("Image generation failed:", imgErr);
+        }
+      }
+
       await supabase.from("actualites").insert({
         title: article.title,
         content: article.content,
         source: "IA District Novalim-CIE",
         type: article.type || "ai_daily",
+        image_url: imageUrl,
       });
     }
 
