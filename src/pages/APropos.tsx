@@ -302,6 +302,41 @@ Son expertise en gestion financière et sa vision stratégique contribuent signi
         </div>
       </section>
 
+      {/* Galerie du District */}
+      <section className="py-16 lg:py-20">
+        <div className="container max-w-5xl">
+          <ScrollReveal className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
+              <Camera className="w-4 h-4" />
+              Le District en images
+            </div>
+            <h2 className="text-2xl lg:text-3xl font-display font-bold text-foreground">
+              Notre identité visuelle & nos actions
+            </h2>
+            <p className="mt-2 text-muted-foreground">Découvrez le visage du District Cité Novalim-CIE et son équipe sur le terrain.</p>
+          </ScrollReveal>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {[
+              { src: novaOfficial, alt: "Logo officiel District Cité Novalim-CIE", label: "Identité officielle du district" },
+              { src: novaAction1, alt: "L'équipe en action", label: "Mobilisation citoyenne" },
+              { src: novaAction2, alt: "Coordination terrain", label: "Coordination terrain" },
+              { src: novaAction3, alt: "Membres du district", label: "Membres et bureau réunis" },
+            ].map((img, i) => (
+              <ScrollReveal key={i} delay={i * 80}>
+                <div className="group rounded-2xl overflow-hidden bg-card border border-border/50 shadow-sm">
+                  <div className="relative aspect-[4/3] bg-secondary/50 flex items-center justify-center overflow-hidden">
+                    <img src={img.src} alt={img.alt} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  </div>
+                  <div className="p-3 text-center">
+                    <p className="text-sm text-muted-foreground">{img.label}</p>
+                  </div>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Partenaires */}
       <section className="py-16 lg:py-20">
         <div className="container max-w-4xl">
