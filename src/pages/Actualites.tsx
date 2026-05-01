@@ -84,35 +84,53 @@ const Actualites = () => {
             </ScrollReveal>
           )}
 
-          {articles?.map((article, i) => (
-            <ScrollReveal key={article.id} delay={i * 60}>
-              <article className="rounded-2xl bg-card border border-border/50 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                {article.image_url && (
-                  <img src={article.image_url} alt={article.title} className="w-full h-48 object-cover" />
-                )}
-                <div className="p-6 space-y-3">
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-primary/10 text-primary font-medium">
-                      {typeIcon(article.type)}
-                      {typeLabel(article.type)}
-                    </span>
-                    <span>{format(new Date(article.created_at), "d MMMM yyyy · HH:mm", { locale: fr })}</span>
-                  </div>
-                  <h2 className="text-lg font-display font-bold text-foreground leading-snug">
-                    {article.title}
-                  </h2>
-                  <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
-                    {article.content}
-                  </div>
-                  {article.source && (
-                    <p className="text-[10px] text-muted-foreground/60 pt-2">
-                      Source : {article.source}
-                    </p>
+          {articles?.map((article: any, i) => {
+            const mediaList: { type: "image" | "video"; url: string }[] = Array.isArray(article.media) ? article.media : [];
+            const fallbackMedia = mediaList.length === 0 && article.image_url
+              ? [{ type: "image" as const, url: article.image_url }]
+              : mediaList;
+
+            return (
+              <ScrollReveal key={article.id} delay={i * 60}>
+                <article className="rounded-2xl bg-card border border-border/50 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                  {fallbackMedia.length > 0 && (
+                    <div className={`grid gap-1 bg-secondary ${fallbackMedia.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
+                      {fallbackMedia.map((m, idx) => (
+                        <div key={idx} className="w-full bg-black/5 flex items-center justify-center">
+                          {m.type === "video" ? (
+                            <video src={m.url} controls className="w-full max-h-[480px] object-contain bg-black" />
+                          ) : (
+                            <img src={m.url} alt={article.title}
+                              className="w-full max-h-[480px] object-contain" />
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   )}
-                </div>
-              </article>
-            </ScrollReveal>
-          ))}
+                  <div className="p-6 space-y-3">
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-primary/10 text-primary font-medium">
+                        {typeIcon(article.type)}
+                        {typeLabel(article.type)}
+                      </span>
+                      <span>{format(new Date(article.created_at), "d MMMM yyyy · HH:mm", { locale: fr })}</span>
+                    </div>
+                    <h2 className="text-lg font-display font-bold text-foreground leading-snug">
+                      {article.title}
+                    </h2>
+                    <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                      {article.content}
+                    </div>
+                    {article.source && (
+                      <p className="text-[10px] text-muted-foreground/60 pt-2">
+                        Source : {article.source}
+                      </p>
+                    )}
+                  </div>
+                </article>
+              </ScrollReveal>
+            );
+          })}
         </div>
       </section>
     </div>
