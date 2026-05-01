@@ -78,6 +78,7 @@ const CarteMembre = () => {
                 phone={member.phone}
                 category={member.category}
                 photoUrl={member.photo_url}
+                email={null}
               />
             </ScrollReveal>
 
