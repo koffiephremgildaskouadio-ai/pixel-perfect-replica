@@ -1,8 +1,12 @@
 import { ScrollReveal } from "@/components/ScrollReveal";
-import { MapPin, Building2, Heart, Users, Shield, Handshake, Star, Crown, ArrowLeft, Award } from "lucide-react";
+import { MapPin, Building2, Heart, Users, Shield, Handshake, Star, Crown, ArrowLeft, Award, Camera } from "lucide-react";
 import { Link } from "react-router-dom";
 import logoNovalim from "@/assets/logo_novalim.png";
 import logoCcjy from "@/assets/logo_ccjy.jpg";
+import novaOfficial from "@/assets/nova_logo_official.jpg";
+import novaAction1 from "@/assets/nova_action1.jpg";
+import novaAction2 from "@/assets/nova_action2.jpg";
+import novaAction3 from "@/assets/nova_action3.jpg";
 
 const districts = [
   { nom: "Port-Bouët 2 Plateau", president: "Cissé Madémorie" },
