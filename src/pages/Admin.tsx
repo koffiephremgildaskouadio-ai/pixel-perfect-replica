@@ -8,6 +8,7 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import {
   ArrowLeft, Plus, Newspaper, Loader2, Trash2,
   Users, Edit, X, Image as ImageIcon, Video as VideoIcon,
+  FileText, Save,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -65,12 +66,14 @@ const Admin = () => {
       <section className="py-8 lg:py-12">
         <div className="container max-w-4xl">
           <Tabs defaultValue="news">
-            <TabsList className="grid grid-cols-2 mb-6">
+            <TabsList className="grid grid-cols-3 mb-6">
               <TabsTrigger value="news"><Newspaper className="w-4 h-4 mr-2" /> Actualités</TabsTrigger>
               <TabsTrigger value="members"><Users className="w-4 h-4 mr-2" /> Membres</TabsTrigger>
+              <TabsTrigger value="about"><FileText className="w-4 h-4 mr-2" /> À Propos</TabsTrigger>
             </TabsList>
             <TabsContent value="news"><NewsManager queryClient={queryClient} /></TabsContent>
             <TabsContent value="members"><MembersManager queryClient={queryClient} /></TabsContent>
+            <TabsContent value="about"><AboutManager /></TabsContent>
           </Tabs>
         </div>
       </section>
