@@ -1,6 +1,8 @@
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { MapPin, Building2, Heart, Users, Shield, Handshake, Star, Crown, ArrowLeft, Award, Camera } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import logoNovalim from "@/assets/logo_novalim.png";
 import logoCcjy from "@/assets/logo_ccjy.jpg";
 import novaOfficial from "@/assets/nova_logo_official.jpg";
@@ -60,6 +62,17 @@ const PersonnaliteCard = ({
 );
 
 const APropos = () => {
+  const { data: blocks } = useQuery({
+    queryKey: ["site-content-public"],
+    queryFn: async () => {
+      const { data } = await (supabase as any).from("site_content").select("*");
+      return data ?? [];
+    },
+  });
+  const block = (key: string) => (blocks ?? []).find((b: any) => b.key === key);
+  const heroBlock = block("apropos.hero");
+  const presBlock = block("apropos.president_intro");
+
   return (
     <div className="pt-16">
       {/* Hero */}
@@ -71,10 +84,10 @@ const APropos = () => {
           <ScrollReveal className="text-center max-w-3xl mx-auto">
             <span className="text-sm font-semibold text-primary tracking-wide uppercase">À propos</span>
             <h1 className="mt-3 text-3xl lg:text-5xl font-display font-bold text-foreground leading-tight">
-              District Cité Novalim-CIE
+              {heroBlock?.title || "District Cité Novalim-CIE"}
             </h1>
-            <p className="mt-4 text-muted-foreground leading-relaxed text-lg">
-              Un district modèle au cœur de la commune de Yopougon, composé à 95 % de cités résidentielles organisées et dynamiques.
+            <p className="mt-4 text-muted-foreground leading-relaxed text-lg whitespace-pre-line">
+              {heroBlock?.content || "Un district modèle au cœur de la commune de Yopougon, composé à 95 % de cités résidentielles organisées et dynamiques."}
             </p>
             <div className="flex items-center justify-center gap-6 mt-8">
               <img src={logoNovalim} alt="Logo District Novalim-CIE" className="w-20 h-20 object-contain" />
@@ -102,13 +115,21 @@ const APropos = () => {
             <ScrollReveal delay={150}>
               <div className="space-y-5">
                 <span className="text-sm font-semibold text-accent tracking-wide uppercase">Le Conseil Communal des Jeunes de Yopougon</span>
-                <h2 className="text-2xl lg:text-3xl font-display font-bold text-foreground leading-tight">Une faîtière au service de la jeunesse</h2>
-                <p className="text-muted-foreground leading-relaxed">
-                  Le <strong>Conseil Communal des Jeunes de Yopougon (CCJY)</strong> est la faîtière de toutes les associations de jeunesse de la commune. Inscrit depuis 2017 auprès du Ministère de la Jeunesse, il œuvre pour la <strong>cohésion sociale</strong>, l'entrepreneuriat jeune et le développement communautaire.
-                </p>
-                <p className="text-muted-foreground leading-relaxed">
-                  La commune de Yopougon, plus grande commune d'Afrique de l'Ouest, regroupe <strong>87 districts</strong> et <strong>11 villages</strong>. Le District Cité Novalim-CIE est l'un de ces 87 districts, rattaché à la <strong>Zone 7</strong>, coordonnée par le Président <strong>Koné Yacouba</strong>, lui-même Vice-Président communal et Président du district Banco 2.
-                </p>
+                <h2 className="text-2xl lg:text-3xl font-display font-bold text-foreground leading-tight">
+                  {presBlock?.title || "Une faîtière au service de la jeunesse"}
+                </h2>
+                {presBlock?.content ? (
+                  <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{presBlock.content}</p>
+                ) : (
+                  <>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Le <strong>Conseil Communal des Jeunes de Yopougon (CCJY)</strong> est la faîtière de toutes les associations de jeunesse de la commune. Inscrit depuis 2017 auprès du Ministère de la Jeunesse, il œuvre pour la <strong>cohésion sociale</strong>, l'entrepreneuriat jeune et le développement communautaire.
+                    </p>
+                    <p className="text-muted-foreground leading-relaxed">
+                      La commune de Yopougon, plus grande commune d'Afrique de l'Ouest, regroupe <strong>87 districts</strong> et <strong>11 villages</strong>. Le District Cité Novalim-CIE est l'un de ces 87 districts, rattaché à la <strong>Zone 7</strong>, coordonnée par le Président <strong>Koné Yacouba</strong>, lui-même Vice-Président communal et Président du district Banco 2.
+                    </p>
+                  </>
+                )}
               </div>
             </ScrollReveal>
           </div>

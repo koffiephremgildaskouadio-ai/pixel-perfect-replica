@@ -8,6 +8,7 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import {
   ArrowLeft, Plus, Newspaper, Loader2, Trash2,
   Users, Edit, X, Image as ImageIcon, Video as VideoIcon,
+  FileText, Save,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -65,12 +66,14 @@ const Admin = () => {
       <section className="py-8 lg:py-12">
         <div className="container max-w-4xl">
           <Tabs defaultValue="news">
-            <TabsList className="grid grid-cols-2 mb-6">
+            <TabsList className="grid grid-cols-3 mb-6">
               <TabsTrigger value="news"><Newspaper className="w-4 h-4 mr-2" /> Actualités</TabsTrigger>
               <TabsTrigger value="members"><Users className="w-4 h-4 mr-2" /> Membres</TabsTrigger>
+              <TabsTrigger value="about"><FileText className="w-4 h-4 mr-2" /> À Propos</TabsTrigger>
             </TabsList>
             <TabsContent value="news"><NewsManager queryClient={queryClient} /></TabsContent>
             <TabsContent value="members"><MembersManager queryClient={queryClient} /></TabsContent>
+            <TabsContent value="about"><AboutManager /></TabsContent>
           </Tabs>
         </div>
       </section>
@@ -435,6 +438,112 @@ const MemberFormDialog = ({
         </form>
       </DialogContent>
     </Dialog>
+  );
+};
+
+/* ============================================================ */
+/* ABOUT MANAGER — editable site_content blocks                  */
+/* ============================================================ */
+const DEFAULT_BLOCKS = [
+  { key: "apropos.hero", label: "Hero — Titre principal" },
+  { key: "apropos.president_intro", label: "Présentation du Président / CCJY" },
+  { key: "apropos.assim_saba", label: "Bloc M. Assim Saba (Président CCJY)" },
+  { key: "apropos.ben_mamadie", label: "Bloc Hon. Ben Mamadie" },
+  { key: "apropos.sanusi", label: "Bloc M. Sanusi Ibrahim" },
+  { key: "apropos.parrain", label: "Bloc Parrain — Abiola Waidi / Jumbo Store" },
+  { key: "apropos.identity", label: "Identité du district" },
+];
+
+const AboutManager = () => {
+  const queryClient = useQueryClient();
+  const { data: blocks } = useQuery({
+    queryKey: ["site-content"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).from("site_content").select("*");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const get = (key: string) => (blocks ?? []).find((b: any) => b.key === key);
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-xl bg-primary/5 border border-primary/20 p-4 text-sm">
+        <p className="font-semibold text-primary mb-1">Édition libre de la page À Propos</p>
+        <p className="text-muted-foreground text-xs">
+          Modifiez le titre, le texte ou l'image de chaque bloc. Les changements sont visibles immédiatement sur la page publique.
+        </p>
+      </div>
+      {DEFAULT_BLOCKS.map(b => (
+        <BlockEditor key={b.key} blockKey={b.key} label={b.label} existing={get(b.key)} queryClient={queryClient} />
+      ))}
+    </div>
+  );
+};
+
+const BlockEditor = ({
+  blockKey, label, existing, queryClient,
+}: { blockKey: string; label: string; existing?: any; queryClient: any }) => {
+  const [title, setTitle] = useState(existing?.title ?? "");
+  const [content, setContent] = useState(existing?.content ?? "");
+  const [imageUrl, setImageUrl] = useState(existing?.image_url ?? "");
+  const [file, setFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setTitle(existing?.title ?? "");
+    setContent(existing?.content ?? "");
+    setImageUrl(existing?.image_url ?? "");
+  }, [existing?.id]);
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      let img = imageUrl;
+      if (file) {
+        const ext = file.name.split(".").pop();
+        const path = `site/${blockKey}-${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage.from("member-photos").upload(path, file);
+        if (upErr) throw upErr;
+        img = supabase.storage.from("member-photos").getPublicUrl(path).data.publicUrl;
+      }
+      const payload = { key: blockKey, title, content, image_url: img };
+      const { error } = await (supabase as any).from("site_content").upsert(payload, { onConflict: "key" });
+      if (error) throw error;
+      toast.success("Bloc enregistré");
+      queryClient.invalidateQueries({ queryKey: ["site-content"] });
+      setFile(null);
+    } catch (e: any) {
+      toast.error(e.message || "Erreur");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="rounded-xl bg-card border border-border/50 p-4 space-y-3">
+      <h3 className="text-sm font-display font-bold text-foreground">{label}</h3>
+      <div>
+        <label className="text-xs font-medium block mb-1">Titre</label>
+        <Input value={title} onChange={e => setTitle(e.target.value)} />
+      </div>
+      <div>
+        <label className="text-xs font-medium block mb-1">Contenu</label>
+        <Textarea value={content} onChange={e => setContent(e.target.value)} rows={5} />
+      </div>
+      <div>
+        <label className="text-xs font-medium block mb-1">Image (optionnelle)</label>
+        <input type="file" accept="image/*" onChange={e => setFile(e.target.files?.[0] ?? null)} className="text-xs" />
+        {imageUrl && !file && (
+          <img src={imageUrl} className="mt-2 w-24 h-24 rounded object-cover" alt="" />
+        )}
+      </div>
+      <Button onClick={save} disabled={saving} size="sm" className="gap-2">
+        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+        Enregistrer
+      </Button>
+    </div>
   );
 };
 
