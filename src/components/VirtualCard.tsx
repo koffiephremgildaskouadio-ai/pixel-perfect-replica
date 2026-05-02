@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { RotateCw } from "lucide-react";
+import { RotateCw, Download, Loader2 } from "lucide-react";
+import { toPng } from "html-to-image";
+import { toast } from "sonner";
 import logoNova from "@/assets/nova_logo_official.jpg";
+import logoCcjy from "@/assets/logo_ccjy.jpg";
 import tampon from "@/assets/tampon.png";
 import signature from "@/assets/signature.png";
 
@@ -19,7 +22,7 @@ interface VirtualCardProps {
 }
 
 const SITE_URL = typeof window !== "undefined" ? window.location.origin : "https://districtcitenovalim-cie.lovable.app";
-const FACEBOOK_URL = "https://web.facebook.com/DistrictCiteNovalimCIE/";
+const FACEBOOK_URL = "https://web.facebook.com/DistrictCiteNovalimCIE";
 
 export const VirtualCard = ({
   memberNumber,
@@ -32,12 +35,34 @@ export const VirtualCard = ({
   email,
 }: VirtualCardProps) => {
   const [flipped, setFlipped] = useState(false);
-  const cardUrl = `${SITE_URL}/carte/${memberId}`;
+  const [downloading, setDownloading] = useState(false);
+  const rectoRef = useRef<HTMLDivElement>(null);
+  const versoRef = useRef<HTMLDivElement>(null);
+
   const initials = `${nom?.[0] ?? ""}${prenoms?.[0] ?? ""}`;
   const validite = "2025 - 2026";
-  // Card number format: JY-NC/XXXX (4 digits) extracted from member_number
   const numericPart = (memberNumber.match(/(\d+)/g)?.pop() ?? "0001").padStart(4, "0");
   const displayNumber = `JY-NC/${numericPart}`;
+
+  const downloadCard = async () => {
+    setDownloading(true);
+    try {
+      const safeName = `${nom}_${prenoms}`.replace(/[^a-zA-Z0-9_-]/g, "_");
+      for (const [side, ref] of [["recto", rectoRef], ["verso", versoRef]] as const) {
+        if (!ref.current) continue;
+        const dataUrl = await toPng(ref.current, { cacheBust: true, pixelRatio: 3, backgroundColor: "#fdf6e3" });
+        const link = document.createElement("a");
+        link.download = `carte_${safeName}_${side}.png`;
+        link.href = dataUrl;
+        link.click();
+      }
+      toast.success("Carte téléchargée (recto + verso)");
+    } catch (e: any) {
+      toast.error("Téléchargement impossible : " + (e.message || "erreur"));
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return (
     <div className="w-full max-w-md mx-auto">
@@ -56,75 +81,48 @@ export const VirtualCard = ({
         >
           {/* ===== RECTO ===== */}
           <div
+            ref={rectoRef}
             className="absolute inset-0 rounded-2xl overflow-hidden shadow-xl"
-            style={{
-              backfaceVisibility: "hidden",
-              backgroundColor: "#fdf6e3",
-            }}
+            style={{ backfaceVisibility: "hidden", backgroundColor: "#fdf6e3" }}
           >
-            {/* Watermark logo background */}
+            {/* District logo watermark in background */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <img
-                src={logoNova}
-                alt=""
-                className="w-[70%] opacity-10 object-contain"
-              />
+              <img src={logoNova} alt="" crossOrigin="anonymous"
+                className="w-[75%] opacity-[0.12] object-contain" />
             </div>
 
             <div className="relative h-full flex flex-col p-3">
-              {/* Header */}
+              {/* Header: District logo (left) + Title + CCJY logo (right) */}
               <div className="flex items-start gap-2">
-                <img
-                  src={logoNova}
-                  alt="Logo District"
-                  className="w-12 h-12 object-contain shrink-0"
-                />
-                <div className="flex-1 text-center">
-                  <p
-                    className="font-bold text-[10px] leading-tight"
-                    style={{ color: "#d97706" }}
-                  >
-                    CONSEIL COMMUNAL DE LA JEUNESSE DE YOPOUGON
+                <img src={logoNova} alt="Logo District" crossOrigin="anonymous"
+                  className="w-12 h-12 object-contain shrink-0" />
+                <div className="flex-1 text-center px-1">
+                  <p className="font-bold text-[9px] leading-tight" style={{ color: "#d97706" }}>
+                    CONSEIL COMMUNAL DES JEUNES DE YOPOUGON
                   </p>
-                  <p
-                    className="font-bold text-[12px] leading-tight mt-0.5"
-                    style={{ color: "#15803d" }}
-                  >
+                  <p className="font-bold text-[11px] leading-tight mt-0.5" style={{ color: "#15803d" }}>
                     DISTRICT CITÉ NOVALIM - CIE
                   </p>
-                  <p
-                    className="font-semibold text-[9px] mt-0.5"
-                    style={{ color: "#dc2626" }}
-                  >
+                  <p className="font-semibold text-[8px] mt-0.5" style={{ color: "#dc2626" }}>
                     CARTE DE MEMBRE N° {displayNumber}
                   </p>
                 </div>
-                <div className="w-12 h-12 shrink-0 flex items-center justify-center text-[7px] text-center font-bold text-green-800 border border-green-700/30 rounded">
-                  RCI
-                </div>
+                <img src={logoCcjy} alt="Logo CCJY" crossOrigin="anonymous"
+                  className="w-12 h-12 object-contain shrink-0 rounded" />
               </div>
 
               {/* Body */}
               <div className="flex-1 flex gap-3 mt-2">
                 {/* Photo */}
-                <div className="relative shrink-0">
+                <div className="shrink-0">
                   {photoUrl ? (
-                    <img
-                      src={photoUrl}
-                      alt={`${nom} ${prenoms}`}
-                      className="w-[88px] h-[110px] object-cover rounded border border-foreground/20"
-                    />
+                    <img src={photoUrl} alt={`${nom} ${prenoms}`} crossOrigin="anonymous"
+                      className="w-[88px] h-[110px] object-cover rounded border border-foreground/20" />
                   ) : (
                     <div className="w-[88px] h-[110px] rounded bg-primary/10 flex items-center justify-center text-2xl font-bold text-primary border border-foreground/20">
                       {initials}
                     </div>
                   )}
-                  {/* Stamp overlay on photo bottom-left */}
-                  <img
-                    src={tampon}
-                    alt=""
-                    className="absolute -bottom-2 -left-2 w-14 h-14 object-contain opacity-90"
-                  />
                 </div>
 
                 {/* Info */}
@@ -151,26 +149,28 @@ export const VirtualCard = ({
               </div>
 
               {/* Footer email + tel */}
-              <div className="flex justify-between items-end text-[8px] text-foreground/80 mt-1 gap-2">
+              <div className="flex justify-between items-end text-[8px] text-foreground/80 mt-1 gap-2 relative z-10">
                 <span className="truncate">Email: {email || "contact@novalim-cie.ci"}</span>
                 <span className="shrink-0">Tel: {phone || "—"}</span>
               </div>
 
-              {/* Signature small overlay bottom right */}
-              <img
-                src={signature}
-                alt=""
-                className="absolute bottom-4 right-3 w-16 opacity-80 pointer-events-none"
-              />
+              {/* Signature ON the stamp (bottom right) */}
+              <div className="absolute bottom-3 right-3 w-20 h-20 pointer-events-none">
+                <img src={tampon} alt="" crossOrigin="anonymous"
+                  className="absolute inset-0 w-full h-full object-contain opacity-90" />
+                <img src={signature} alt="" crossOrigin="anonymous"
+                  className="absolute inset-0 w-full h-full object-contain opacity-95" />
+              </div>
             </div>
 
-            <div className="absolute top-2 right-2 p-1 rounded-full bg-white/70 text-muted-foreground">
+            <div className="absolute top-2 right-14 p-1 rounded-full bg-white/70 text-muted-foreground">
               <RotateCw className="w-3 h-3" />
             </div>
           </div>
 
           {/* ===== VERSO ===== */}
           <div
+            ref={versoRef}
             className="absolute inset-0 rounded-2xl overflow-hidden shadow-xl"
             style={{
               backfaceVisibility: "hidden",
@@ -178,18 +178,19 @@ export const VirtualCard = ({
               backgroundColor: "#fdf6e3",
             }}
           >
-            {/* Watermark logo background */}
+            {/* District logo watermark in background */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <img src={logoNova} alt="" className="w-[80%] opacity-15 object-contain" />
+              <img src={logoNova} alt="" crossOrigin="anonymous"
+                className="w-[80%] opacity-[0.15] object-contain" />
             </div>
 
             <div className="relative h-full flex flex-col items-center justify-between p-3">
-              {/* Top: site URL QR */}
+              {/* Top: Facebook QR */}
               <div className="flex flex-col items-center gap-0.5">
                 <div className="bg-white p-1 rounded">
-                  <QRCodeSVG value={SITE_URL} size={48} level="M" includeMargin={false} />
+                  <QRCodeSVG value={FACEBOOK_URL} size={56} level="M" includeMargin={false} />
                 </div>
-                <p className="text-[7px] text-foreground/70 font-medium">Site officiel</p>
+                <p className="text-[7px] text-foreground/70 font-medium">Page Facebook officielle</p>
               </div>
 
               {/* Center text */}
@@ -204,12 +205,12 @@ export const VirtualCard = ({
                 </p>
               </div>
 
-              {/* Bottom: Facebook QR */}
+              {/* Bottom: Site QR */}
               <div className="flex flex-col items-center gap-0.5">
                 <div className="bg-white p-1 rounded">
-                  <QRCodeSVG value={FACEBOOK_URL} size={48} level="M" includeMargin={false} />
+                  <QRCodeSVG value={SITE_URL} size={48} level="M" includeMargin={false} />
                 </div>
-                <p className="text-[7px] text-foreground/70 font-medium">Page Facebook</p>
+                <p className="text-[7px] text-foreground/70 font-medium">Site officiel</p>
               </div>
             </div>
 
@@ -220,9 +221,17 @@ export const VirtualCard = ({
         </div>
       </div>
 
-      <p className="text-center text-[10px] text-muted-foreground mt-3">
-        Cliquez sur la carte pour la retourner
-      </p>
+      <div className="mt-3 flex items-center justify-center gap-3">
+        <p className="text-[10px] text-muted-foreground">Cliquez pour retourner</p>
+        <button
+          onClick={downloadCard}
+          disabled={downloading}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-60"
+        >
+          {downloading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
+          {downloading ? "Téléchargement…" : "Télécharger"}
+        </button>
+      </div>
     </div>
   );
 };
