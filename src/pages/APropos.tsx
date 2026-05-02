@@ -1,6 +1,8 @@
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { MapPin, Building2, Heart, Users, Shield, Handshake, Star, Crown, ArrowLeft, Award, Camera } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import logoNovalim from "@/assets/logo_novalim.png";
 import logoCcjy from "@/assets/logo_ccjy.jpg";
 import novaOfficial from "@/assets/nova_logo_official.jpg";
@@ -60,6 +62,17 @@ const PersonnaliteCard = ({
 );
 
 const APropos = () => {
+  const { data: blocks } = useQuery({
+    queryKey: ["site-content-public"],
+    queryFn: async () => {
+      const { data } = await (supabase as any).from("site_content").select("*");
+      return data ?? [];
+    },
+  });
+  const block = (key: string) => (blocks ?? []).find((b: any) => b.key === key);
+  const heroBlock = block("apropos.hero");
+  const presBlock = block("apropos.president_intro");
+
   return (
     <div className="pt-16">
       {/* Hero */}
