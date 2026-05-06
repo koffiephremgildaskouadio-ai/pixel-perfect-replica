@@ -113,8 +113,8 @@ export const VirtualCard = ({
 
               {/* Body */}
               <div className="flex-1 flex gap-3 mt-2">
-                {/* Photo */}
-                <div className="shrink-0">
+                {/* Photo + tampon/signature dessous */}
+                <div className="shrink-0 flex flex-col items-center">
                   {photoUrl ? (
                     <img src={photoUrl} alt={`${nom} ${prenoms}`} crossOrigin="anonymous"
                       className="w-[88px] h-[110px] object-cover rounded border border-foreground/20" />
@@ -123,6 +123,13 @@ export const VirtualCard = ({
                       {initials}
                     </div>
                   )}
+                  {/* Tampon avec signature superposée, juste sous la photo */}
+                  <div className="relative w-[88px] h-[44px] mt-1">
+                    <img src={tampon} alt="" crossOrigin="anonymous"
+                      className="absolute inset-0 w-full h-full object-contain opacity-90" />
+                    <img src={signature} alt="" crossOrigin="anonymous"
+                      className="absolute inset-0 w-full h-full object-contain opacity-95" />
+                  </div>
                 </div>
 
                 {/* Info */}
