@@ -56,9 +56,15 @@ const Conference = () => {
           toolbarButtons: [
             "microphone", "camera", "desktop", "chat", "raisehand",
             "participants-pane", "tileview", "hangup", "recording",
-            "settings", "fullscreen", "select-background",
+            "settings", "fullscreen", "select-background", "videoquality",
+            "reactions", "emoji", "invite", "shareaudio", "sharedvideo",
+            "livestreaming", "stats", "security", "mute-everyone", "etherpad",
+            "filmstrip", "closedcaptions", "whiteboard", "noisesuppression",
           ],
-          subject: "Conférence District Novalim-CIE",
+          subject: "Conférence District Cité Novalim - CIE",
+          disableReactions: false,
+          disablePolls: false,
+          enableEmojiReactions: true,
         },
         interfaceConfigOverwrite: {
           SHOW_JITSI_WATERMARK: false,
