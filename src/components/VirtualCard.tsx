@@ -161,13 +161,6 @@ export const VirtualCard = ({
                 <span className="shrink-0">Tel: {phone || "—"}</span>
               </div>
 
-              {/* Signature ON the stamp (bottom right) */}
-              <div className="absolute bottom-3 right-3 w-20 h-20 pointer-events-none">
-                <img src={tampon} alt="" crossOrigin="anonymous"
-                  className="absolute inset-0 w-full h-full object-contain opacity-90" />
-                <img src={signature} alt="" crossOrigin="anonymous"
-                  className="absolute inset-0 w-full h-full object-contain opacity-95" />
-              </div>
             </div>
 
             <div className="absolute top-2 right-14 p-1 rounded-full bg-white/70 text-muted-foreground">
