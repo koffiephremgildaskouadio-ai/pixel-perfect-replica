@@ -126,6 +126,22 @@ const Actualites = () => {
                         Source : {article.source}
                       </p>
                     )}
+                    <div className="flex flex-wrap gap-2 pt-3 border-t border-border/40">
+                      <a
+                        href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`*${article.title}*\n\n${article.content}\n\n— District Cité Novalim-CIE\nhttps://districtcitenovalim-cie.lovable.app`)}`}
+                        target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-[#25D366] text-white hover:opacity-90"
+                      >
+                        <Share2 className="w-3.5 h-3.5" /> Partager sur WhatsApp
+                      </a>
+                      <a
+                        href="https://chat.whatsapp.com/ElxkVGBSEDlBlIpX00cCys"
+                        target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20"
+                      >
+                        <Users className="w-3.5 h-3.5" /> Groupe du District
+                      </a>
+                    </div>
                   </div>
                 </article>
               </ScrollReveal>
