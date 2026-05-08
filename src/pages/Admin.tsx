@@ -8,8 +8,9 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import {
   ArrowLeft, Plus, Newspaper, Loader2, Trash2,
   Users, Edit, X, Image as ImageIcon, Video as VideoIcon,
-  FileText, Save,
+  FileText, Save, Award,
 } from "lucide-react";
+import { generateCertificate } from "@/lib/certificate";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
