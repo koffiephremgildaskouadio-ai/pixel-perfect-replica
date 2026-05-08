@@ -437,8 +437,32 @@ const MemberFormDialog = ({
             </div>
           </div>
           <div>
-            <label className="text-xs font-medium block mb-1">Cahier de charges</label>
-            <Textarea value={form.cahier_charges} onChange={e => setForm({ ...form, cahier_charges: e.target.value })} rows={3} />
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-medium">Cahier de charges</label>
+              {form.poste && ["bureau", "cabinet", "coordonnateur", "commission"].includes(form.category) && (
+                <Button
+                  type="button" variant="ghost" size="sm" className="h-7 text-xs gap-1 text-primary"
+                  onClick={async () => {
+                    const t = toast.loading("Génération du cahier de charges…");
+                    try {
+                      const { data, error } = await supabase.functions.invoke("generate-cahier", {
+                        body: { nom: form.nom, prenoms: form.prenoms, poste: form.poste, category: form.category },
+                      });
+                      if (error) throw error;
+                      if (data?.cahier_charges) {
+                        setForm(f => ({ ...f, cahier_charges: data.cahier_charges }));
+                        toast.success("Cahier généré", { id: t });
+                      } else throw new Error("Réponse vide");
+                    } catch (e: any) {
+                      toast.error(e.message || "Erreur IA", { id: t });
+                    }
+                  }}
+                >
+                  <Sparkles className="w-3 h-3" /> Générer avec l'IA
+                </Button>
+              )}
+            </div>
+            <Textarea value={form.cahier_charges} onChange={e => setForm({ ...form, cahier_charges: e.target.value })} rows={5} />
           </div>
           <div>
             <label className="text-xs font-medium block mb-1">Photo</label>
