@@ -8,7 +8,7 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import {
   ArrowLeft, Plus, Newspaper, Loader2, Trash2,
   Users, Edit, X, Image as ImageIcon, Video as VideoIcon,
-  FileText, Save, Award,
+  FileText, Save, Award, Sparkles, MessageSquare, Phone, Mail, Send,
 } from "lucide-react";
 import { generateCertificate } from "@/lib/certificate";
 import { toast } from "sonner";
@@ -67,13 +67,15 @@ const Admin = () => {
       <section className="py-8 lg:py-12">
         <div className="container max-w-4xl">
           <Tabs defaultValue="news">
-            <TabsList className="grid grid-cols-3 mb-6">
+            <TabsList className="grid grid-cols-4 mb-6">
               <TabsTrigger value="news"><Newspaper className="w-4 h-4 mr-2" /> Actualités</TabsTrigger>
               <TabsTrigger value="members"><Users className="w-4 h-4 mr-2" /> Membres</TabsTrigger>
+              <TabsTrigger value="comm"><MessageSquare className="w-4 h-4 mr-2" /> Communication</TabsTrigger>
               <TabsTrigger value="about"><FileText className="w-4 h-4 mr-2" /> À Propos</TabsTrigger>
             </TabsList>
             <TabsContent value="news"><NewsManager queryClient={queryClient} /></TabsContent>
             <TabsContent value="members"><MembersManager queryClient={queryClient} /></TabsContent>
+            <TabsContent value="comm"><CommunicationManager /></TabsContent>
             <TabsContent value="about"><AboutManager /></TabsContent>
           </Tabs>
         </div>
@@ -435,8 +437,32 @@ const MemberFormDialog = ({
             </div>
           </div>
           <div>
-            <label className="text-xs font-medium block mb-1">Cahier de charges</label>
-            <Textarea value={form.cahier_charges} onChange={e => setForm({ ...form, cahier_charges: e.target.value })} rows={3} />
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-medium">Cahier de charges</label>
+              {form.poste && ["bureau", "cabinet", "coordonnateur", "commission"].includes(form.category) && (
+                <Button
+                  type="button" variant="ghost" size="sm" className="h-7 text-xs gap-1 text-primary"
+                  onClick={async () => {
+                    const t = toast.loading("Génération du cahier de charges…");
+                    try {
+                      const { data, error } = await supabase.functions.invoke("generate-cahier", {
+                        body: { nom: form.nom, prenoms: form.prenoms, poste: form.poste, category: form.category },
+                      });
+                      if (error) throw error;
+                      if (data?.cahier_charges) {
+                        setForm(f => ({ ...f, cahier_charges: data.cahier_charges }));
+                        toast.success("Cahier généré", { id: t });
+                      } else throw new Error("Réponse vide");
+                    } catch (e: any) {
+                      toast.error(e.message || "Erreur IA", { id: t });
+                    }
+                  }}
+                >
+                  <Sparkles className="w-3 h-3" /> Générer avec l'IA
+                </Button>
+              )}
+            </div>
+            <Textarea value={form.cahier_charges} onChange={e => setForm({ ...form, cahier_charges: e.target.value })} rows={5} />
           </div>
           <div>
             <label className="text-xs font-medium block mb-1">Photo</label>
@@ -562,6 +588,186 @@ const BlockEditor = ({
         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
         Enregistrer
       </Button>
+    </div>
+  );
+};
+
+/* ============================================================ */
+/* COMMUNICATION MANAGER — WhatsApp / SMS / Email broadcast      */
+/* ============================================================ */
+const WHATSAPP_GROUP = "https://chat.whatsapp.com/ElxkVGBSEDlBlIpX00cCys";
+
+const CommunicationManager = () => {
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  const { data: members } = useQuery({
+    queryKey: ["comm-members"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("members")
+        .select("id, nom, prenoms, phone, poste, category, user_id")
+        .eq("is_active", true)
+        .order("category")
+        .order("member_number");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: emails } = useQuery({
+    queryKey: ["comm-emails"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("profiles").select("id, email");
+      if (error) throw error;
+      return new Map((data ?? []).map((p: any) => [p.id, p.email]));
+    },
+  });
+
+  const cleanPhone = (p?: string | null) => (p ?? "").replace(/[^\d]/g, "");
+  const intl = (p?: string | null) => {
+    const c = cleanPhone(p);
+    if (!c) return "";
+    return c.startsWith("225") ? c : `225${c.replace(/^0+/, "")}`;
+  };
+
+  const toggle = (id: string) => {
+    setSelected(prev => {
+      const n = new Set(prev);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
+  };
+
+  const selectAll = () => setSelected(new Set((members ?? []).map((m: any) => m.id)));
+  const clearAll = () => setSelected(new Set());
+
+  const selectedMembers = (members ?? []).filter((m: any) => selected.has(m.id));
+  const fullMessage = subject ? `*${subject}*\n\n${message}` : message;
+
+  const broadcastWhatsApp = () => {
+    if (!message.trim()) { toast.error("Message requis"); return; }
+    const targets = selectedMembers.filter((m: any) => intl(m.phone));
+    if (!targets.length) { toast.error("Aucun destinataire avec téléphone"); return; }
+    targets.forEach((m: any, i: number) => {
+      setTimeout(() => {
+        window.open(`https://wa.me/${intl(m.phone)}?text=${encodeURIComponent(fullMessage)}`, "_blank");
+      }, i * 400);
+    });
+    toast.success(`Ouverture de ${targets.length} fenêtre(s) WhatsApp`);
+  };
+
+  const broadcastSMS = () => {
+    if (!message.trim()) { toast.error("Message requis"); return; }
+    const targets = selectedMembers.filter((m: any) => cleanPhone(m.phone));
+    if (!targets.length) { toast.error("Aucun destinataire avec téléphone"); return; }
+    const numbers = targets.map((m: any) => intl(m.phone)).join(",");
+    window.location.href = `sms:${numbers}?body=${encodeURIComponent(fullMessage)}`;
+    toast.success(`SMS pour ${targets.length} membre(s)`);
+  };
+
+  const broadcastEmail = () => {
+    if (!message.trim()) { toast.error("Message requis"); return; }
+    const addrs = selectedMembers
+      .map((m: any) => emails?.get(m.user_id))
+      .filter(Boolean);
+    if (!addrs.length) { toast.error("Aucun email disponible"); return; }
+    const subj = subject || "Information du District Cité Novalim-CIE";
+    window.location.href = `mailto:?bcc=${addrs.join(",")}&subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(message)}`;
+    toast.success(`Email pour ${addrs.length} membre(s)`);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-xl bg-primary/5 border border-primary/20 p-4 text-sm">
+        <p className="font-semibold text-primary mb-1 flex items-center gap-2">
+          <Send className="w-4 h-4" /> Diffusion aux membres
+        </p>
+        <p className="text-muted-foreground text-xs">
+          Sélectionnez les membres puis envoyez via WhatsApp, SMS ou Email. Vous pouvez aussi partager dans le groupe WhatsApp officiel.
+        </p>
+      </div>
+
+      <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-3">
+        <div>
+          <label className="text-xs font-medium block mb-1">Objet (optionnel)</label>
+          <Input value={subject} onChange={e => setSubject(e.target.value)} placeholder="Ex: Réunion mensuelle" />
+        </div>
+        <div>
+          <label className="text-xs font-medium block mb-1">Message *</label>
+          <Textarea value={message} onChange={e => setMessage(e.target.value)} rows={5}
+            placeholder="Bonjour, vous êtes convoqués à la réunion du..." />
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <Button onClick={broadcastWhatsApp} className="gap-2 bg-green-600 hover:bg-green-700 text-white">
+            <MessageSquare className="w-4 h-4" /> WhatsApp
+          </Button>
+          <Button onClick={broadcastSMS} variant="secondary" className="gap-2">
+            <Phone className="w-4 h-4" /> SMS
+          </Button>
+          <Button onClick={broadcastEmail} variant="secondary" className="gap-2">
+            <Mail className="w-4 h-4" /> Email
+          </Button>
+          <Button asChild variant="outline" className="gap-2">
+            <a href={WHATSAPP_GROUP} target="_blank" rel="noopener noreferrer">
+              <Users className="w-4 h-4" /> Groupe
+            </a>
+          </Button>
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          Astuce : sur mobile, WhatsApp et SMS s'ouvrent directement. {selected.size} membre(s) sélectionné(s).
+        </p>
+      </div>
+
+      <div className="bg-card rounded-2xl border border-border/50 p-5">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-display font-bold">Destinataires ({members?.length ?? 0})</h3>
+          <div className="flex gap-2">
+            <Button size="sm" variant="ghost" onClick={selectAll}>Tout sélectionner</Button>
+            <Button size="sm" variant="ghost" onClick={clearAll}>Vider</Button>
+          </div>
+        </div>
+        <div className="space-y-1 max-h-96 overflow-y-auto">
+          {members?.map((m: any) => {
+            const phone = m.phone;
+            const email = emails?.get(m.user_id);
+            return (
+              <label key={m.id}
+                className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50 cursor-pointer">
+                <input type="checkbox" checked={selected.has(m.id)} onChange={() => toggle(m.id)} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{m.nom} {m.prenoms}</p>
+                  <p className="text-[11px] text-muted-foreground truncate">
+                    {m.category} {m.poste && `· ${m.poste}`}
+                  </p>
+                </div>
+                <div className="flex gap-1 shrink-0">
+                  {phone && (
+                    <a href={`https://wa.me/${intl(phone)}`} target="_blank" rel="noopener noreferrer"
+                       onClick={e => e.stopPropagation()}
+                       className="p-1.5 rounded text-green-600 hover:bg-green-50" title="WhatsApp">
+                      <MessageSquare className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                  {phone && (
+                    <a href={`sms:${intl(phone)}`} onClick={e => e.stopPropagation()}
+                       className="p-1.5 rounded text-primary hover:bg-primary/10" title="SMS">
+                      <Phone className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                  {email && (
+                    <a href={`mailto:${email}`} onClick={e => e.stopPropagation()}
+                       className="p-1.5 rounded text-muted-foreground hover:bg-secondary" title="Email">
+                      <Mail className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                </div>
+              </label>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 };
