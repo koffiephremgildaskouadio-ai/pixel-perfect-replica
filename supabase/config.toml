@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.generate-news]
 verify_jwt = false
+
+[functions.generate-cahier]
+verify_jwt = false
