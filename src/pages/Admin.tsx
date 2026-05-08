@@ -8,7 +8,7 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import {
   ArrowLeft, Plus, Newspaper, Loader2, Trash2,
   Users, Edit, X, Image as ImageIcon, Video as VideoIcon,
-  FileText, Save, Award,
+  FileText, Save, Award, Sparkles, MessageSquare, Phone, Mail, Send,
 } from "lucide-react";
 import { generateCertificate } from "@/lib/certificate";
 import { toast } from "sonner";
