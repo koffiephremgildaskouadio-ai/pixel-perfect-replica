@@ -284,6 +284,24 @@ const MembersManager = ({ queryClient }: { queryClient: any }) => {
               </p>
             </div>
             <MemberFormDialog mode="edit" member={m} queryClient={queryClient} />
+            {["bureau", "cabinet", "coordonnateur", "commission"].includes(m.category) && (
+              <Button
+                variant="ghost" size="icon"
+                title="Télécharger le certificat PDF"
+                onClick={async () => {
+                  const t = toast.loading("Génération du certificat…");
+                  try {
+                    await generateCertificate(m);
+                    toast.success("Certificat téléchargé", { id: t });
+                  } catch (e: any) {
+                    toast.error(e.message || "Erreur", { id: t });
+                  }
+                }}
+                className="text-primary"
+              >
+                <Award className="w-4 h-4" />
+              </Button>
+            )}
             <Button variant="ghost" size="icon" onClick={() => handleDelete(m.id, `${m.nom} ${m.prenoms}`)}
               className="text-destructive">
               <Trash2 className="w-4 h-4" />
