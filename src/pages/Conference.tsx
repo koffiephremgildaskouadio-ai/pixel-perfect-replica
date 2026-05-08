@@ -2,8 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Video, Phone, Users, Copy, Check, ExternalLink } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import {
+  ArrowLeft, Video, Phone, Users, Copy, Check,
+  Sparkles, ShieldCheck, Infinity as InfinityIcon, MessageCircle, Share2,
+} from "lucide-react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -11,12 +14,11 @@ const Conference = () => {
   const [roomName, setRoomName] = useState("");
   const [userName, setUserName] = useState("");
   const [inCall, setInCall] = useState(false);
+  const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const jitsiContainer = useRef<HTMLDivElement>(null);
   const apiRef = useRef<any>(null);
-  const navigate = useNavigate();
 
-  // Get user info
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
@@ -24,23 +26,24 @@ const Conference = () => {
         setUserName(`${meta?.nom || ""} ${meta?.prenoms || ""}`.trim() || data.user.email || "Membre");
       }
     });
+    const params = new URLSearchParams(window.location.search);
+    const room = params.get("room");
+    if (room) {
+      setRoomName(room);
+      // auto-join when invited via link
+      setTimeout(() => startCall(false, room), 200);
+    }
+    return () => { apiRef.current?.dispose(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const generateRoom = () => {
-    const id = `novalim-${Date.now().toString(36)}`;
-    setRoomName(id);
-    return id;
-  };
-
-  const startCall = (audioOnly = false) => {
-    const room = roomName.trim() || generateRoom();
+  const startCall = (audioOnly = false, override?: string) => {
+    const room = (override ?? roomName).trim() || `novalim-${Date.now().toString(36)}`;
     setRoomName(room);
+    setActiveRoom(room);
     setInCall(true);
 
-    // Load Jitsi API
-    const script = document.createElement("script");
-    script.src = "https://meet.jit.si/external_api.js";
-    script.onload = () => {
+    const launch = () => {
       if (!jitsiContainer.current) return;
       // @ts-ignore
       apiRef.current = new JitsiMeetExternalAPI("meet.jit.si", {
@@ -53,6 +56,13 @@ const Conference = () => {
           startWithVideoMuted: audioOnly,
           prejoinPageEnabled: false,
           disableDeepLinking: true,
+          enableWelcomePage: false,
+          enableClosePage: false,
+          subject: "District Cité Novalim - CIE",
+          disableReactions: false,
+          disablePolls: false,
+          enableEmojiReactions: true,
+          requireDisplayName: false,
           toolbarButtons: [
             "microphone", "camera", "desktop", "chat", "raisehand",
             "participants-pane", "tileview", "hangup", "recording",
@@ -61,133 +71,147 @@ const Conference = () => {
             "livestreaming", "stats", "security", "mute-everyone", "etherpad",
             "filmstrip", "closedcaptions", "whiteboard", "noisesuppression",
           ],
-          subject: "Conférence District Cité Novalim - CIE",
-          disableReactions: false,
-          disablePolls: false,
-          enableEmojiReactions: true,
         },
         interfaceConfigOverwrite: {
           SHOW_JITSI_WATERMARK: false,
           SHOW_BRAND_WATERMARK: false,
-          DEFAULT_BACKGROUND: "#1a3a2a",
+          DEFAULT_BACKGROUND: "#0f3a26",
           TOOLBAR_ALWAYS_VISIBLE: true,
           MOBILE_APP_PROMO: false,
+          DISABLE_JOIN_LEAVE_NOTIFICATIONS: false,
         },
-        userInfo: { displayName: userName },
+        userInfo: { displayName: userName || "Membre Novalim" },
       });
 
       apiRef.current.addListener("readyToClose", () => {
         setInCall(false);
+        setActiveRoom(null);
         apiRef.current?.dispose();
         apiRef.current = null;
       });
     };
-    document.head.appendChild(script);
-  };
 
-  const copyLink = () => {
-    const room = roomName.trim() || generateRoom();
-    setRoomName(room);
-    const link = `${window.location.origin}/conference?room=${room}`;
-    navigator.clipboard.writeText(link);
-    setCopied(true);
-    toast.success("Lien de la conférence copié !");
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  // Auto-join if room in URL
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const room = params.get("room");
-    if (room) {
-      setRoomName(room);
+    if ((window as any).JitsiMeetExternalAPI) {
+      launch();
+    } else {
+      const script = document.createElement("script");
+      script.src = "https://meet.jit.si/external_api.js";
+      script.onload = launch;
+      document.head.appendChild(script);
     }
-  }, []);
+  };
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      apiRef.current?.dispose();
-    };
-  }, []);
+  const buildLink = (room: string) =>
+    `${window.location.origin}/conference?room=${room}`;
+
+  const copyLink = async (room: string) => {
+    const link = buildLink(room);
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      toast.success("Lien copié — partagez-le aux participants");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Copie impossible");
+    }
+  };
+
+  const shareLink = async (room: string) => {
+    const link = buildLink(room);
+    const text = `Rejoignez la conférence du District Cité Novalim - CIE : ${link}`;
+    if (navigator.share) {
+      try { await navigator.share({ title: "Conférence Novalim", text, url: link }); } catch {}
+    } else {
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+    }
+  };
 
   if (inCall) {
     return (
-      <div className="fixed inset-0 z-50 bg-background">
-        <div ref={jitsiContainer} className="w-full h-full" />
+      <div className="fixed inset-0 z-50 bg-background flex flex-col">
+        {/* Bandeau lien — visible APRÈS lancement */}
+        {activeRoom && (
+          <div className="bg-primary text-primary-foreground px-3 py-2 flex items-center gap-2 flex-wrap text-xs sm:text-sm shadow-md">
+            <Sparkles className="w-4 h-4 shrink-0" />
+            <span className="font-semibold shrink-0">Lien d'invitation :</span>
+            <code className="bg-black/20 px-2 py-0.5 rounded truncate flex-1 min-w-0">
+              {buildLink(activeRoom)}
+            </code>
+            <Button size="sm" variant="secondary" className="h-7 gap-1" onClick={() => copyLink(activeRoom)}>
+              {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+              Copier
+            </Button>
+            <Button size="sm" variant="secondary" className="h-7 gap-1" onClick={() => shareLink(activeRoom)}>
+              <Share2 className="w-3.5 h-3.5" /> Partager
+            </Button>
+          </div>
+        )}
+        <div ref={jitsiContainer} className="flex-1 w-full" />
       </div>
     );
   }
 
   return (
-    <div className="pt-16 min-h-screen bg-secondary/30">
-      <div className="container max-w-2xl py-10 lg:py-16">
+    <div className="pt-16 min-h-screen bg-gradient-to-b from-secondary/30 to-background">
+      <div className="container max-w-3xl py-10 lg:py-16">
         <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-8 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Retour à l'accueil
         </Link>
 
-        <ScrollReveal className="text-center mb-10">
-          <span className="text-sm font-semibold text-primary tracking-wide uppercase">Communication</span>
-          <h1 className="mt-3 text-3xl lg:text-4xl font-display font-bold text-foreground">
-            Salle de Conférence
+        <ScrollReveal className="text-center mb-8">
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">
+            <InfinityIcon className="w-3.5 h-3.5" /> Sans limite de temps · Gratuit
+          </span>
+          <h1 className="mt-4 text-3xl lg:text-4xl font-display font-bold text-foreground">
+            Salle de Conférence Novalim
           </h1>
-          <p className="mt-3 text-muted-foreground leading-relaxed max-w-lg mx-auto">
-            Lancez ou rejoignez une conférence audio/vidéo en direct avec les membres du district.
+          <p className="mt-3 text-muted-foreground leading-relaxed max-w-xl mx-auto">
+            Lancez une visioconférence professionnelle en un clic. Le lien d'invitation sera généré
+            <strong> automatiquement après le démarrage</strong>.
           </p>
         </ScrollReveal>
 
         <ScrollReveal delay={100}>
-          <div className="bg-card rounded-2xl border border-border/50 shadow-sm p-6 lg:p-8 space-y-6">
-            {/* Room name */}
+          <div className="bg-card rounded-3xl border border-border/50 shadow-xl p-6 lg:p-8 space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Nom de la salle (optionnel)</label>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Ex: reunion-bureau-avril"
-                  value={roomName}
-                  onChange={(e) => setRoomName(e.target.value.replace(/\s+/g, "-").toLowerCase())}
-                  className="flex-1"
-                />
-                <Button variant="outline" size="icon" onClick={copyLink} title="Copier le lien">
-                  {copied ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">Laissez vide pour créer une salle automatique. Partagez le lien pour inviter des participants.</p>
+              <Input
+                placeholder="Ex: bureau-mai, ag-extraordinaire…"
+                value={roomName}
+                onChange={(e) => setRoomName(e.target.value.replace(/\s+/g, "-").toLowerCase())}
+              />
+              <p className="text-xs text-muted-foreground">
+                Laissez vide pour générer une salle automatique. Le lien apparaîtra dès le démarrage.
+              </p>
             </div>
 
-            {/* Action buttons */}
             <div className="grid sm:grid-cols-2 gap-3">
               <Button
-                variant="hero"
-                size="lg"
-                className="gap-2 w-full"
+                variant="hero" size="lg" className="gap-2 w-full text-base h-14"
                 onClick={() => startCall(false)}
               >
                 <Video className="w-5 h-5" />
-                Appel Vidéo
+                Démarrer Vidéo
               </Button>
               <Button
-                variant="outline"
-                size="lg"
-                className="gap-2 w-full"
+                variant="outline" size="lg" className="gap-2 w-full text-base h-14"
                 onClick={() => startCall(true)}
               >
                 <Phone className="w-5 h-5" />
-                Appel Audio
+                Démarrer Audio
               </Button>
             </div>
 
-            {/* Features */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-border/30">
               {[
-                { icon: "🎥", label: "Vidéo HD" },
-                { icon: "🎤", label: "Audio clair" },
-                { icon: "💬", label: "Chat intégré" },
-                { icon: "🖥️", label: "Partage d'écran" },
+                { icon: InfinityIcon, label: "Durée illimitée" },
+                { icon: ShieldCheck, label: "Chiffré & sécurisé" },
+                { icon: MessageCircle, label: "Chat & emojis" },
+                { icon: Users, label: "Jusqu'à 100 pers." },
               ].map((f) => (
-                <div key={f.label} className="text-center p-3 rounded-xl bg-secondary/50">
-                  <span className="text-2xl block mb-1">{f.icon}</span>
-                  <span className="text-xs font-medium text-muted-foreground">{f.label}</span>
+                <div key={f.label} className="text-center p-3 rounded-xl bg-secondary/60 border border-border/30">
+                  <f.icon className="w-5 h-5 mx-auto mb-1.5 text-primary" />
+                  <span className="text-xs font-semibold text-foreground">{f.label}</span>
                 </div>
               ))}
             </div>
@@ -197,22 +221,21 @@ const Conference = () => {
         <ScrollReveal delay={200}>
           <div className="mt-6 bg-card rounded-2xl border border-border/50 shadow-sm p-6 space-y-4">
             <div className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-primary" />
+              <Sparkles className="w-5 h-5 text-primary" />
               <h2 className="font-display font-bold text-foreground">Comment ça marche ?</h2>
             </div>
             <ol className="space-y-3 text-sm text-muted-foreground">
-              <li className="flex gap-3">
-                <span className="w-6 h-6 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center shrink-0">1</span>
-                <span>Cliquez sur <strong>Appel Vidéo</strong> ou <strong>Appel Audio</strong> pour démarrer la conférence.</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="w-6 h-6 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center shrink-0">2</span>
-                <span>Copiez le lien de la salle et partagez-le avec les participants.</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="w-6 h-6 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center shrink-0">3</span>
-                <span>Les participants cliquent sur le lien et rejoignent la conférence directement.</span>
-              </li>
+              {[
+                "Cliquez sur Démarrer Vidéo ou Démarrer Audio. La conférence s'ouvre instantanément.",
+                "Une fois en salle, le lien d'invitation s'affiche en haut de l'écran.",
+                "Cliquez sur Copier ou Partager pour inviter d'autres membres (WhatsApp, e-mail…).",
+                "Tous ceux qui ouvrent le lien rejoignent automatiquement la même salle.",
+              ].map((t, i) => (
+                <li key={i} className="flex gap-3">
+                  <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground font-bold text-xs flex items-center justify-center shrink-0">{i + 1}</span>
+                  <span>{t}</span>
+                </li>
+              ))}
             </ol>
           </div>
         </ScrollReveal>
