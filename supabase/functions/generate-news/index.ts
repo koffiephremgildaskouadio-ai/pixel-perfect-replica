@@ -204,6 +204,17 @@ Réponds UNIQUEMENT avec le JSON.`;
       });
     }
 
+    // === Rotation: garder seulement les 30 actualités IA les plus récentes ===
+    const { data: aiPosts } = await supabase
+      .from("actualites")
+      .select("id, created_at")
+      .eq("source", "IA District Novalim-CIE")
+      .order("created_at", { ascending: false });
+    if (aiPosts && aiPosts.length > 30) {
+      const toDelete = aiPosts.slice(30).map((p: any) => p.id);
+      await supabase.from("actualites").delete().in("id", toDelete);
+    }
+
     return new Response(JSON.stringify({ success: true, count: articles.length }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
