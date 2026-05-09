@@ -274,15 +274,23 @@ export const VirtualCard = ({
         </div>
       </div>
 
-      <div className="mt-3 flex items-center justify-center gap-3">
-        <p className="text-[10px] text-muted-foreground">Cliquez pour retourner</p>
+      <div className="mt-3 flex items-center justify-center gap-2 flex-wrap">
+        <p className="text-[10px] text-muted-foreground w-full text-center">Cliquez pour retourner</p>
         <button
           onClick={downloadCard}
           disabled={downloading}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-60"
         >
           {downloading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
-          {downloading ? "Téléchargement…" : "Télécharger"}
+          PNG (R+V)
+        </button>
+        <button
+          onClick={downloadPDF}
+          disabled={downloading}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-600 text-white text-xs font-medium hover:bg-orange-700 disabled:opacity-60"
+        >
+          {downloading ? <Loader2 className="w-3 h-3 animate-spin" /> : <FileText className="w-3 h-3" />}
+          PDF (R+V)
         </button>
       </div>
     </div>
