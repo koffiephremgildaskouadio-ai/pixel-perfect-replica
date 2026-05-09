@@ -107,38 +107,40 @@ serve(async (req) => {
       });
     }
 
-    // Standard chat streaming
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          ...messages,
-        ],
-        stream: true,
-      }),
-    });
+    // Standard chat streaming with fallback models for stability
+    const MODELS = [
+      "google/gemini-2.5-flash",
+      "google/gemini-2.5-flash-lite",
+      "google/gemini-3-flash-preview",
+    ];
 
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Trop de requêtes, veuillez réessayer dans quelques instants." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+    let response: Response | null = null;
+    let lastErr = "";
+    for (const model of MODELS) {
+      const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
+          stream: true,
+        }),
+      });
+      if (r.ok) { response = r; break; }
+      lastErr = `${model}: ${r.status}`;
+      console.warn("model failed, trying next:", lastErr);
+      if (r.status !== 429 && r.status !== 503 && r.status !== 500) {
+        // non-transient → still try fallbacks but keep going
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Service temporairement indisponible." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
-      return new Response(JSON.stringify({ error: "Erreur du service IA" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    }
+
+    if (!response) {
+      console.error("All models failed:", lastErr);
+      return new Response(JSON.stringify({ error: "Service IA momentanément surchargé. Réessayez dans quelques secondes." }), {
+        status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 

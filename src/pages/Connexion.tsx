@@ -54,16 +54,18 @@ const Connexion = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nom.trim() || !prenoms.trim()) {
-      toast.error("Veuillez remplir votre nom et prénoms.");
-      return;
-    }
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { nom: nom.trim(), prenoms: prenoms.trim() } },
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: {
+            nom: nom.trim() || email.split("@")[0],
+            prenoms: prenoms.trim() || "Membre",
+          },
+        },
       });
       if (error) throw error;
       toast.success("Inscription réussie ! Vous pouvez maintenant vous connecter.");
@@ -96,12 +98,12 @@ const Connexion = () => {
               {mode === "signup" && (
                 <>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Nom</label>
-                    <Input placeholder="Votre nom de famille" value={nom} onChange={(e) => setNom(e.target.value)} required />
+                    <label className="text-sm font-medium text-foreground">Nom <span className="text-muted-foreground text-xs">(optionnel)</span></label>
+                    <Input placeholder="Votre nom de famille" value={nom} onChange={(e) => setNom(e.target.value)} />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Prénoms</label>
-                    <Input placeholder="Vos prénoms" value={prenoms} onChange={(e) => setPrenoms(e.target.value)} required />
+                    <label className="text-sm font-medium text-foreground">Prénoms <span className="text-muted-foreground text-xs">(optionnel)</span></label>
+                    <Input placeholder="Vos prénoms" value={prenoms} onChange={(e) => setPrenoms(e.target.value)} />
                   </div>
                 </>
               )}
