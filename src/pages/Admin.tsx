@@ -593,14 +593,96 @@ const BlockEditor = ({
 };
 
 /* ============================================================ */
-/* COMMUNICATION MANAGER — WhatsApp / SMS / Email broadcast      */
+/* COMMUNICATION MANAGER — Templates + Members + Partners        */
 /* ============================================================ */
 const WHATSAPP_GROUP = "https://chat.whatsapp.com/ElxkVGBSEDlBlIpX00cCys";
+
+type Template = { key: string; label: string; subject: string; body: string };
+const TEMPLATES: Template[] = [
+  {
+    key: "reunion",
+    label: "📅 Convocation à une réunion",
+    subject: "Convocation – Réunion du District",
+    body:
+`Bonjour {nom},
+
+Vous êtes cordialement convoqué(e) à la prochaine réunion du District Cité Novalim-CIE :
+
+📅 Date : [JJ/MM/AAAA]
+🕐 Heure : [HH:MM]
+📍 Lieu : [Lieu de la réunion]
+📝 Ordre du jour : [Sujets à aborder]
+
+Votre présence est vivement souhaitée.
+
+Cordialement,
+Le Bureau Exécutif – District Cité Novalim-CIE`,
+  },
+  {
+    key: "info",
+    label: "ℹ️ Information générale",
+    subject: "Information importante",
+    body:
+`Bonjour {nom},
+
+Le Bureau Exécutif souhaite porter à votre attention l'information suivante :
+
+[Votre message ici]
+
+Pour toute question, n'hésitez pas à nous contacter au 07 89 53 63 18.
+
+Cordialement,
+District Cité Novalim-CIE`,
+  },
+  {
+    key: "convocation",
+    label: "📨 Convocation officielle",
+    subject: "Convocation officielle – Présence requise",
+    body:
+`Cher(e) {nom},
+
+Par la présente, vous êtes officiellement convoqué(e) à :
+
+🏛️ Événement : [Nom de l'événement]
+📅 Date : [JJ/MM/AAAA]
+🕐 Heure : [HH:MM]
+📍 Lieu : [Adresse]
+
+Motif : [Raison de la convocation]
+
+Votre présence est obligatoire.
+
+Le Président du District,
+Kouadio Koffi Ephrem Gildas`,
+  },
+  {
+    key: "evenement",
+    label: "🎉 Invitation à un événement",
+    subject: "Invitation – Événement du District",
+    body:
+`Bonjour {nom},
+
+Nous avons l'honneur de vous inviter à :
+
+🎉 [Nom de l'événement]
+📅 [JJ/MM/AAAA] à [HH:MM]
+📍 [Lieu]
+
+Votre présence honorera cet événement.
+
+Cordialement,
+District Cité Novalim-CIE`,
+  },
+];
+
+type Recipient = { id: string; nom: string; phone: string | null; email?: string | null; group: "membre" | "partenaire"; meta?: string };
 
 const CommunicationManager = () => {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [showPreview, setShowPreview] = useState(false);
+  const [aiPolishing, setAiPolishing] = useState(false);
 
   const { data: members } = useQuery({
     queryKey: ["comm-members"],
@@ -609,10 +691,19 @@ const CommunicationManager = () => {
         .from("members")
         .select("id, nom, prenoms, phone, poste, category, user_id")
         .eq("is_active", true)
-        .order("category")
-        .order("member_number");
+        .order("category").order("member_number");
       if (error) throw error;
       return data;
+    },
+  });
+
+  const { data: partners } = useQuery({
+    queryKey: ["comm-partners"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("directory_entries").select("id, name, phone, category, address").order("name");
+      if (error) throw error;
+      return data ?? [];
     },
   });
 
@@ -624,6 +715,18 @@ const CommunicationManager = () => {
       return new Map((data ?? []).map((p: any) => [p.id, p.email]));
     },
   });
+
+  const recipients: Recipient[] = [
+    ...((members ?? []).map((m: any) => ({
+      id: `m-${m.id}`, nom: `${m.nom} ${m.prenoms}`, phone: m.phone,
+      email: emails?.get(m.user_id), group: "membre" as const,
+      meta: `${m.category}${m.poste ? " · " + m.poste : ""}`,
+    }))),
+    ...((partners ?? []).map((p: any) => ({
+      id: `p-${p.id}`, nom: p.name, phone: p.phone, email: null,
+      group: "partenaire" as const, meta: `${p.category}${p.address ? " · " + p.address : ""}`,
+    }))),
+  ];
 
   const cleanPhone = (p?: string | null) => (p ?? "").replace(/[^\d]/g, "");
   const intl = (p?: string | null) => {
@@ -640,65 +743,140 @@ const CommunicationManager = () => {
     });
   };
 
-  const selectAll = () => setSelected(new Set((members ?? []).map((m: any) => m.id)));
+  const selectAll = () => setSelected(new Set(recipients.map(r => r.id)));
+  const selectAllMembers = () => setSelected(new Set(recipients.filter(r => r.group === "membre").map(r => r.id)));
+  const selectAllPartners = () => setSelected(new Set(recipients.filter(r => r.group === "partenaire").map(r => r.id)));
   const clearAll = () => setSelected(new Set());
 
-  const selectedMembers = (members ?? []).filter((m: any) => selected.has(m.id));
-  const fullMessage = subject ? `*${subject}*\n\n${message}` : message;
+  const selectedRecipients = recipients.filter(r => selected.has(r.id));
+  const personalize = (r: Recipient) => (subject ? `*${subject}*\n\n` : "") + message.replace(/\{nom\}/gi, r.nom);
+  const previewSample = recipients.find(r => selected.has(r.id)) ?? recipients[0];
+  const previewText = previewSample ? personalize(previewSample) : (subject ? `*${subject}*\n\n${message}` : message);
+
+  const applyTemplate = (tpl: Template) => {
+    setSubject(tpl.subject);
+    setMessage(tpl.body);
+    toast.success(`Modèle "${tpl.label}" chargé`);
+  };
+
+  const aiPolish = async () => {
+    if (!message.trim()) { toast.error("Écrivez d'abord un message à améliorer"); return; }
+    setAiPolishing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("chat-ai", {
+        body: {
+          messages: [{
+            role: "user",
+            content: `Améliore ce message officiel du District Cité Novalim-CIE pour qu'il soit clair, professionnel, chaleureux et structuré (avec emojis pertinents). Garde la variable {nom}. Réponds UNIQUEMENT par le message final, sans explication :\n\n${message}`,
+          }],
+        },
+      });
+      if (error) throw error;
+      // chat-ai is streaming; invoke returns the body? — fallback: prompt user
+      const txt = typeof data === "string" ? data : (data?.text || data?.message || "");
+      if (txt) { setMessage(txt); toast.success("Message amélioré par l'IA"); }
+      else toast.info("Conservez votre message — l'IA n'a pas répondu de texte exploitable.");
+    } catch (e: any) {
+      toast.error("IA momentanément indisponible : " + (e.message || ""));
+    } finally {
+      setAiPolishing(false);
+    }
+  };
 
   const broadcastWhatsApp = () => {
     if (!message.trim()) { toast.error("Message requis"); return; }
-    const targets = selectedMembers.filter((m: any) => intl(m.phone));
+    const targets = selectedRecipients.filter(r => intl(r.phone));
     if (!targets.length) { toast.error("Aucun destinataire avec téléphone"); return; }
-    targets.forEach((m: any, i: number) => {
+    if (!confirm(`Envoyer ce message WhatsApp à ${targets.length} destinataire(s) ?`)) return;
+    targets.forEach((r, i) => {
       setTimeout(() => {
-        window.open(`https://wa.me/${intl(m.phone)}?text=${encodeURIComponent(fullMessage)}`, "_blank");
+        window.open(`https://wa.me/${intl(r.phone)}?text=${encodeURIComponent(personalize(r))}`, "_blank");
       }, i * 400);
     });
-    toast.success(`Ouverture de ${targets.length} fenêtre(s) WhatsApp`);
+    toast.success(`Ouverture de ${targets.length} conversation(s) WhatsApp`);
   };
 
   const broadcastSMS = () => {
     if (!message.trim()) { toast.error("Message requis"); return; }
-    const targets = selectedMembers.filter((m: any) => cleanPhone(m.phone));
+    const targets = selectedRecipients.filter(r => cleanPhone(r.phone));
     if (!targets.length) { toast.error("Aucun destinataire avec téléphone"); return; }
-    const numbers = targets.map((m: any) => intl(m.phone)).join(",");
-    window.location.href = `sms:${numbers}?body=${encodeURIComponent(fullMessage)}`;
-    toast.success(`SMS pour ${targets.length} membre(s)`);
+    const numbers = targets.map(r => intl(r.phone)).join(",");
+    const body = subject ? `${subject}\n\n${message}` : message;
+    window.location.href = `sms:${numbers}?body=${encodeURIComponent(body)}`;
+    toast.success(`SMS pour ${targets.length} destinataire(s)`);
   };
 
   const broadcastEmail = () => {
     if (!message.trim()) { toast.error("Message requis"); return; }
-    const addrs = selectedMembers
-      .map((m: any) => emails?.get(m.user_id))
-      .filter(Boolean);
-    if (!addrs.length) { toast.error("Aucun email disponible"); return; }
+    const addrs = selectedRecipients.map(r => r.email).filter(Boolean) as string[];
+    if (!addrs.length) { toast.error("Aucun email disponible (les partenaires n'ont pas d'email)"); return; }
     const subj = subject || "Information du District Cité Novalim-CIE";
     window.location.href = `mailto:?bcc=${addrs.join(",")}&subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(message)}`;
-    toast.success(`Email pour ${addrs.length} membre(s)`);
+    toast.success(`Email pour ${addrs.length} destinataire(s)`);
   };
 
   return (
     <div className="space-y-6">
       <div className="rounded-xl bg-primary/5 border border-primary/20 p-4 text-sm">
         <p className="font-semibold text-primary mb-1 flex items-center gap-2">
-          <Send className="w-4 h-4" /> Diffusion aux membres
+          <Send className="w-4 h-4" /> Centre de diffusion
         </p>
         <p className="text-muted-foreground text-xs">
-          Sélectionnez les membres puis envoyez via WhatsApp, SMS ou Email. Vous pouvez aussi partager dans le groupe WhatsApp officiel.
+          Choisissez un modèle, prévisualisez, puis envoyez à vos membres et partenaires via WhatsApp, SMS ou Email.
+          Utilisez <code className="bg-secondary px-1 rounded">{"{nom}"}</code> pour personnaliser le message.
         </p>
       </div>
 
+      {/* Template library */}
+      <div className="bg-card rounded-2xl border border-border/50 p-5">
+        <h3 className="text-sm font-display font-bold mb-3 flex items-center gap-2">
+          <FileText className="w-4 h-4 text-primary" /> Bibliothèque de modèles
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {TEMPLATES.map(tpl => (
+            <button key={tpl.key} type="button" onClick={() => applyTemplate(tpl)}
+              className="text-left p-3 rounded-lg border border-border/50 hover:border-primary/40 hover:bg-primary/5 transition">
+              <p className="text-sm font-semibold text-foreground">{tpl.label}</p>
+              <p className="text-[11px] text-muted-foreground line-clamp-2 mt-0.5">{tpl.body.split("\n")[0]}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Editor */}
       <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-3">
         <div>
-          <label className="text-xs font-medium block mb-1">Objet (optionnel)</label>
+          <label className="text-xs font-medium block mb-1">Objet</label>
           <Input value={subject} onChange={e => setSubject(e.target.value)} placeholder="Ex: Réunion mensuelle" />
         </div>
         <div>
-          <label className="text-xs font-medium block mb-1">Message *</label>
-          <Textarea value={message} onChange={e => setMessage(e.target.value)} rows={5}
-            placeholder="Bonjour, vous êtes convoqués à la réunion du..." />
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-xs font-medium">Message * (utilisez {"{nom}"} pour personnaliser)</label>
+            <Button type="button" variant="ghost" size="sm" className="h-7 text-xs gap-1 text-primary" onClick={aiPolish} disabled={aiPolishing}>
+              {aiPolishing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+              Améliorer avec l'IA
+            </Button>
+          </div>
+          <Textarea value={message} onChange={e => setMessage(e.target.value)} rows={8}
+            placeholder="Bonjour {nom}, vous êtes convoqué(e) à la réunion du..." />
         </div>
+
+        <div className="flex items-center justify-between">
+          <Button type="button" variant="outline" size="sm" onClick={() => setShowPreview(!showPreview)}>
+            {showPreview ? "Masquer l'aperçu" : "👁️ Prévisualiser"}
+          </Button>
+          <p className="text-[11px] text-muted-foreground">{selected.size} destinataire(s) sélectionné(s)</p>
+        </div>
+
+        {showPreview && (
+          <div className="rounded-xl border border-border bg-secondary/30 p-4">
+            <p className="text-[11px] uppercase font-bold text-muted-foreground mb-2">
+              Aperçu (pour {previewSample?.nom ?? "—"})
+            </p>
+            <pre className="whitespace-pre-wrap text-sm font-sans text-foreground">{previewText || "—"}</pre>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <Button onClick={broadcastWhatsApp} className="gap-2 bg-green-600 hover:bg-green-700 text-white">
             <MessageSquare className="w-4 h-4" /> WhatsApp
@@ -716,56 +894,60 @@ const CommunicationManager = () => {
           </Button>
         </div>
         <p className="text-[11px] text-muted-foreground">
-          Astuce : sur mobile, WhatsApp et SMS s'ouvrent directement. {selected.size} membre(s) sélectionné(s).
+          📲 Sur mobile, WhatsApp et SMS s'ouvrent dans l'app native — l'envoi est confirmé d'un clic. Aperçu obligatoire avant envoi groupé.
         </p>
       </div>
 
+      {/* Recipients list */}
       <div className="bg-card rounded-2xl border border-border/50 p-5">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-display font-bold">Destinataires ({members?.length ?? 0})</h3>
-          <div className="flex gap-2">
-            <Button size="sm" variant="ghost" onClick={selectAll}>Tout sélectionner</Button>
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <h3 className="text-sm font-display font-bold">
+            Destinataires ({recipients.length})
+          </h3>
+          <div className="flex gap-1 flex-wrap">
+            <Button size="sm" variant="ghost" onClick={selectAllMembers}>Membres</Button>
+            <Button size="sm" variant="ghost" onClick={selectAllPartners}>Partenaires</Button>
+            <Button size="sm" variant="ghost" onClick={selectAll}>Tous</Button>
             <Button size="sm" variant="ghost" onClick={clearAll}>Vider</Button>
           </div>
         </div>
         <div className="space-y-1 max-h-96 overflow-y-auto">
-          {members?.map((m: any) => {
-            const phone = m.phone;
-            const email = emails?.get(m.user_id);
-            return (
-              <label key={m.id}
-                className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50 cursor-pointer">
-                <input type="checkbox" checked={selected.has(m.id)} onChange={() => toggle(m.id)} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{m.nom} {m.prenoms}</p>
-                  <p className="text-[11px] text-muted-foreground truncate">
-                    {m.category} {m.poste && `· ${m.poste}`}
-                  </p>
-                </div>
-                <div className="flex gap-1 shrink-0">
-                  {phone && (
-                    <a href={`https://wa.me/${intl(phone)}`} target="_blank" rel="noopener noreferrer"
-                       onClick={e => e.stopPropagation()}
-                       className="p-1.5 rounded text-green-600 hover:bg-green-50" title="WhatsApp">
-                      <MessageSquare className="w-3.5 h-3.5" />
-                    </a>
-                  )}
-                  {phone && (
-                    <a href={`sms:${intl(phone)}`} onClick={e => e.stopPropagation()}
-                       className="p-1.5 rounded text-primary hover:bg-primary/10" title="SMS">
-                      <Phone className="w-3.5 h-3.5" />
-                    </a>
-                  )}
-                  {email && (
-                    <a href={`mailto:${email}`} onClick={e => e.stopPropagation()}
-                       className="p-1.5 rounded text-muted-foreground hover:bg-secondary" title="Email">
-                      <Mail className="w-3.5 h-3.5" />
-                    </a>
-                  )}
-                </div>
-              </label>
-            );
-          })}
+          {recipients.map(r => (
+            <label key={r.id}
+              className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50 cursor-pointer">
+              <input type="checkbox" checked={selected.has(r.id)} onChange={() => toggle(r.id)} />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate flex items-center gap-2">
+                  {r.nom}
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded-full uppercase font-bold ${
+                    r.group === "membre" ? "bg-primary/10 text-primary" : "bg-orange-500/10 text-orange-600"
+                  }`}>{r.group}</span>
+                </p>
+                <p className="text-[11px] text-muted-foreground truncate">{r.meta}</p>
+              </div>
+              <div className="flex gap-1 shrink-0">
+                {r.phone && (
+                  <a href={`https://wa.me/${intl(r.phone)}`} target="_blank" rel="noopener noreferrer"
+                     onClick={e => e.stopPropagation()}
+                     className="p-1.5 rounded text-green-600 hover:bg-green-50" title="WhatsApp">
+                    <MessageSquare className="w-3.5 h-3.5" />
+                  </a>
+                )}
+                {r.phone && (
+                  <a href={`sms:${intl(r.phone)}`} onClick={e => e.stopPropagation()}
+                     className="p-1.5 rounded text-primary hover:bg-primary/10" title="SMS">
+                    <Phone className="w-3.5 h-3.5" />
+                  </a>
+                )}
+                {r.email && (
+                  <a href={`mailto:${r.email}`} onClick={e => e.stopPropagation()}
+                     className="p-1.5 rounded text-muted-foreground hover:bg-secondary" title="Email">
+                    <Mail className="w-3.5 h-3.5" />
+                  </a>
+                )}
+              </div>
+            </label>
+          ))}
         </div>
       </div>
     </div>

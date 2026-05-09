@@ -1,7 +1,8 @@
 import { useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { RotateCw, Download, Loader2 } from "lucide-react";
+import { RotateCw, Download, Loader2, FileText } from "lucide-react";
 import { toPng } from "html-to-image";
+import jsPDF from "jspdf";
 import { toast } from "sonner";
 import logoNova from "@/assets/nova_logo_official.jpg";
 import logoCcjy from "@/assets/logo_ccjy.jpg";
@@ -63,6 +64,44 @@ export const VirtualCard = ({
     }
   };
 
+  const downloadPDF = async () => {
+    setDownloading(true);
+    try {
+      if (!rectoRef.current || !versoRef.current) throw new Error("Carte non prête");
+      const safeName = `${nom}_${prenoms}`.replace(/[^a-zA-Z0-9_-]/g, "_");
+      const opts = { cacheBust: true, pixelRatio: 3, backgroundColor: "#fdf6e3" };
+      // Briefly un-flip for capture
+      const wasFlipped = flipped;
+      setFlipped(false);
+      await new Promise((r) => setTimeout(r, 50));
+      const rectoUrl = await toPng(rectoRef.current, opts);
+      const versoUrl = await toPng(versoRef.current, opts);
+      setFlipped(wasFlipped);
+
+      // ID-1 card 85.6 x 54 mm — center 2 cards on A4 portrait
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const pageW = 210;
+      const cardW = 85.6, cardH = 54;
+      const x = (pageW - cardW) / 2;
+      pdf.setFontSize(14);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Carte de Membre — RECTO", pageW / 2, 20, { align: "center" });
+      pdf.addImage(rectoUrl, "PNG", x, 28, cardW, cardH);
+      pdf.text("Carte de Membre — VERSO", pageW / 2, 105, { align: "center" });
+      pdf.addImage(versoUrl, "PNG", x, 113, cardW, cardH);
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "italic");
+      pdf.setTextColor(100);
+      pdf.text("District Cité Novalim - CIE · CCJY Yopougon", pageW / 2, 280, { align: "center" });
+      pdf.save(`carte_${safeName}.pdf`);
+      toast.success("PDF téléchargé (recto + verso)");
+    } catch (e: any) {
+      toast.error("PDF impossible : " + (e.message || "erreur"));
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className="w-full max-w-md mx-auto">
       <div
@@ -75,7 +114,7 @@ export const VirtualCard = ({
           style={{
             transformStyle: "preserve-3d",
             transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
-            aspectRatio: "85.6 / 54",
+            aspectRatio: "85.6 / 60",
           }}
         >
           {/* ===== RECTO ===== */}
@@ -235,15 +274,23 @@ export const VirtualCard = ({
         </div>
       </div>
 
-      <div className="mt-3 flex items-center justify-center gap-3">
-        <p className="text-[10px] text-muted-foreground">Cliquez pour retourner</p>
+      <div className="mt-3 flex items-center justify-center gap-2 flex-wrap">
+        <p className="text-[10px] text-muted-foreground w-full text-center">Cliquez pour retourner</p>
         <button
           onClick={downloadCard}
           disabled={downloading}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-60"
         >
           {downloading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
-          {downloading ? "Téléchargement…" : "Télécharger"}
+          PNG (R+V)
+        </button>
+        <button
+          onClick={downloadPDF}
+          disabled={downloading}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-600 text-white text-xs font-medium hover:bg-orange-700 disabled:opacity-60"
+        >
+          {downloading ? <Loader2 className="w-3 h-3 animate-spin" /> : <FileText className="w-3 h-3" />}
+          PDF (R+V)
         </button>
       </div>
     </div>
