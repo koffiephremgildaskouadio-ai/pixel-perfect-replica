@@ -1,7 +1,8 @@
 import { useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { RotateCw, Download, Loader2 } from "lucide-react";
+import { RotateCw, Download, Loader2, FileText } from "lucide-react";
 import { toPng } from "html-to-image";
+import jsPDF from "jspdf";
 import { toast } from "sonner";
 import logoNova from "@/assets/nova_logo_official.jpg";
 import logoCcjy from "@/assets/logo_ccjy.jpg";
@@ -58,6 +59,44 @@ export const VirtualCard = ({
       toast.success("Carte téléchargée (recto + verso)");
     } catch (e: any) {
       toast.error("Téléchargement impossible : " + (e.message || "erreur"));
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const downloadPDF = async () => {
+    setDownloading(true);
+    try {
+      if (!rectoRef.current || !versoRef.current) throw new Error("Carte non prête");
+      const safeName = `${nom}_${prenoms}`.replace(/[^a-zA-Z0-9_-]/g, "_");
+      const opts = { cacheBust: true, pixelRatio: 3, backgroundColor: "#fdf6e3" };
+      // Briefly un-flip for capture
+      const wasFlipped = flipped;
+      setFlipped(false);
+      await new Promise((r) => setTimeout(r, 50));
+      const rectoUrl = await toPng(rectoRef.current, opts);
+      const versoUrl = await toPng(versoRef.current, opts);
+      setFlipped(wasFlipped);
+
+      // ID-1 card 85.6 x 54 mm — center 2 cards on A4 portrait
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const pageW = 210;
+      const cardW = 85.6, cardH = 54;
+      const x = (pageW - cardW) / 2;
+      pdf.setFontSize(14);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Carte de Membre — RECTO", pageW / 2, 20, { align: "center" });
+      pdf.addImage(rectoUrl, "PNG", x, 28, cardW, cardH);
+      pdf.text("Carte de Membre — VERSO", pageW / 2, 105, { align: "center" });
+      pdf.addImage(versoUrl, "PNG", x, 113, cardW, cardH);
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "italic");
+      pdf.setTextColor(100);
+      pdf.text("District Cité Novalim - CIE · CCJY Yopougon", pageW / 2, 280, { align: "center" });
+      pdf.save(`carte_${safeName}.pdf`);
+      toast.success("PDF téléchargé (recto + verso)");
+    } catch (e: any) {
+      toast.error("PDF impossible : " + (e.message || "erreur"));
     } finally {
       setDownloading(false);
     }
