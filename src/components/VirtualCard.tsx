@@ -114,7 +114,7 @@ export const VirtualCard = ({
           style={{
             transformStyle: "preserve-3d",
             transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
-            aspectRatio: "85.6 / 54",
+            aspectRatio: "85.6 / 60",
           }}
         >
           {/* ===== RECTO ===== */}
