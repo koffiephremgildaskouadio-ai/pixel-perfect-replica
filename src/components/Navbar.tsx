@@ -39,7 +39,7 @@ export const Navbar = () => {
 
   const checkAdmin = async (userId: string) => {
     const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-    setIsAdmin(!!data?.some(r => ["admin", "moderator"].includes(r.role)));
+    setIsAdmin(!!data?.some(r => ["admin", "moderator", "super_admin"].includes(r.role)));
   };
 
   const handleLogout = async () => {
