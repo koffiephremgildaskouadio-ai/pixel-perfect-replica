@@ -790,6 +790,7 @@ const CommunicationManager = () => {
     try {
       const { data, error } = await supabase.functions.invoke("chat-ai", {
         body: {
+          stream: false,
           messages: [{
             role: "user",
             content: `Améliore ce message officiel du District Cité Novalim-CIE pour qu'il soit clair, professionnel, chaleureux et structuré (avec emojis pertinents). Garde la variable {nom}. Réponds UNIQUEMENT par le message final, sans explication :\n\n${message}`,
@@ -815,7 +816,7 @@ const CommunicationManager = () => {
     if (!confirm(`Envoyer ce message WhatsApp à ${targets.length} destinataire(s) ?`)) return;
     targets.forEach((r, i) => {
       setTimeout(() => {
-        window.open(`https://wa.me/${intl(r.phone)}?text=${encodeURIComponent(personalize(r))}`, "_blank");
+        window.open(`https://api.whatsapp.com/send?phone=${intl(r.phone)}&text=${encodeURIComponent(personalize(r))}`, "_blank", "noopener,noreferrer");
       }, i * 400);
     });
     toast.success(`Ouverture de ${targets.length} conversation(s) WhatsApp`);
@@ -825,10 +826,13 @@ const CommunicationManager = () => {
     if (!message.trim()) { toast.error("Message requis"); return; }
     const targets = selectedRecipients.filter(r => cleanPhone(r.phone));
     if (!targets.length) { toast.error("Aucun destinataire avec téléphone"); return; }
-    const numbers = targets.map(r => intl(r.phone)).join(",");
     const body = subject ? `${subject}\n\n${message}` : message;
-    window.location.href = `sms:${numbers}?body=${encodeURIComponent(body)}`;
-    toast.success(`SMS pour ${targets.length} destinataire(s)`);
+    targets.forEach((r, i) => {
+      setTimeout(() => {
+        window.open(`sms:${intl(r.phone)}?body=${encodeURIComponent(personalize(r) || body)}`, "_self");
+      }, i * 250);
+    });
+    toast.success(`Préparation de ${targets.length} SMS`);
   };
 
   const broadcastEmail = () => {
