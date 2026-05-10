@@ -10,6 +10,7 @@ export interface CertMember {
   prenoms: string;
   poste?: string | null;
   category: string;
+  district?: string | null;
   phone?: string | null;
   quartier?: string | null;
   cahier_charges?: string | null;
@@ -92,7 +93,7 @@ export const generateCertificate = async (m: CertMember) => {
   doc.text("CONSEIL COMMUNAL DES JEUNES DE YOPOUGON", W / 2, 24, { align: "center" });
   doc.setTextColor(21, 128, 61);
   doc.setFontSize(15);
-  doc.text("DISTRICT CITÉ NOVALIM - CIE", W / 2, 32, { align: "center" });
+  doc.text(`DISTRICT ${String(m.district || "Novalim-CIE").toUpperCase()}`, W / 2, 32, { align: "center" });
   doc.setTextColor(120, 53, 15);
   doc.setFontSize(9);
   doc.setFont("helvetica", "italic");
@@ -143,6 +144,7 @@ export const generateCertificate = async (m: CertMember) => {
   doc.setFontSize(11);
   const rows: [string, string][] = [
     ["N° de membre", m.member_number],
+    ["District", m.district || "Novalim-CIE"],
     ["Catégorie", categoryLabel(m.category)],
     ["Téléphone", m.phone || "—"],
     ["Quartier", m.quartier || "—"],
