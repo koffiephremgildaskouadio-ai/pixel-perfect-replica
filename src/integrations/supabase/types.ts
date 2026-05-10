@@ -94,6 +94,7 @@ export type Database = {
           cahier_charges: string | null
           category: string
           created_at: string
+          district: string
           id: string
           is_active: boolean
           member_number: string
@@ -110,6 +111,7 @@ export type Database = {
           cahier_charges?: string | null
           category?: string
           created_at?: string
+          district?: string
           id?: string
           is_active?: boolean
           member_number: string
@@ -126,6 +128,7 @@ export type Database = {
           cahier_charges?: string | null
           category?: string
           created_at?: string
+          district?: string
           id?: string
           is_active?: boolean
           member_number?: string
