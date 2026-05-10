@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { VirtualCard } from "@/components/VirtualCard";
 import { ScrollReveal } from "@/components/ScrollReveal";
@@ -10,6 +11,19 @@ import { Button } from "@/components/ui/button";
 const CarteMembre = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [canDownload, setCanDownload] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return setCanDownload(false);
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id);
+      setCanDownload(!!roles?.some((r) => r.role === "super_admin"));
+    })();
+  }, []);
 
   const { data: member, isLoading, error } = useQuery({
     queryKey: ["member", id],
@@ -79,6 +93,7 @@ const CarteMembre = () => {
                 category={member.category}
                 photoUrl={member.photo_url}
                 email={null}
+                canDownload={canDownload}
               />
             </ScrollReveal>
 

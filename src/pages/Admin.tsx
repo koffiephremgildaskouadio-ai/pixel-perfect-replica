@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ const Admin = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -33,7 +34,8 @@ const Admin = () => {
       if (!session) { navigate("/connexion"); return; }
       const { data: roles } = await supabase
         .from("user_roles").select("role").eq("user_id", session.user.id);
-      const ok = roles?.some(r => ["admin", "moderator"].includes(r.role));
+      const ok = roles?.some(r => ["admin", "moderator", "super_admin"].includes(r.role));
+      setIsSuperAdmin(!!roles?.some(r => r.role === "super_admin"));
       if (!ok) { toast.error("Accès refusé"); navigate("/"); return; }
       setIsAdmin(true);
     })();
@@ -74,7 +76,7 @@ const Admin = () => {
               <TabsTrigger value="about"><FileText className="w-4 h-4 mr-2" /> À Propos</TabsTrigger>
             </TabsList>
             <TabsContent value="news"><NewsManager queryClient={queryClient} /></TabsContent>
-            <TabsContent value="members"><MembersManager queryClient={queryClient} /></TabsContent>
+            <TabsContent value="members"><MembersManager queryClient={queryClient} isSuperAdmin={isSuperAdmin} /></TabsContent>
             <TabsContent value="comm"><CommunicationManager /></TabsContent>
             <TabsContent value="about"><AboutManager /></TabsContent>
           </Tabs>
@@ -246,7 +248,7 @@ const NewsManager = ({ queryClient }: { queryClient: any }) => {
 /* ============================================================ */
 /* MEMBERS MANAGER (CRUD)                                        */
 /* ============================================================ */
-const MembersManager = ({ queryClient }: { queryClient: any }) => {
+const MembersManager = ({ queryClient, isSuperAdmin }: { queryClient: any; isSuperAdmin: boolean }) => {
   const { data: members } = useQuery({
     queryKey: ["admin-members"],
     queryFn: async () => {
@@ -255,6 +257,11 @@ const MembersManager = ({ queryClient }: { queryClient: any }) => {
       return data;
     },
   });
+
+  const grouped = useMemo(() => ({
+    novalim: (members ?? []).filter((m: any) => (m.district ?? "Novalim-CIE") !== "France-ville"),
+    franceville: (members ?? []).filter((m: any) => m.district === "France-ville"),
+  }), [members]);
 
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`Supprimer définitivement ${name} ?`)) return;
@@ -265,51 +272,60 @@ const MembersManager = ({ queryClient }: { queryClient: any }) => {
     queryClient.invalidateQueries({ queryKey: ["bureau-members"] });
   };
 
+  const MemberRow = ({ m }: { m: any }) => (
+    <div key={m.id} className="p-3 rounded-xl bg-card border border-border/50 flex items-center gap-3">
+      {m.photo_url
+        ? <img src={m.photo_url} className="w-10 h-10 rounded-lg object-cover shrink-0" alt="" />
+        : <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-sm font-bold shrink-0">
+            {m.nom?.[0]}{m.prenoms?.[0]}
+          </div>}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold truncate">{m.nom} {m.prenoms}</p>
+        <p className="text-xs text-muted-foreground truncate">
+          {m.member_number} · {m.category} {m.poste && `· ${m.poste}`} · {m.district ?? "Novalim-CIE"}
+        </p>
+      </div>
+      <MemberFormDialog mode="edit" member={m} queryClient={queryClient} />
+      {isSuperAdmin && ["bureau", "cabinet", "coordonnateur", "commission"].includes(m.category) && (
+        <Button
+          variant="ghost" size="icon"
+          title="Télécharger le certificat PDF"
+          onClick={async () => {
+            const t = toast.loading("Génération du certificat…");
+            try {
+              await generateCertificate(m);
+              toast.success("Certificat téléchargé", { id: t });
+            } catch (e: any) {
+              toast.error(e.message || "Erreur", { id: t });
+            }
+          }}
+          className="text-primary"
+        >
+          <Award className="w-4 h-4" />
+        </Button>
+      )}
+      <Button variant="ghost" size="icon" onClick={() => handleDelete(m.id, `${m.nom} ${m.prenoms}`)}
+        className="text-destructive">
+        <Trash2 className="w-4 h-4" />
+      </Button>
+    </div>
+  );
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-display font-bold">Liste des membres ({members?.length ?? 0})</h2>
         <MemberFormDialog mode="create" queryClient={queryClient} />
       </div>
-      <div className="space-y-2">
-        {members?.map((m: any) => (
-          <div key={m.id} className="p-3 rounded-xl bg-card border border-border/50 flex items-center gap-3">
-            {m.photo_url
-              ? <img src={m.photo_url} className="w-10 h-10 rounded-lg object-cover shrink-0" alt="" />
-              : <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-sm font-bold shrink-0">
-                  {m.nom?.[0]}{m.prenoms?.[0]}
-                </div>}
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate">{m.nom} {m.prenoms}</p>
-              <p className="text-xs text-muted-foreground truncate">
-                {m.member_number} · {m.category} {m.poste && `· ${m.poste}`}
-              </p>
-            </div>
-            <MemberFormDialog mode="edit" member={m} queryClient={queryClient} />
-            {["bureau", "cabinet", "coordonnateur", "commission"].includes(m.category) && (
-              <Button
-                variant="ghost" size="icon"
-                title="Télécharger le certificat PDF"
-                onClick={async () => {
-                  const t = toast.loading("Génération du certificat…");
-                  try {
-                    await generateCertificate(m);
-                    toast.success("Certificat téléchargé", { id: t });
-                  } catch (e: any) {
-                    toast.error(e.message || "Erreur", { id: t });
-                  }
-                }}
-                className="text-primary"
-              >
-                <Award className="w-4 h-4" />
-              </Button>
-            )}
-            <Button variant="ghost" size="icon" onClick={() => handleDelete(m.id, `${m.nom} ${m.prenoms}`)}
-              className="text-destructive">
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </div>
-        ))}
+      <div className="space-y-4">
+        <div>
+          <h3 className="text-sm font-display font-bold mb-2 text-foreground">District Cité Novalim-CIE</h3>
+          <div className="space-y-2">{grouped.novalim.map((m: any) => <MemberRow key={m.id} m={m} />)}</div>
+        </div>
+        <div>
+          <h3 className="text-sm font-display font-bold mb-2 text-foreground">District France-ville</h3>
+          <div className="space-y-2">{grouped.franceville.map((m: any) => <MemberRow key={m.id} m={m} />)}</div>
+        </div>
       </div>
     </div>
   );
@@ -325,6 +341,7 @@ const MemberFormDialog = ({
     prenoms: member?.prenoms ?? "",
     poste: member?.poste ?? "",
     category: member?.category ?? "membre",
+    district: member?.district ?? "Novalim-CIE",
     phone: member?.phone ?? "",
     quartier: member?.quartier ?? "",
     cahier_charges: member?.cahier_charges ?? "",
@@ -425,6 +442,14 @@ const MemberFormDialog = ({
               <Input value={form.member_number} onChange={e => setForm({ ...form, member_number: e.target.value })}
                 placeholder="auto" />
             </div>
+          </div>
+          <div>
+            <label className="text-xs font-medium block mb-1">District</label>
+            <select value={form.district} onChange={e => setForm({ ...form, district: e.target.value })}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm">
+              <option value="Novalim-CIE">Novalim-CIE</option>
+              <option value="France-ville">France-ville</option>
+            </select>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
@@ -765,6 +790,7 @@ const CommunicationManager = () => {
     try {
       const { data, error } = await supabase.functions.invoke("chat-ai", {
         body: {
+          stream: false,
           messages: [{
             role: "user",
             content: `Améliore ce message officiel du District Cité Novalim-CIE pour qu'il soit clair, professionnel, chaleureux et structuré (avec emojis pertinents). Garde la variable {nom}. Réponds UNIQUEMENT par le message final, sans explication :\n\n${message}`,
@@ -790,7 +816,7 @@ const CommunicationManager = () => {
     if (!confirm(`Envoyer ce message WhatsApp à ${targets.length} destinataire(s) ?`)) return;
     targets.forEach((r, i) => {
       setTimeout(() => {
-        window.open(`https://wa.me/${intl(r.phone)}?text=${encodeURIComponent(personalize(r))}`, "_blank");
+        window.open(`https://api.whatsapp.com/send?phone=${intl(r.phone)}&text=${encodeURIComponent(personalize(r))}`, "_blank", "noopener,noreferrer");
       }, i * 400);
     });
     toast.success(`Ouverture de ${targets.length} conversation(s) WhatsApp`);
@@ -800,10 +826,13 @@ const CommunicationManager = () => {
     if (!message.trim()) { toast.error("Message requis"); return; }
     const targets = selectedRecipients.filter(r => cleanPhone(r.phone));
     if (!targets.length) { toast.error("Aucun destinataire avec téléphone"); return; }
-    const numbers = targets.map(r => intl(r.phone)).join(",");
     const body = subject ? `${subject}\n\n${message}` : message;
-    window.location.href = `sms:${numbers}?body=${encodeURIComponent(body)}`;
-    toast.success(`SMS pour ${targets.length} destinataire(s)`);
+    targets.forEach((r, i) => {
+      setTimeout(() => {
+        window.open(`sms:${intl(r.phone)}?body=${encodeURIComponent(personalize(r) || body)}`, "_self");
+      }, i * 250);
+    });
+    toast.success(`Préparation de ${targets.length} SMS`);
   };
 
   const broadcastEmail = () => {

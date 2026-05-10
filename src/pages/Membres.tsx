@@ -13,15 +13,28 @@ const Membres = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [canDownload, setCanDownload] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      if (session) {
+        supabase.from("user_roles").select("role").eq("user_id", session.user.id).then(({ data }) => {
+          setCanDownload(!!data?.some((r) => r.role === "super_admin"));
+        });
+      }
       setLoading(false);
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      if (session) {
+        supabase.from("user_roles").select("role").eq("user_id", session.user.id).then(({ data }) => {
+          setCanDownload(!!data?.some((r) => r.role === "super_admin"));
+        });
+      } else {
+        setCanDownload(false);
+      }
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -127,6 +140,8 @@ const Membres = () => {
                 quartier={myCard.quartier}
                 phone={myCard.phone}
                 category={myCard.category}
+                photoUrl={myCard.photo_url}
+                canDownload={canDownload}
               />
             </ScrollReveal>
           </div>

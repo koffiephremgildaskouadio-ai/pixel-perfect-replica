@@ -5,6 +5,12 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const json = (body: Record<string, unknown>, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+
 const SYSTEM_PROMPT = `Tu es NovalimIA, l'assistant IA officiel ultra-intelligent du District Cité Novalim-CIE, rattaché au Conseil Communal des Jeunes de Yopougon (CCJY) en Côte d'Ivoire. Tu es conçu pour être aussi compétent que les meilleurs assistants IA (Claude, ChatGPT, Copilot), capable de répondre à TOUTES les questions possibles, qu'elles soient liées au district ou non.
 
 ## TON IDENTITÉ
@@ -71,9 +77,11 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { messages, generateImage, imagePrompt } = body;
+    const { messages, generateImage, imagePrompt, stream = true } = body;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+    const safeMessages = Array.isArray(messages) ? messages.slice(-12) : [];
 
     // Image generation mode
     if (generateImage && imagePrompt) {
@@ -93,18 +101,14 @@ serve(async (req) => {
       if (!imgResponse.ok) {
         const errText = await imgResponse.text();
         console.error("Image gen error:", imgResponse.status, errText);
-        return new Response(JSON.stringify({ error: "Erreur de génération d'image", text: "Je ne peux pas générer cette image pour le moment." }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return json({ error: "Erreur de génération d'image", text: "Je ne peux pas générer cette image pour le moment.", fallback: true });
       }
 
       const imgData = await imgResponse.json();
       const imageUrl = imgData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
       const text = imgData.choices?.[0]?.message?.content || "Voici l'image générée :";
 
-      return new Response(JSON.stringify({ imageUrl, text }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return json({ imageUrl, text });
     }
 
     // Standard chat streaming with fallback models for stability
@@ -125,8 +129,8 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           model,
-          messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
-          stream: true,
+          messages: [{ role: "system", content: SYSTEM_PROMPT }, ...safeMessages],
+          stream,
         }),
       });
       if (r.ok) { response = r; break; }
@@ -139,9 +143,12 @@ serve(async (req) => {
 
     if (!response) {
       console.error("All models failed:", lastErr);
-      return new Response(JSON.stringify({ error: "Service IA momentanément surchargé. Réessayez dans quelques secondes." }), {
-        status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return json({ error: "Service IA momentanément surchargé. Réessayez dans quelques secondes.", fallback: true }, 200);
+    }
+
+    if (!stream) {
+      const data = await response.json();
+      return json({ text: data.choices?.[0]?.message?.content || "" });
     }
 
     return new Response(response.body, {
@@ -149,8 +156,6 @@ serve(async (req) => {
     });
   } catch (e) {
     console.error("chat-ai error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Erreur inconnue" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json({ error: e instanceof Error ? e.message : "Erreur inconnue", fallback: true }, 200);
   }
 });
