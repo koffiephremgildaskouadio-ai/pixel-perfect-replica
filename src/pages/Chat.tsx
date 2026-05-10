@@ -210,6 +210,15 @@ const Chat = () => {
             signal: controller.signal,
           });
 
+          const contentType = resp.headers.get("content-type") || "";
+          if (contentType.includes("application/json")) {
+            const payload = await resp.json().catch(() => ({}));
+            if (payload?.fallback && attempt < MAX_RETRIES) {
+              continue;
+            }
+            throw new Error(payload?.error || `Erreur ${resp.status}`);
+          }
+
           if (!resp.ok || !resp.body) {
             let errMsg = `Erreur ${resp.status}`;
             try {
@@ -330,6 +339,11 @@ const Chat = () => {
         body: JSON.stringify({ messages: last.apiMessages }),
         signal: controller.signal,
       });
+      const contentType = resp.headers.get("content-type") || "";
+      if (contentType.includes("application/json")) {
+        const payload = await resp.json().catch(() => ({}));
+        throw new Error(payload?.error || `Erreur ${resp.status}`);
+      }
       if (!resp.ok || !resp.body) throw new Error(`Erreur ${resp.status}`);
 
       const reader = resp.body.getReader();
