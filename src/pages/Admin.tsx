@@ -341,6 +341,7 @@ const MemberFormDialog = ({
     prenoms: member?.prenoms ?? "",
     poste: member?.poste ?? "",
     category: member?.category ?? "membre",
+    district: member?.district ?? "Novalim-CIE",
     phone: member?.phone ?? "",
     quartier: member?.quartier ?? "",
     cahier_charges: member?.cahier_charges ?? "",
@@ -441,6 +442,14 @@ const MemberFormDialog = ({
               <Input value={form.member_number} onChange={e => setForm({ ...form, member_number: e.target.value })}
                 placeholder="auto" />
             </div>
+          </div>
+          <div>
+            <label className="text-xs font-medium block mb-1">District</label>
+            <select value={form.district} onChange={e => setForm({ ...form, district: e.target.value })}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm">
+              <option value="Novalim-CIE">Novalim-CIE</option>
+              <option value="France-ville">France-ville</option>
+            </select>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
