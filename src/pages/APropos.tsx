@@ -9,6 +9,8 @@ import novaOfficial from "@/assets/nova_logo_official.jpg";
 import novaAction1 from "@/assets/nova_action1.jpg";
 import novaAction2 from "@/assets/nova_action2.jpg";
 import novaAction3 from "@/assets/nova_action3.jpg";
+import bambaAdama from "@/assets/bamba_adama.jpg";
+import francevilleLogo from "@/assets/franceville_logo.jpg";
 
 const districts = [
   { nom: "Port-Bouët 2 Plateau", president: "Cissé Madémorie" },
@@ -260,6 +262,54 @@ Son expertise en gestion financière et sa vision stratégique contribuent signi
                     « Le développement d'une communauté commence par l'engagement de ses leaders envers sa jeunesse. » — Esprit de M. Abiola Waidi
                   </p>
                 </div>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* District partenaire France-ville — Bamba Adama */}
+      <section className="py-16 lg:py-24 bg-gradient-to-br from-emerald-50 via-white to-amber-50">
+        <div className="container">
+          <ScrollReveal className="text-center max-w-3xl mx-auto mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
+              <Handshake className="w-4 h-4" /> District partenaire
+            </div>
+            <h2 className="text-3xl lg:text-4xl font-display font-bold text-foreground">
+              District France-ville
+            </h2>
+            <p className="mt-3 text-muted-foreground leading-relaxed">
+              Sous la présidence engagée de <strong>M. Bamba Adama</strong>, le District France-ville (Zone 1 – Ananeraie Maroc) partage avec Cité Novalim-CIE une vision commune au service de la jeunesse de Yopougon.
+            </p>
+          </ScrollReveal>
+          <div className="grid lg:grid-cols-2 gap-12 items-center max-w-5xl mx-auto">
+            <ScrollReveal direction="left">
+              <div className="flex flex-col items-center gap-6">
+                <div className="rounded-2xl overflow-hidden shadow-2xl border-4 border-primary/30 w-72 h-80">
+                  <img src={bambaAdama} alt="M. Bamba Adama, Président du District France-ville" className="w-full h-full object-cover" />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-xl font-display font-bold text-foreground">Bamba Adama</h3>
+                  <p className="text-primary font-semibold text-sm">Président du District France-ville</p>
+                  <p className="text-xs text-muted-foreground mt-1">CCJY – Zone 1 Ananeraie Maroc</p>
+                </div>
+                <img src={francevilleLogo} alt="Logo Union de la Jeunesse du Quartier France-ville" className="w-32 h-32 object-contain rounded-full bg-white p-2 shadow-md" />
+              </div>
+            </ScrollReveal>
+            <ScrollReveal delay={150}>
+              <div className="space-y-4 text-muted-foreground leading-relaxed">
+                <p>
+                  <strong>M. Bamba Adama</strong> dirige le District France-ville avec une approche fondée sur l'unité, la rigueur et l'inclusion — incarnée par le slogan <em>« Union de la Jeunesse du Quartier France-ville »</em>.
+                </p>
+                <p>
+                  Son bureau exécutif respecte le principe de <strong>30 % de femmes minimum</strong> et regroupe des compétences clés : planification, juridique, mobilisation des partenaires, communication, projets et finances.
+                </p>
+                <p>
+                  Aux côtés du Président Kouadio Koffi Ephrem Gildas, M. Bamba Adama porte la vision de <strong>« Deux districts, une vision commune »</strong> lors de la cérémonie d'investiture conjointe du 26 Avril 2026.
+                </p>
+                <Link to="/france-ville" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition">
+                  Découvrir le bureau de France-ville →
+                </Link>
               </div>
             </ScrollReveal>
           </div>
