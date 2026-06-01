@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, User, LogOut, ShieldCheck, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { InstallPWA } from "@/components/InstallPWA";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo_novalim.png";
 import type { Session } from "@supabase/supabase-js";
@@ -86,6 +87,7 @@ export const Navbar = () => {
         </nav>
 
         <div className="flex items-center gap-2">
+          <InstallPWA />
           {session ? (
             <Button variant="outline" size="sm" className="hidden sm:flex gap-2" onClick={handleLogout}>
               <LogOut className="w-4 h-4" />
