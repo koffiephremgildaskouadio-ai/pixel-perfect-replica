@@ -1,9 +1,10 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { RotateCw, Download, Loader2, FileText } from "lucide-react";
 import { toPng } from "html-to-image";
 import jsPDF from "jspdf";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import logoNova from "@/assets/nova_logo_official.jpg";
 import logoCcjy from "@/assets/logo_ccjy.jpg";
 import tampon from "@/assets/tampon.png";
@@ -23,8 +24,18 @@ interface VirtualCardProps {
   canDownload?: boolean;
 }
 
-const FACEBOOK_URL = "https://web.facebook.com/DistrictCiteNovalimCIE";
-const SITE_URL = typeof window !== "undefined" ? window.location.origin : "https://districtcitenovalim-cie.lovable.app";
+const FALLBACK_FACEBOOK_URL = "https://web.facebook.com/DistrictCiteNovalimCIE";
+const FALLBACK_SITE_URL = typeof window !== "undefined" ? window.location.origin : "https://districtcitenovalim-cie.lovable.app";
+
+type CardSettings = {
+  header_top?: string;
+  header_main?: string;
+  validity?: string;
+  emergency_phone?: string;
+  verso_text?: string;
+  facebook_url?: string;
+  site_url?: string;
+};
 
 export const VirtualCard = ({
   memberNumber,
@@ -38,11 +49,24 @@ export const VirtualCard = ({
 }: VirtualCardProps) => {
   const [flipped, setFlipped] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [settings, setSettings] = useState<CardSettings>({});
   const rectoRef = useRef<HTMLDivElement>(null);
   const versoRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    supabase.from("site_content").select("metadata").eq("key", "card_settings").maybeSingle()
+      .then(({ data }) => setSettings(((data?.metadata as any) ?? {}) as CardSettings));
+  }, []);
+
+  const HEADER_TOP = settings.header_top || "CONSEIL COMMUNAL DES JEUNES DE YOPOUGON";
+  const HEADER_MAIN = settings.header_main || "DISTRICT CITÉ NOVALIM - CIE";
+  const VALIDITE = settings.validity || "2025 - 2026";
+  const EMERGENCY = settings.emergency_phone || "07 89 53 63 18";
+  const VERSO_TEXT = settings.verso_text || "Cette carte est la propriété\ndu District Cité Novalim - CIE.\nEn cas de perte, merci de nous contacter";
+  const FACEBOOK_URL = settings.facebook_url || FALLBACK_FACEBOOK_URL;
+  const SITE_URL = settings.site_url || FALLBACK_SITE_URL;
+
   const initials = `${nom?.[0] ?? ""}${prenoms?.[0] ?? ""}`;
-  const validite = "2025 - 2026";
   const numericPart = (memberNumber.match(/(\d+)/g)?.pop() ?? "0001").padStart(4, "0");
   const displayNumber = `JY-NC/${numericPart}`;
 
