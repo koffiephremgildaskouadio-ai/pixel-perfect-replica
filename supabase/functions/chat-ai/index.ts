@@ -113,37 +113,46 @@ serve(async (req) => {
 
     // Standard chat streaming with fallback models for stability
     const MODELS = [
+      "google/gemini-3-flash-preview",
+      "google/gemini-3.5-flash",
       "google/gemini-2.5-flash",
       "google/gemini-2.5-flash-lite",
-      "google/gemini-3-flash-preview",
+      "openai/gpt-5-mini",
     ];
 
     let response: Response | null = null;
     let lastErr = "";
     for (const model of MODELS) {
-      const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model,
-          messages: [{ role: "system", content: SYSTEM_PROMPT }, ...safeMessages],
-          stream,
-        }),
-      });
-      if (r.ok) { response = r; break; }
-      lastErr = `${model}: ${r.status}`;
-      console.warn("model failed, trying next:", lastErr);
-      if (r.status !== 429 && r.status !== 503 && r.status !== 500) {
-        // non-transient → still try fallbacks but keep going
+      try {
+        const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model,
+            messages: [{ role: "system", content: SYSTEM_PROMPT }, ...safeMessages],
+            stream,
+          }),
+        });
+        if (r.ok) { response = r; break; }
+        const errBody = await r.text().catch(() => "");
+        lastErr = `${model}: ${r.status} ${errBody.slice(0, 200)}`;
+        console.warn("model failed:", lastErr);
+      } catch (fetchErr) {
+        lastErr = `${model}: ${fetchErr instanceof Error ? fetchErr.message : "fetch error"}`;
+        console.warn("fetch failed:", lastErr);
       }
     }
 
     if (!response) {
       console.error("All models failed:", lastErr);
-      return json({ error: "Service IA momentanément surchargé. Réessayez dans quelques secondes.", fallback: true }, 200);
+      return json({
+        error: "Service IA momentanément surchargé. Réessayez dans quelques secondes.",
+        text: "Désolé, je rencontre une difficulté technique passagère. Veuillez réessayer dans quelques instants. 🙏",
+        fallback: true,
+      }, 200);
     }
 
     if (!stream) {
