@@ -168,10 +168,10 @@ export const VirtualCard = ({
                 </div>
                 <div className="flex-1 text-center px-1 text-white">
                   <p className="font-bold text-[8px] leading-tight tracking-wide">
-                    CONSEIL COMMUNAL DES JEUNES DE YOPOUGON
+                    {HEADER_TOP}
                   </p>
                   <p className="font-bold text-[10px] leading-tight">
-                    DISTRICT CITÉ NOVALIM - CIE
+                    {HEADER_MAIN}
                   </p>
                 </div>
                 <div className="bg-white rounded-md p-0.5 shrink-0">
@@ -224,7 +224,7 @@ export const VirtualCard = ({
                   )}
                   <div className="flex items-center gap-1 pt-0.5">
                     <span className="font-bold text-green-800 text-[8px] uppercase">Validité :</span>
-                    <span className="font-bold text-[10px] text-orange-600">{validite}</span>
+                    <span className="font-bold text-[10px] text-orange-600">{VALIDITE}</span>
                   </div>
                 </div>
               </div>
