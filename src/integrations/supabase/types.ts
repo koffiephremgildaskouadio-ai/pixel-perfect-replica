@@ -164,6 +164,60 @@ export type Database = {
         }
         Relationships: []
       }
+      portals: {
+        Row: {
+          color: string | null
+          cover_url: string | null
+          created_at: string
+          created_by: string | null
+          custom_links: Json
+          description: string | null
+          display_order: number
+          id: string
+          is_published: boolean
+          logo_url: string | null
+          member_ids: Json
+          slug: string
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          cover_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          custom_links?: Json
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_published?: boolean
+          logo_url?: string | null
+          member_ids?: Json
+          slug: string
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          cover_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          custom_links?: Json
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_published?: boolean
+          logo_url?: string | null
+          member_ids?: Json
+          slug?: string
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
