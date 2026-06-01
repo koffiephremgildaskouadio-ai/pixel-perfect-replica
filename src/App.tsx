@@ -17,6 +17,7 @@ import Conference from "./pages/Conference.tsx";
 import Admin from "./pages/Admin.tsx";
 import Annuaire from "./pages/Annuaire.tsx";
 import FranceVille from "./pages/FranceVille.tsx";
+import Portail from "./pages/Portail.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/a-propos" element={<APropos />} />
           <Route path="/france-ville" element={<FranceVille />} />
+          <Route path="/portail/:slug" element={<Portail />} />
           <Route path="/conference" element={<Conference />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/annuaire" element={<Annuaire />} />
