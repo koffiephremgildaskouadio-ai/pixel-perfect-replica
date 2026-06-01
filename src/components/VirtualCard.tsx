@@ -269,16 +269,14 @@ export const VirtualCard = ({
 
               {/* Texte central */}
               <div className="flex-1 text-center px-1">
-                <p className="font-bold text-foreground text-[10px] leading-snug">
-                  Cette carte est la propriété<br />
-                  du District Cité Novalim - CIE.<br />
-                  En cas de perte, merci de nous contacter
+                <p className="font-bold text-foreground text-[10px] leading-snug whitespace-pre-line">
+                  {VERSO_TEXT}
                 </p>
                 <p className="font-bold text-[12px] mt-1.5 text-red-600">
-                  07 89 53 63 18
+                  {EMERGENCY}
                 </p>
                 <p className="text-[7px] text-foreground/60 mt-0.5 truncate">
-                  districtcitenovalim-cie.lovable.app
+                  {(SITE_URL || "").replace(/^https?:\/\//, "")}
                 </p>
               </div>
 
