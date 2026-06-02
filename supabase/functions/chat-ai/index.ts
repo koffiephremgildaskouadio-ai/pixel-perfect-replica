@@ -111,12 +111,14 @@ serve(async (req) => {
       return json({ imageUrl, text });
     }
 
-    // Standard chat streaming with fallback models for stability
+    // Modèles les plus performants en priorité (Gemini 3, GPT-5.5, Claude-like quality via gateway)
     const MODELS = [
       "google/gemini-3-flash-preview",
-      "google/gemini-3.5-flash",
+      "google/gemini-3.1-pro-preview",
+      "openai/gpt-5.5",
+      "openai/gpt-5.4",
+      "google/gemini-2.5-pro",
       "google/gemini-2.5-flash",
-      "google/gemini-2.5-flash-lite",
       "openai/gpt-5-mini",
     ];
 
