@@ -104,21 +104,36 @@ export const VirtualCard = ({
       const versoUrl = await toPng(versoRef.current, opts);
       setFlipped(wasFlipped);
 
-      // ID-1 card 85.6 x 54 mm — center 2 cards on A4 portrait
-      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-      const pageW = 210;
-      const cardW = 85.6, cardH = 54;
+      // Carte grand format — A4 paysage, recto et verso XXL pour une lecture facile
+      const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+      const pageW = 297, pageH = 210;
+      const cardW = 240, cardH = 150;
       const x = (pageW - cardW) / 2;
-      pdf.setFontSize(14);
+      const y = (pageH - cardH) / 2;
+
+      // Page 1 — RECTO
+      pdf.setFontSize(16);
       pdf.setFont("helvetica", "bold");
-      pdf.text("Carte de Membre — RECTO", pageW / 2, 20, { align: "center" });
-      pdf.addImage(rectoUrl, "PNG", x, 28, cardW, cardH);
-      pdf.text("Carte de Membre — VERSO", pageW / 2, 105, { align: "center" });
-      pdf.addImage(versoUrl, "PNG", x, 113, cardW, cardH);
-      pdf.setFontSize(9);
+      pdf.setTextColor(21, 128, 61);
+      pdf.text("Carte de Membre — RECTO", pageW / 2, 16, { align: "center" });
+      pdf.addImage(rectoUrl, "PNG", x, y, cardW, cardH);
+      pdf.setFontSize(10);
       pdf.setFont("helvetica", "italic");
       pdf.setTextColor(100);
-      pdf.text("District Cité Novalim - CIE · CCJY Yopougon", pageW / 2, 280, { align: "center" });
+      pdf.text("District Cité Novalim - CIE · CCJY Yopougon", pageW / 2, pageH - 8, { align: "center" });
+
+      // Page 2 — VERSO
+      pdf.addPage("a4", "landscape");
+      pdf.setFontSize(16);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(21, 128, 61);
+      pdf.text("Carte de Membre — VERSO", pageW / 2, 16, { align: "center" });
+      pdf.addImage(versoUrl, "PNG", x, y, cardW, cardH);
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "italic");
+      pdf.setTextColor(100);
+      pdf.text("District Cité Novalim - CIE · CCJY Yopougon", pageW / 2, pageH - 8, { align: "center" });
+
       pdf.save(`carte_${safeName}.pdf`);
       toast.success("PDF téléchargé (recto + verso)");
     } catch (e: any) {
