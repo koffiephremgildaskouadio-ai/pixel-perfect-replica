@@ -43,10 +43,13 @@ const Conference = () => {
     setActiveRoom(room);
     setInCall(true);
 
+    // Serveur Jitsi libre SANS limite de temps (meet.jit.si impose 5 min aux invités non-auth)
+    const JITSI_DOMAIN = "meet.ffmuc.net";
+
     const launch = () => {
       if (!jitsiContainer.current) return;
       // @ts-ignore
-      apiRef.current = new JitsiMeetExternalAPI("meet.jit.si", {
+      apiRef.current = new JitsiMeetExternalAPI(JITSI_DOMAIN, {
         roomName: `NovalimCIE_${room}`,
         parentNode: jitsiContainer.current,
         width: "100%",
@@ -63,6 +66,9 @@ const Conference = () => {
           disablePolls: false,
           enableEmojiReactions: true,
           requireDisplayName: false,
+          disableProfile: true,
+          hideConferenceTimer: false,
+          conferenceInfo: { autoHide: ["conference-timer"] },
           toolbarButtons: [
             "microphone", "camera", "desktop", "chat", "raisehand",
             "participants-pane", "tileview", "hangup", "recording",
@@ -95,8 +101,15 @@ const Conference = () => {
       launch();
     } else {
       const script = document.createElement("script");
-      script.src = "https://meet.jit.si/external_api.js";
+      script.src = `https://${JITSI_DOMAIN}/external_api.js`;
       script.onload = launch;
+      script.onerror = () => {
+        // Fallback : repli sur meet.jit.si si ffmuc indisponible
+        const s2 = document.createElement("script");
+        s2.src = "https://meet.jit.si/external_api.js";
+        s2.onload = launch;
+        document.head.appendChild(s2);
+      };
       document.head.appendChild(script);
     }
   };
