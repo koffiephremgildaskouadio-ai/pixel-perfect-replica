@@ -174,7 +174,7 @@ export const VirtualCard = ({
           >
             {/* District logo watermark — léger pour ne pas gêner */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <img src={logoNova} alt="" crossOrigin="anonymous"
+              <img src={LOGO_DISTRICT} alt="" crossOrigin="anonymous"
                 className="w-[70%] opacity-[0.07] object-contain" />
             </div>
 
@@ -186,7 +186,7 @@ export const VirtualCard = ({
               {/* Header avec logos + titres */}
               <div className="flex items-center gap-2 relative z-10">
                 <div className="bg-white rounded-md p-0.5 shrink-0">
-                  <img src={logoNova} alt="Logo District" crossOrigin="anonymous"
+                  <img src={LOGO_DISTRICT} alt="Logo District" crossOrigin="anonymous"
                     className="w-10 h-10 object-contain" />
                 </div>
                 <div className="flex-1 text-center px-1 text-white">
@@ -198,7 +198,7 @@ export const VirtualCard = ({
                   </p>
                 </div>
                 <div className="bg-white rounded-md p-0.5 shrink-0">
-                  <img src={logoCcjy} alt="Logo CCJY" crossOrigin="anonymous"
+                  <img src={LOGO_CCJY} alt="Logo CCJY" crossOrigin="anonymous"
                     className="w-10 h-10 object-contain" />
                 </div>
               </div>
@@ -222,9 +222,9 @@ export const VirtualCard = ({
                   )}
                   {/* Tampon + signature superposés JUSTE en dessous */}
                   <div className="relative w-[78px] h-[36px] mt-0.5">
-                    <img src={tampon} alt="" crossOrigin="anonymous"
+                    <img src={TAMPON} alt="" crossOrigin="anonymous"
                       className="absolute inset-0 w-full h-full object-contain opacity-90" />
-                    <img src={signature} alt="" crossOrigin="anonymous"
+                    <img src={SIGNATURE} alt="" crossOrigin="anonymous"
                       className="absolute inset-0 w-full h-full object-contain" />
                   </div>
                 </div>
@@ -275,7 +275,7 @@ export const VirtualCard = ({
             }}
           >
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <img src={logoNova} alt="" crossOrigin="anonymous"
+              <img src={LOGO_DISTRICT} alt="" crossOrigin="anonymous"
                 className="w-[75%] opacity-[0.10] object-contain" />
             </div>
 
