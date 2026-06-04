@@ -3,6 +3,7 @@ import logoNova from "@/assets/nova_logo_official.jpg";
 import logoCcjy from "@/assets/logo_ccjy.jpg";
 import tampon from "@/assets/tampon.png";
 import signature from "@/assets/signature.png";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface CertMember {
   member_number: string;
@@ -69,8 +70,14 @@ export const generateCertificate = async (m: CertMember) => {
   doc.setLineWidth(0.6);
   doc.rect(11.5, 11.5, W - 23, H - 23);
 
+  // Chargement des overrides admin (logos, tampon, signature)
+  const { data: cs } = await supabase.from("site_content").select("metadata").eq("key", "certificate_settings").maybeSingle();
+  const overrides = ((cs?.metadata as any) ?? {}) as Record<string, string>;
   const [novaImg, ccjyImg, tamponImg, signImg] = await Promise.all([
-    toDataURL(logoNova), toDataURL(logoCcjy), toDataURL(tampon), toDataURL(signature),
+    toDataURL(overrides.logo_district || logoNova),
+    toDataURL(overrides.logo_ccjy || logoCcjy),
+    toDataURL(overrides.tampon_url || tampon),
+    toDataURL(overrides.signature_url || signature),
   ]);
 
   // Logos en haut
