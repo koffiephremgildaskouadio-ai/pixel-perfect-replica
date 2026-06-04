@@ -157,22 +157,3 @@ const Actualites = () => {
 
 export default Actualites;
 
-const _OLD_END = (
-                      <a
-                        href="ignored"
-                      >
-                        <Users className="w-3.5 h-3.5" /> Groupe du District
-                      </a>
-                    </div>
-                  </div>
-                </article>
-              </ScrollReveal>
-            );
-          })}
-        </div>
-      </section>
-    </div>
-  );
-};
-
-export default Actualites;
