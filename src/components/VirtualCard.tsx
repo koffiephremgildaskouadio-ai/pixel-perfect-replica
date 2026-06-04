@@ -35,6 +35,10 @@ type CardSettings = {
   verso_text?: string;
   facebook_url?: string;
   site_url?: string;
+  logo_district?: string;
+  logo_ccjy?: string;
+  tampon_url?: string;
+  signature_url?: string;
 };
 
 export const VirtualCard = ({
@@ -65,6 +69,10 @@ export const VirtualCard = ({
   const VERSO_TEXT = settings.verso_text || "Cette carte est la propriété\ndu District Cité Novalim - CIE.\nEn cas de perte, merci de nous contacter";
   const FACEBOOK_URL = settings.facebook_url || FALLBACK_FACEBOOK_URL;
   const SITE_URL = settings.site_url || FALLBACK_SITE_URL;
+  const LOGO_DISTRICT = settings.logo_district || logoNova;
+  const LOGO_CCJY = settings.logo_ccjy || logoCcjy;
+  const TAMPON = settings.tampon_url || tampon;
+  const SIGNATURE = settings.signature_url || signature;
 
   const initials = `${nom?.[0] ?? ""}${prenoms?.[0] ?? ""}`;
   const numericPart = (memberNumber.match(/(\d+)/g)?.pop() ?? "0001").padStart(4, "0");
