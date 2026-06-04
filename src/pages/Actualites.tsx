@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useEffect } from "react";
+import { Comments } from "@/components/Comments";
 
 const Actualites = () => {
   useEffect(() => {
@@ -138,6 +139,27 @@ const Actualites = () => {
                         href="https://chat.whatsapp.com/ElxkVGBSEDlBlIpX00cCys"
                         target="_blank" rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20"
+                      >
+                        <Users className="w-3.5 h-3.5" /> Groupe du District
+                      </a>
+                    </div>
+                    <Comments actualiteId={article.id} />
+                  </div>
+                </article>
+              </ScrollReveal>
+            );
+          })}
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default Actualites;
+
+const _OLD_END = (
+                      <a
+                        href="ignored"
                       >
                         <Users className="w-3.5 h-3.5" /> Groupe du District
                       </a>
