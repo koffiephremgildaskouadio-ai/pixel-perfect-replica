@@ -35,6 +35,10 @@ type CardSettings = {
   verso_text?: string;
   facebook_url?: string;
   site_url?: string;
+  logo_district?: string;
+  logo_ccjy?: string;
+  tampon_url?: string;
+  signature_url?: string;
 };
 
 export const VirtualCard = ({
@@ -65,6 +69,10 @@ export const VirtualCard = ({
   const VERSO_TEXT = settings.verso_text || "Cette carte est la propriété\ndu District Cité Novalim - CIE.\nEn cas de perte, merci de nous contacter";
   const FACEBOOK_URL = settings.facebook_url || FALLBACK_FACEBOOK_URL;
   const SITE_URL = settings.site_url || FALLBACK_SITE_URL;
+  const LOGO_DISTRICT = settings.logo_district || logoNova;
+  const LOGO_CCJY = settings.logo_ccjy || logoCcjy;
+  const TAMPON = settings.tampon_url || tampon;
+  const SIGNATURE = settings.signature_url || signature;
 
   const initials = `${nom?.[0] ?? ""}${prenoms?.[0] ?? ""}`;
   const numericPart = (memberNumber.match(/(\d+)/g)?.pop() ?? "0001").padStart(4, "0");
@@ -166,7 +174,7 @@ export const VirtualCard = ({
           >
             {/* District logo watermark — léger pour ne pas gêner */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <img src={logoNova} alt="" crossOrigin="anonymous"
+              <img src={LOGO_DISTRICT} alt="" crossOrigin="anonymous"
                 className="w-[70%] opacity-[0.07] object-contain" />
             </div>
 
@@ -178,7 +186,7 @@ export const VirtualCard = ({
               {/* Header avec logos + titres */}
               <div className="flex items-center gap-2 relative z-10">
                 <div className="bg-white rounded-md p-0.5 shrink-0">
-                  <img src={logoNova} alt="Logo District" crossOrigin="anonymous"
+                  <img src={LOGO_DISTRICT} alt="Logo District" crossOrigin="anonymous"
                     className="w-10 h-10 object-contain" />
                 </div>
                 <div className="flex-1 text-center px-1 text-white">
@@ -190,7 +198,7 @@ export const VirtualCard = ({
                   </p>
                 </div>
                 <div className="bg-white rounded-md p-0.5 shrink-0">
-                  <img src={logoCcjy} alt="Logo CCJY" crossOrigin="anonymous"
+                  <img src={LOGO_CCJY} alt="Logo CCJY" crossOrigin="anonymous"
                     className="w-10 h-10 object-contain" />
                 </div>
               </div>
@@ -214,9 +222,9 @@ export const VirtualCard = ({
                   )}
                   {/* Tampon + signature superposés JUSTE en dessous */}
                   <div className="relative w-[78px] h-[36px] mt-0.5">
-                    <img src={tampon} alt="" crossOrigin="anonymous"
+                    <img src={TAMPON} alt="" crossOrigin="anonymous"
                       className="absolute inset-0 w-full h-full object-contain opacity-90" />
-                    <img src={signature} alt="" crossOrigin="anonymous"
+                    <img src={SIGNATURE} alt="" crossOrigin="anonymous"
                       className="absolute inset-0 w-full h-full object-contain" />
                   </div>
                 </div>
@@ -267,7 +275,7 @@ export const VirtualCard = ({
             }}
           >
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <img src={logoNova} alt="" crossOrigin="anonymous"
+              <img src={LOGO_DISTRICT} alt="" crossOrigin="anonymous"
                 className="w-[75%] opacity-[0.10] object-contain" />
             </div>
 

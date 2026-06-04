@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useEffect } from "react";
+import { Comments } from "@/components/Comments";
 
 const Actualites = () => {
   useEffect(() => {
@@ -142,6 +143,7 @@ const Actualites = () => {
                         <Users className="w-3.5 h-3.5" /> Groupe du District
                       </a>
                     </div>
+                    <Comments actualiteId={article.id} />
                   </div>
                 </article>
               </ScrollReveal>
@@ -154,3 +156,4 @@ const Actualites = () => {
 };
 
 export default Actualites;
+

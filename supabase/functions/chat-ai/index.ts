@@ -81,7 +81,8 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const safeMessages = Array.isArray(messages) ? messages.slice(-12) : [];
+    // Garde un historique large pour des réponses contextuelles riches (≈ Claude/ChatGPT)
+    const safeMessages = Array.isArray(messages) ? messages.slice(-40) : [];
 
     // Image generation mode
     if (generateImage && imagePrompt) {
@@ -92,7 +93,7 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash-image",
+          model: "google/gemini-3.1-flash-image-preview",
           messages: [{ role: "user", content: imagePrompt }],
           modalities: ["image", "text"],
         }),
@@ -101,7 +102,22 @@ serve(async (req) => {
       if (!imgResponse.ok) {
         const errText = await imgResponse.text();
         console.error("Image gen error:", imgResponse.status, errText);
-        return json({ error: "Erreur de génération d'image", text: "Je ne peux pas générer cette image pour le moment.", fallback: true });
+        // Fallback Nano Banana
+        const fb = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash-image",
+            messages: [{ role: "user", content: imagePrompt }],
+            modalities: ["image", "text"],
+          }),
+        });
+        if (!fb.ok) return json({ error: "Erreur image", text: "Je ne peux pas générer cette image pour le moment.", fallback: true });
+        const d = await fb.json();
+        return json({
+          imageUrl: d.choices?.[0]?.message?.images?.[0]?.image_url?.url,
+          text: d.choices?.[0]?.message?.content || "Voici l'image générée :",
+        });
       }
 
       const imgData = await imgResponse.json();
@@ -111,14 +127,15 @@ serve(async (req) => {
       return json({ imageUrl, text });
     }
 
-    // Modèles les plus performants en priorité (Gemini 3, GPT-5.5, Claude-like quality via gateway)
+    // Modèles ultra-performants (niveau Claude/ChatGPT) avec fallback intelligent
     const MODELS = [
-      "google/gemini-3-flash-preview",
-      "google/gemini-3.1-pro-preview",
       "openai/gpt-5.5",
+      "google/gemini-3.1-pro-preview",
+      "google/gemini-3-flash-preview",
       "openai/gpt-5.4",
       "google/gemini-2.5-pro",
-      "google/gemini-2.5-flash",
+      "openai/gpt-5",
+      "google/gemini-3.5-flash",
       "openai/gpt-5-mini",
     ];
 
@@ -126,17 +143,22 @@ serve(async (req) => {
     let lastErr = "";
     for (const model of MODELS) {
       try {
+        const payload: any = {
+          model,
+          messages: [{ role: "system", content: SYSTEM_PROMPT }, ...safeMessages],
+          stream,
+          temperature: 0.7,
+        };
+        // Reasoning effort pour les modèles GPT-5 (réponses plus profondes)
+        if (model.startsWith("openai/gpt-5")) payload.reasoning_effort = "medium";
+
         const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${LOVABLE_API_KEY}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            model,
-            messages: [{ role: "system", content: SYSTEM_PROMPT }, ...safeMessages],
-            stream,
-          }),
+          body: JSON.stringify(payload),
         });
         if (r.ok) { response = r; break; }
         const errBody = await r.text().catch(() => "");
