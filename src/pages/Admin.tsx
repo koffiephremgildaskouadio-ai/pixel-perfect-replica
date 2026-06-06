@@ -9,11 +9,12 @@ import {
   ArrowLeft, Plus, Newspaper, Loader2, Trash2,
   Users, Edit, X, Image as ImageIcon, Video as VideoIcon,
   FileText, Save, Award, Sparkles, MessageSquare, Phone, Mail, Send,
-  CreditCard, LayoutGrid,
+  CreditCard, LayoutGrid, BarChart3,
 } from "lucide-react";
 import { generateCertificate } from "@/lib/certificate";
 import { PortalsManager } from "@/components/admin/PortalsManager";
 import { CardSettingsManager } from "@/components/admin/CardSettingsManager";
+import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -71,8 +72,9 @@ const Admin = () => {
 
       <section className="py-8 lg:py-12">
         <div className="container max-w-4xl">
-          <Tabs defaultValue="news">
-            <TabsList className="grid grid-cols-3 md:grid-cols-6 mb-6 h-auto">
+          <Tabs defaultValue="dashboard">
+            <TabsList className="grid grid-cols-3 md:grid-cols-7 mb-6 h-auto">
+              <TabsTrigger value="dashboard" className="text-xs md:text-sm"><BarChart3 className="w-4 h-4 mr-1" /> Dashboard</TabsTrigger>
               <TabsTrigger value="news" className="text-xs md:text-sm"><Newspaper className="w-4 h-4 mr-1" /> Actus</TabsTrigger>
               <TabsTrigger value="members" className="text-xs md:text-sm"><Users className="w-4 h-4 mr-1" /> Membres</TabsTrigger>
               <TabsTrigger value="comm" className="text-xs md:text-sm"><MessageSquare className="w-4 h-4 mr-1" /> Comm.</TabsTrigger>
@@ -80,6 +82,7 @@ const Admin = () => {
               <TabsTrigger value="card" className="text-xs md:text-sm"><CreditCard className="w-4 h-4 mr-1" /> Carte</TabsTrigger>
               <TabsTrigger value="portals" className="text-xs md:text-sm"><LayoutGrid className="w-4 h-4 mr-1" /> Portails</TabsTrigger>
             </TabsList>
+            <TabsContent value="dashboard"><AnalyticsDashboard /></TabsContent>
             <TabsContent value="news"><NewsManager queryClient={queryClient} /></TabsContent>
             <TabsContent value="members"><MembersManager queryClient={queryClient} isSuperAdmin={isSuperAdmin} /></TabsContent>
             <TabsContent value="comm"><CommunicationManager /></TabsContent>
