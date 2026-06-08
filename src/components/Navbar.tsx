@@ -92,6 +92,7 @@ export const Navbar = () => {
         <div className="flex items-center gap-2">
           <GlobalSearch />
           {session && <NotificationBell />}
+          {session && <MyProfileButton variant="outline" />}
           <InstallPWA />
           {session ? (
             <Button variant="outline" size="sm" className="hidden sm:flex gap-2" onClick={handleLogout}>
