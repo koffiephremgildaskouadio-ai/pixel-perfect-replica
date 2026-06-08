@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { VirtualCard } from "@/components/VirtualCard";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle, Phone, MapPin, Briefcase, FileText, User, ArrowLeft } from "lucide-react";
+import { AlertCircle, Phone, MapPin, Briefcase, FileText, User, ArrowLeft, Mail, Facebook, Linkedin, MessageCircle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const CarteMembre = () => {
