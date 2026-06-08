@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { InstallPWA } from "@/components/InstallPWA";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { NotificationBell } from "@/components/NotificationBell";
+import { MyProfileButton } from "@/components/MyProfileButton";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo_novalim.png";
 import type { Session } from "@supabase/supabase-js";
