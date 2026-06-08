@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { VirtualCard } from "@/components/VirtualCard";
+import { MyProfileEditor } from "@/components/MyProfileEditor";
+import { useQueryClient } from "@tanstack/react-query";
 import type { Session } from "@supabase/supabase-js";
 
 const Membres = () => {
