@@ -17,6 +17,7 @@ const Membres = () => {
   const [search, setSearch] = useState("");
   const [canDownload, setCanDownload] = useState(false);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
