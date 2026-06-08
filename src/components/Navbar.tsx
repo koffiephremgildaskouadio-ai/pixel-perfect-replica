@@ -147,10 +147,13 @@ export const Navbar = () => {
               </Link>
             )}
             {session ? (
-              <Button variant="outline" size="sm" className="mt-2 w-full gap-2" onClick={() => { handleLogout(); setMobileOpen(false); }}>
-                <LogOut className="w-4 h-4" />
-                Déconnexion
-              </Button>
+              <>
+                <div className="mt-2"><MyProfileButton variant="outline" /></div>
+                <Button variant="outline" size="sm" className="mt-2 w-full gap-2" onClick={() => { handleLogout(); setMobileOpen(false); }}>
+                  <LogOut className="w-4 h-4" />
+                  Déconnexion
+                </Button>
+              </>
             ) : (
               <Link to="/connexion" onClick={() => setMobileOpen(false)}>
                 <Button variant="outline" size="sm" className="mt-2 w-full gap-2">
