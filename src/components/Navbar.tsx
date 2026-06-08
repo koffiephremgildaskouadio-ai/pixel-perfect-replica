@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { InstallPWA } from "@/components/InstallPWA";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { NotificationBell } from "@/components/NotificationBell";
+import { MyProfileButton } from "@/components/MyProfileButton";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo_novalim.png";
 import type { Session } from "@supabase/supabase-js";
@@ -91,6 +92,7 @@ export const Navbar = () => {
         <div className="flex items-center gap-2">
           <GlobalSearch />
           {session && <NotificationBell />}
+          {session && <MyProfileButton variant="outline" />}
           <InstallPWA />
           {session ? (
             <Button variant="outline" size="sm" className="hidden sm:flex gap-2" onClick={handleLogout}>
@@ -145,10 +147,13 @@ export const Navbar = () => {
               </Link>
             )}
             {session ? (
-              <Button variant="outline" size="sm" className="mt-2 w-full gap-2" onClick={() => { handleLogout(); setMobileOpen(false); }}>
-                <LogOut className="w-4 h-4" />
-                Déconnexion
-              </Button>
+              <>
+                <div className="mt-2"><MyProfileButton variant="outline" /></div>
+                <Button variant="outline" size="sm" className="mt-2 w-full gap-2" onClick={() => { handleLogout(); setMobileOpen(false); }}>
+                  <LogOut className="w-4 h-4" />
+                  Déconnexion
+                </Button>
+              </>
             ) : (
               <Link to="/connexion" onClick={() => setMobileOpen(false)}>
                 <Button variant="outline" size="sm" className="mt-2 w-full gap-2">
