@@ -25,6 +25,7 @@ export type Database = {
           title: string
           type: string
           updated_at: string
+          views_count: number
         }
         Insert: {
           content: string
@@ -36,6 +37,7 @@ export type Database = {
           title: string
           type?: string
           updated_at?: string
+          views_count?: number
         }
         Update: {
           content?: string
@@ -47,6 +49,7 @@ export type Database = {
           title?: string
           type?: string
           updated_at?: string
+          views_count?: number
         }
         Relationships: []
       }
@@ -129,12 +132,16 @@ export type Database = {
       }
       members: {
         Row: {
+          bio: string | null
           cahier_charges: string | null
           category: string
           created_at: string
           district: string
+          email: string | null
+          facebook: string | null
           id: string
           is_active: boolean
+          linkedin: string | null
           member_number: string
           nom: string
           phone: string | null
@@ -142,16 +149,22 @@ export type Database = {
           poste: string | null
           prenoms: string
           quartier: string | null
+          skills: string[] | null
           updated_at: string
           user_id: string | null
+          whatsapp: string | null
         }
         Insert: {
+          bio?: string | null
           cahier_charges?: string | null
           category?: string
           created_at?: string
           district?: string
+          email?: string | null
+          facebook?: string | null
           id?: string
           is_active?: boolean
+          linkedin?: string | null
           member_number: string
           nom: string
           phone?: string | null
@@ -159,16 +172,22 @@ export type Database = {
           poste?: string | null
           prenoms: string
           quartier?: string | null
+          skills?: string[] | null
           updated_at?: string
           user_id?: string | null
+          whatsapp?: string | null
         }
         Update: {
+          bio?: string | null
           cahier_charges?: string | null
           category?: string
           created_at?: string
           district?: string
+          email?: string | null
+          facebook?: string | null
           id?: string
           is_active?: boolean
+          linkedin?: string | null
           member_number?: string
           nom?: string
           phone?: string | null
@@ -176,8 +195,10 @@ export type Database = {
           poste?: string | null
           prenoms?: string
           quartier?: string | null
+          skills?: string[] | null
           updated_at?: string
           user_id?: string | null
+          whatsapp?: string | null
         }
         Relationships: []
       }
@@ -255,6 +276,38 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      post_reactions: {
+        Row: {
+          actualite_id: string
+          created_at: string
+          id: string
+          reaction: string
+          user_id: string
+        }
+        Insert: {
+          actualite_id: string
+          created_at?: string
+          id?: string
+          reaction?: string
+          user_id: string
+        }
+        Update: {
+          actualite_id?: string
+          created_at?: string
+          id?: string
+          reaction?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_reactions_actualite_id_fkey"
+            columns: ["actualite_id"]
+            isOneToOne: false
+            referencedRelation: "actualites"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
