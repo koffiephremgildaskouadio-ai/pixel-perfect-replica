@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useEffect } from "react";
 import { Comments } from "@/components/Comments";
+import { PostReactions } from "@/components/PostReactions";
 
 const Actualites = () => {
   useEffect(() => {
