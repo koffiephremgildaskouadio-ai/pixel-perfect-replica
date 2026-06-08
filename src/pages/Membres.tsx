@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { VirtualCard } from "@/components/VirtualCard";
+import { MyProfileEditor } from "@/components/MyProfileEditor";
+import { useQueryClient } from "@tanstack/react-query";
 import type { Session } from "@supabase/supabase-js";
 
 const Membres = () => {
@@ -15,6 +17,7 @@ const Membres = () => {
   const [search, setSearch] = useState("");
   const [canDownload, setCanDownload] = useState(false);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -127,9 +130,15 @@ const Membres = () => {
         <section className="py-12 lg:py-16">
           <div className="container max-w-lg">
             <ScrollReveal>
-              <div className="flex items-center gap-2 mb-6">
-                <CreditCard className="w-5 h-5 text-primary" />
-                <h2 className="text-lg font-display font-bold text-foreground">Ma Carte Virtuelle</h2>
+              <div className="flex items-center justify-between gap-2 mb-6 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-primary" />
+                  <h2 className="text-lg font-display font-bold text-foreground">Ma Carte Virtuelle</h2>
+                </div>
+                <MyProfileEditor
+                  member={myCard}
+                  onSaved={() => queryClient.invalidateQueries({ queryKey: ["all-members"] })}
+                />
               </div>
               <VirtualCard
                 memberId={myCard.id}
