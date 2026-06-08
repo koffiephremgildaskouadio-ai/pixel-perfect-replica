@@ -128,6 +128,58 @@ const CarteMembre = () => {
                   </div>
                 </div>
 
+                {member.bio && (
+                  <div className="border-t border-border/30 px-6 py-5">
+                    <div className="flex items-center gap-2 mb-2">
+                      <User className="w-4 h-4 text-primary" />
+                      <h2 className="text-sm font-display font-bold text-foreground uppercase tracking-wide">Présentation</h2>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{member.bio}</p>
+                  </div>
+                )}
+
+                {Array.isArray(member.skills) && member.skills.length > 0 && (
+                  <div className="border-t border-border/30 px-6 py-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Sparkles className="w-4 h-4 text-accent" />
+                      <h2 className="text-sm font-display font-bold text-foreground uppercase tracking-wide">Compétences</h2>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {member.skills.map((s: string, i: number) => (
+                        <span key={i} className="text-xs font-medium px-2.5 py-1 rounded-full bg-accent/10 text-accent">{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {(member.email || member.whatsapp || member.facebook || member.linkedin) && (
+                  <div className="border-t border-border/30 px-6 py-5">
+                    <h2 className="text-sm font-display font-bold text-foreground uppercase tracking-wide mb-3">Contact & Réseaux</h2>
+                    <div className="flex flex-wrap gap-2">
+                      {member.email && (
+                        <a href={`mailto:${member.email}`} className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20">
+                          <Mail className="w-3.5 h-3.5" /> Email
+                        </a>
+                      )}
+                      {member.whatsapp && (
+                        <a href={`https://wa.me/${member.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-[#25D366] text-white hover:opacity-90">
+                          <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
+                        </a>
+                      )}
+                      {member.facebook && (
+                        <a href={member.facebook} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-[#1877F2] text-white hover:opacity-90">
+                          <Facebook className="w-3.5 h-3.5" /> Facebook
+                        </a>
+                      )}
+                      {member.linkedin && (
+                        <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-[#0A66C2] text-white hover:opacity-90">
+                          <Linkedin className="w-3.5 h-3.5" /> LinkedIn
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {cahierItems.length > 0 && (
                   <div className="border-t border-border/30 px-6 py-5">
                     <div className="flex items-center gap-2 mb-3">
