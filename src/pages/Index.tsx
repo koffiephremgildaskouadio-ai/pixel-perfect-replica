@@ -46,7 +46,7 @@ const Index = () => {
     queryFn: async () => {
       const [{ count: membersCount }, { count: newsCount }, { count: directoryCount }] = await Promise.all([
         supabase.from("members").select("id", { count: "exact", head: true }).eq("is_active", true),
-        supabase.from("actualites").select("id", { count: "exact", head: true }).eq("is_published", true),
+        supabase.from("actualites").select("id", { count: "exact", head: true }),
         supabase.from("directory_entries").select("id", { count: "exact", head: true }),
       ]);
       return {
