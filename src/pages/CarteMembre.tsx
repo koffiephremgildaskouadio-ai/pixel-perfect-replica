@@ -92,7 +92,8 @@ const CarteMembre = () => {
                 phone={member.phone}
                 category={member.category}
                 photoUrl={member.photo_url}
-                email={null}
+                email={member.email || null}
+                district={member.district}
                 canDownload={canDownload}
               />
             </ScrollReveal>
@@ -200,7 +201,7 @@ const CarteMembre = () => {
             </ScrollReveal>
 
             <p className="text-center text-xs text-muted-foreground">
-              Fiche d'identification officielle · District Cité Novalim-CIE · CCJY Yopougon
+              Fiche d'identification officielle · {(member.district || "").toLowerCase().includes("france") ? "District France-ville" : "District Cité Novalim-CIE · CCJY Yopougon"}
             </p>
           </>
         )}
