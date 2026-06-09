@@ -9,6 +9,7 @@ import logoNova from "@/assets/nova_logo_official.jpg";
 import logoCcjy from "@/assets/logo_ccjy.jpg";
 import tampon from "@/assets/tampon.png";
 import signature from "@/assets/signature.png";
+import francevilleLogo from "@/assets/franceville_logo.jpg";
 
 interface VirtualCardProps {
   memberNumber: string;
@@ -22,6 +23,7 @@ interface VirtualCardProps {
   photoUrl?: string | null;
   email?: string | null;
   canDownload?: boolean;
+  district?: string | null;
 }
 
 const FALLBACK_FACEBOOK_URL = "https://web.facebook.com/DistrictCiteNovalimCIE";
@@ -50,7 +52,9 @@ export const VirtualCard = ({
   photoUrl,
   email,
   canDownload = true,
+  district,
 }: VirtualCardProps) => {
+  const isFranceVille = (district || "").toLowerCase().includes("france");
   const [flipped, setFlipped] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [settings, setSettings] = useState<CardSettings>({});
@@ -58,19 +62,23 @@ export const VirtualCard = ({
   const versoRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    supabase.from("site_content").select("metadata").eq("key", "card_settings").maybeSingle()
+    // France-Ville uses its own dedicated card settings key so it never impacts Novalim-CIE
+    const key = isFranceVille ? "card_settings_franceville" : "card_settings";
+    supabase.from("site_content").select("metadata").eq("key", key).maybeSingle()
       .then(({ data }) => setSettings(((data?.metadata as any) ?? {}) as CardSettings));
-  }, []);
+  }, [isFranceVille]);
 
-  const HEADER_TOP = settings.header_top || "CONSEIL COMMUNAL DES JEUNES DE YOPOUGON";
-  const HEADER_MAIN = settings.header_main || "DISTRICT CITÉ NOVALIM - CIE";
+  const HEADER_TOP = settings.header_top || (isFranceVille ? "UNION DE LA JEUNESSE" : "CONSEIL COMMUNAL DES JEUNES DE YOPOUGON");
+  const HEADER_MAIN = settings.header_main || (isFranceVille ? "DISTRICT FRANCE-VILLE" : "DISTRICT CITÉ NOVALIM - CIE");
   const VALIDITE = settings.validity || "2025 - 2026";
   const EMERGENCY = settings.emergency_phone || "07 89 53 63 18";
-  const VERSO_TEXT = settings.verso_text || "Cette carte est la propriété\ndu District Cité Novalim - CIE.\nEn cas de perte, merci de nous contacter";
+  const VERSO_TEXT = settings.verso_text || (isFranceVille
+    ? "Cette carte est la propriété\ndu District France-ville.\nEn cas de perte, merci de nous contacter"
+    : "Cette carte est la propriété\ndu District Cité Novalim - CIE.\nEn cas de perte, merci de nous contacter");
   const FACEBOOK_URL = settings.facebook_url || FALLBACK_FACEBOOK_URL;
   const SITE_URL = settings.site_url || FALLBACK_SITE_URL;
-  const LOGO_DISTRICT = settings.logo_district || logoNova;
-  const LOGO_CCJY = settings.logo_ccjy || logoCcjy;
+  const LOGO_DISTRICT = settings.logo_district || (isFranceVille ? francevilleLogo : logoNova);
+  const LOGO_CCJY = settings.logo_ccjy || (isFranceVille ? francevilleLogo : logoCcjy);
   const TAMPON = settings.tampon_url || tampon;
   const SIGNATURE = settings.signature_url || signature;
 
