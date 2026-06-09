@@ -17,15 +17,50 @@ export const MyProfileButton = ({ variant = "ghost", showLabel = true }: { varia
     bio: "", email: "", phone: "", facebook: "", linkedin: "", whatsapp: "", skills: "",
   });
 
+  const normalize = (s: string) =>
+    (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+
   const load = async () => {
     setLoading(true);
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) { setLoading(false); return; }
-    const { data } = await supabase
+
+    let { data } = await supabase
       .from("members")
       .select("*")
       .eq("user_id", session.user.id)
       .maybeSingle();
+
+    // Fallback: match by profile name (accent-insensitive) and auto-link
+    if (!data) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("nom, prenoms")
+        .eq("id", session.user.id)
+        .maybeSingle();
+
+      if (profile?.nom) {
+        const { data: candidates } = await supabase
+          .from("members")
+          .select("*")
+          .is("user_id", null);
+        const target = `${normalize(profile.nom)} ${normalize(profile.prenoms || "")}`.trim();
+        const match = (candidates || []).find((m: any) => {
+          const full = `${normalize(m.nom)} ${normalize(m.prenoms || "")}`.trim();
+          return full === target || full.startsWith(target) || target.startsWith(full);
+        });
+        if (match) {
+          const { data: linked } = await supabase
+            .from("members")
+            .update({ user_id: session.user.id })
+            .eq("id", match.id)
+            .select("*")
+            .maybeSingle();
+          data = linked || match;
+        }
+      }
+    }
+
     if (data) {
       setMember(data);
       setForm({
