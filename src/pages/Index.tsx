@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { VisitorModal } from "@/components/VisitorModal";
@@ -38,6 +40,22 @@ const features = [
 
 const Index = () => {
   const [showModal, setShowModal] = useState(false);
+
+  const { data: stats } = useQuery({
+    queryKey: ["public-stats"],
+    queryFn: async () => {
+      const [{ count: membersCount }, { count: newsCount }, { count: directoryCount }] = await Promise.all([
+        supabase.from("members").select("id", { count: "exact", head: true }).eq("is_active", true),
+        supabase.from("actualites").select("id", { count: "exact", head: true }),
+        supabase.from("directory_entries").select("id", { count: "exact", head: true }),
+      ]);
+      return {
+        members: membersCount ?? 0,
+        news: newsCount ?? 0,
+        directory: directoryCount ?? 0,
+      };
+    },
+  });
 
   useEffect(() => {
     const visited = sessionStorage.getItem("novalim_visitor");
@@ -167,9 +185,9 @@ const Index = () => {
                 </p>
                 <div className="grid grid-cols-3 gap-4 pt-4">
                   {[
-                    { value: "1000+", label: "Membres" },
-                    { value: "Zone 7", label: "CCJY" },
-                    { value: "95%", label: "Cités" },
+                    { value: stats ? `${stats.members}+` : "…", label: "Membres actifs" },
+                    { value: stats ? `${stats.news}` : "…", label: "Publications" },
+                    { value: stats ? `${stats.directory}` : "…", label: "Partenaires" },
                   ].map((stat) => (
                     <div key={stat.label} className="text-center p-3 rounded-xl bg-card border border-border/50">
                       <div className="text-2xl font-display font-bold text-primary">{stat.value}</div>
