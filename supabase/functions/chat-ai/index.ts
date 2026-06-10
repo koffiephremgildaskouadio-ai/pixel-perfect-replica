@@ -127,16 +127,14 @@ serve(async (req) => {
       return json({ imageUrl, text });
     }
 
-    // Modèles ultra-performants (niveau Claude/ChatGPT) avec fallback intelligent
+    // Modèles ultra-performants avec fallback intelligent (modèles validés Lovable AI Gateway)
     const MODELS = [
-      "openai/gpt-5.5",
-      "google/gemini-3.1-pro-preview",
       "google/gemini-3-flash-preview",
-      "openai/gpt-5.4",
       "google/gemini-2.5-pro",
+      "google/gemini-2.5-flash",
       "openai/gpt-5",
-      "google/gemini-3.5-flash",
       "openai/gpt-5-mini",
+      "google/gemini-2.5-flash-lite",
     ];
 
     let response: Response | null = null;
