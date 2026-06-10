@@ -402,6 +402,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      public_stats: {
+        Args: never
+        Returns: {
+          directory_count: number
+          members_count: number
+          news_count: number
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "super_admin"
