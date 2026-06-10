@@ -44,15 +44,13 @@ const Index = () => {
   const { data: stats } = useQuery({
     queryKey: ["public-stats"],
     queryFn: async () => {
-      const [{ count: membersCount }, { count: newsCount }, { count: directoryCount }] = await Promise.all([
-        supabase.from("members").select("id", { count: "exact", head: true }).eq("is_active", true),
-        supabase.from("actualites").select("id", { count: "exact", head: true }),
-        supabase.from("directory_entries").select("id", { count: "exact", head: true }),
-      ]);
+      const { data, error } = await (supabase as any).rpc("public_stats");
+      if (error || !data?.[0]) return { members: 0, news: 0, directory: 0 };
+      const row = data[0];
       return {
-        members: membersCount ?? 0,
-        news: newsCount ?? 0,
-        directory: directoryCount ?? 0,
+        members: Number(row.members_count ?? 0),
+        news: Number(row.news_count ?? 0),
+        directory: Number(row.directory_count ?? 0),
       };
     },
   });
