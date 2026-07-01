@@ -145,17 +145,37 @@ Aujourd'hui c'est ${dateStr}. Génère exactement 1 publication motivante et ins
 Format JSON: [{"title":"...","content":"2-3 paragraphes","type":"ai_daily","image_prompt":"description en anglais d'une image illustrant"}]
 Réponds UNIQUEMENT avec le JSON.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [{ role: "user", content: prompt }],
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error("AI gateway error: " + response.status);
+    const NEWS_MODELS = [
+      "google/gemini-3-flash-preview",
+      "google/gemini-2.5-flash",
+      "google/gemini-2.5-flash-lite",
+      "openai/gpt-5-mini",
+    ];
+    let response: Response | null = null;
+    let lastErr = "";
+    for (const model of NEWS_MODELS) {
+      try {
+        const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model,
+            messages: [{ role: "user", content: prompt }],
+          }),
+        });
+        if (r.ok) { response = r; break; }
+        lastErr = `${model}: ${r.status}`;
+        console.warn("news model failed", lastErr);
+      } catch (err) {
+        lastErr = `${model}: ${err instanceof Error ? err.message : "fetch"}`;
+      }
+    }
+    if (!response) {
+      console.error("All news models failed:", lastErr);
+      return new Response(JSON.stringify({ success: false, error: "AI gateway indisponible", detail: lastErr }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const data = await response.json();
