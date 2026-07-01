@@ -84,6 +84,25 @@ export const generateCertificate = async (m: CertMember) => {
   if (novaImg) doc.addImage(novaImg, "PNG", 16, 16, 30, 30);
   if (ccjyImg) doc.addImage(ccjyImg, "PNG", W - 46, 16, 30, 30);
 
+  // Photo du membre (si disponible) — cadre ovale à droite du bloc titre
+  if (m.photo_url) {
+    try {
+      const photoImg = await toDataURL(m.photo_url);
+      if (photoImg) {
+        // Cercle de fond
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(21, 128, 61);
+        doc.setLineWidth(1.5);
+        doc.circle(W - 32, 100, 16, "FD");
+        doc.addImage(photoImg, "PNG", W - 47, 85, 30, 30);
+        // Re-cercle par-dessus pour effet vignette
+        doc.setDrawColor(217, 119, 6);
+        doc.setLineWidth(0.8);
+        doc.circle(W - 32, 100, 16);
+      }
+    } catch { /* skip photo */ }
+  }
+
   // Filigrane central
   if (novaImg) {
     // @ts-ignore
