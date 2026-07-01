@@ -12,6 +12,7 @@ import {
   CreditCard, LayoutGrid, BarChart3,
 } from "lucide-react";
 import { generateCertificate } from "@/lib/certificate";
+import { exportAllMembersPDF } from "@/lib/membersExport";
 import { PortalsManager } from "@/components/admin/PortalsManager";
 import { CardSettingsManager } from "@/components/admin/CardSettingsManager";
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
