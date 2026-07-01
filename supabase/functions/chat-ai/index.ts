@@ -127,12 +127,14 @@ serve(async (req) => {
       return json({ imageUrl, text });
     }
 
-    // Modèles ultra-performants avec fallback intelligent (modèles validés Lovable AI Gateway)
+    // Modèles ultra-performants avec fallback intelligent (catalogue Lovable AI Gateway validé)
     const MODELS = [
       "google/gemini-3-flash-preview",
+      "google/gemini-3.5-flash",
+      "openai/gpt-5.4",
       "google/gemini-2.5-pro",
-      "google/gemini-2.5-flash",
       "openai/gpt-5",
+      "google/gemini-2.5-flash",
       "openai/gpt-5-mini",
       "google/gemini-2.5-flash-lite",
     ];
