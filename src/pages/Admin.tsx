@@ -9,7 +9,7 @@ import {
   ArrowLeft, Plus, Newspaper, Loader2, Trash2,
   Users, Edit, X, Image as ImageIcon, Video as VideoIcon,
   FileText, Save, Award, Sparkles, MessageSquare, Phone, Mail, Send,
-  CreditCard, LayoutGrid, BarChart3,
+  CreditCard, LayoutGrid, BarChart3, Download,
 } from "lucide-react";
 import { generateCertificate } from "@/lib/certificate";
 import { exportAllMembersPDF } from "@/lib/membersExport";
