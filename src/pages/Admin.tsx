@@ -324,9 +324,28 @@ const MembersManager = ({ queryClient, isSuperAdmin }: { queryClient: any; isSup
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-wrap justify-between items-center gap-2">
         <h2 className="text-lg font-display font-bold">Liste des membres ({members?.length ?? 0})</h2>
-        <MemberFormDialog mode="create" queryClient={queryClient} />
+        <div className="flex items-center gap-2">
+          {isSuperAdmin && (
+            <Button
+              variant="outline" size="sm"
+              onClick={async () => {
+                const t = toast.loading("Génération du PDF…");
+                try {
+                  await exportAllMembersPDF();
+                  toast.success("Base de données exportée", { id: t });
+                } catch (e: any) {
+                  toast.error(e.message || "Erreur d'export", { id: t });
+                }
+              }}
+              className="gap-2"
+            >
+              <Download className="w-4 h-4" /> Exporter la base (PDF)
+            </Button>
+          )}
+          <MemberFormDialog mode="create" queryClient={queryClient} />
+        </div>
       </div>
       <div className="space-y-4">
         <div>
