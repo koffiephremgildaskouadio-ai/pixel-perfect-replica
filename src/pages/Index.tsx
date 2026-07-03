@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { VisitorModal } from "@/components/VisitorModal";
+import { SEO } from "@/components/SEO";
 import { Users, Newspaper, MessageCircle, Shield, ArrowRight, Info } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-district.jpg";
@@ -67,6 +68,11 @@ const Index = () => {
 
   return (
     <>
+      <SEO
+        title="District Cité Novalim-CIE — Plateforme Officielle CCJY Yopougon"
+        description="Plateforme officielle du District Cité Novalim-CIE (Zone 7, CCJY Yopougon). Carte de membre digitale, actualités, annuaire, conférences et assistant IA."
+        path="/"
+      />
       <VisitorModal open={showModal} onSubmit={handleVisitorSubmit} />
 
       {/* Hero */}
