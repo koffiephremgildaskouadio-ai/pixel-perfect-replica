@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { SEO } from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -48,7 +49,7 @@ const Actualites = () => {
   };
 
   return (
-    <div className="pt-16">
+    <div className="pt-16"><SEO title="Actualités du District Novalim-CIE" description="Toutes les actualités officielles du District Cité Novalim-CIE : événements, communiqués, activités du CCJY Zone 7 Yopougon." path="/actualites" />
       <section className="py-16 lg:py-24 bg-secondary/50">
         <div className="container">
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-6 transition-colors">

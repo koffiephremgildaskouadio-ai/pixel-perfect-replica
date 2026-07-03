@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://districtcitenovalim-cie.lovable.app/</loc><priority>1.0</priority></url>
-  <url><loc>https://districtcitenovalim-cie.lovable.app/apropos</loc><priority>0.8</priority></url>
-  <url><loc>https://districtcitenovalim-cie.lovable.app/bureau</loc><priority>0.8</priority></url>
-  <url><loc>https://districtcitenovalim-cie.lovable.app/membres</loc><priority>0.7</priority></url>
-  <url><loc>https://districtcitenovalim-cie.lovable.app/actualites</loc><priority>0.9</priority></url>
-  <url><loc>https://districtcitenovalim-cie.lovable.app/annuaire</loc><priority>0.7</priority></url>
-  <url><loc>https://districtcitenovalim-cie.lovable.app/conference</loc><priority>0.6</priority></url>
-  <url><loc>https://districtcitenovalim-cie.lovable.app/chat</loc><priority>0.6</priority></url>
+  <url><loc>https://districtcitenovalim-cie.lovable.app/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://districtcitenovalim-cie.lovable.app/a-propos</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://districtcitenovalim-cie.lovable.app/bureau</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://districtcitenovalim-cie.lovable.app/membres</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://districtcitenovalim-cie.lovable.app/actualites</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://districtcitenovalim-cie.lovable.app/annuaire</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://districtcitenovalim-cie.lovable.app/france-ville</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://districtcitenovalim-cie.lovable.app/conference</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://districtcitenovalim-cie.lovable.app/chat</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://districtcitenovalim-cie.lovable.app/connexion</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
 </urlset>
