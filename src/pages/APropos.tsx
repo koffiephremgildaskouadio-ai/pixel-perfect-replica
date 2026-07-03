@@ -1,4 +1,5 @@
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { SEO } from "@/components/SEO";
 import { MapPin, Building2, Heart, Users, Shield, Handshake, Star, Crown, ArrowLeft, Award, Camera } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -74,7 +75,7 @@ const APropos = () => {
   const presBlock = block("apropos.president_intro");
 
   return (
-    <div className="pt-16">
+    <div className="pt-16"><SEO title="À propos — District Cité Novalim-CIE" description="Découvrez la mission, l'histoire et les partenaires du District Cité Novalim-CIE, membre de la Zone 7 du CCJY à Yopougon." path="/a-propos" />
       {/* Hero */}
       <section className="py-16 lg:py-24 bg-secondary/50">
         <div className="container">
