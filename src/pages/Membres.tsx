@@ -26,28 +26,69 @@ const Membres = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  const checkPermissions = async (userId: string) => {
+    const [{ data: roles }, { data: me }] = await Promise.all([
+      supabase.from("user_roles").select("role").eq("user_id", userId),
+      supabase.from("members").select("poste").eq("user_id", userId).maybeSingle(),
+    ]);
+    setCanDownload(!!roles?.some((r) => r.role === "super_admin"));
+    const isAdmin = !!roles?.some((r) => ["admin", "super_admin", "moderator"].includes(r.role));
+    const poste = (me?.poste ?? "").toLowerCase();
+    const isVP = poste.startsWith("vice-président") || poste.startsWith("vice-president") || poste.startsWith("vice président") || poste.startsWith("vice president");
+    setCanAddMember(isAdmin || isVP);
+  };
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session) {
-        supabase.from("user_roles").select("role").eq("user_id", session.user.id).then(({ data }) => {
-          setCanDownload(!!data?.some((r) => r.role === "super_admin"));
-        });
-      }
+      if (session) checkPermissions(session.user.id);
       setLoading(false);
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session) {
-        supabase.from("user_roles").select("role").eq("user_id", session.user.id).then(({ data }) => {
-          setCanDownload(!!data?.some((r) => r.role === "super_admin"));
-        });
-      } else {
-        setCanDownload(false);
-      }
+      if (session) checkPermissions(session.user.id);
+      else { setCanDownload(false); setCanAddMember(false); }
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  const handleAddMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!addForm.nom.trim() || !addForm.prenoms.trim()) { toast.error("Nom et prénoms requis"); return; }
+    setAddSaving(true);
+    try {
+      // Generate a member number
+      const { data: last } = await supabase
+        .from("members")
+        .select("member_number")
+        .like("member_number", "NCV-2025-%")
+        .order("member_number", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const lastNum = last?.member_number ? parseInt(last.member_number.split("-")[2], 10) : 100;
+      const memberNumber = `NCV-2025-${String(lastNum + 1).padStart(3, "0")}`;
+
+      const { error } = await supabase.from("members").insert({
+        member_number: memberNumber,
+        nom: addForm.nom.trim(),
+        prenoms: addForm.prenoms.trim(),
+        phone: addForm.phone.trim() || null,
+        quartier: addForm.quartier.trim() || null,
+        category: addForm.category,
+        is_active: true,
+      });
+      if (error) throw error;
+      toast.success(`${addForm.category === "partenaire" ? "Partenaire" : "Membre"} ajouté (${memberNumber})`);
+      setAddForm({ nom: "", prenoms: "", phone: "", quartier: "", category: "membre" });
+      setShowAdd(false);
+      queryClient.invalidateQueries({ queryKey: ["all-members"] });
+    } catch (err: any) {
+      toast.error(err.message ?? "Erreur");
+    } finally {
+      setAddSaving(false);
+    }
+  };
+
 
   const { data: members } = useQuery({
     queryKey: ["all-members", search],
