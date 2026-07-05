@@ -148,7 +148,7 @@ const Annuaire = () => {
                 <h2 className="text-lg font-semibold text-foreground">
                   {CATEGORIES.find(c => c.value === selectedCat)?.label}
                 </h2>
-                {isAdmin && (
+                {canEdit && (
                   <Button size="sm" variant="outline" className="ml-auto" onClick={() => setShowAdd(!showAdd)}>
                     <Plus className="w-4 h-4 mr-1" /> Ajouter
                   </Button>
@@ -160,7 +160,7 @@ const Annuaire = () => {
                 <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher..." className="pl-10" />
               </div>
 
-              {showAdd && isAdmin && (
+              {showAdd && canEdit && (
                 <form onSubmit={handleAdd} className="bg-card rounded-xl border border-border/50 p-4 mb-6 space-y-3">
                   <Input value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="Nom de l'établissement" required />
                   <Input value={form.address} onChange={e => setForm({...form, address: e.target.value})} placeholder="Adresse / Localisation" />
@@ -177,7 +177,7 @@ const Annuaire = () => {
               {filtered?.length === 0 && !isLoading && (
                 <div className="text-center py-12 text-muted-foreground">
                   <p>Aucun établissement trouvé dans cette catégorie.</p>
-                  {isAdmin && <p className="text-sm mt-1">Utilisez le bouton "Ajouter" pour en créer.</p>}
+                  {canEdit && <p className="text-sm mt-1">Utilisez le bouton "Ajouter" pour en créer.</p>}
                 </div>
               )}
 
