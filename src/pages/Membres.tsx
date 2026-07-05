@@ -19,6 +19,10 @@ const Membres = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [canDownload, setCanDownload] = useState(false);
+  const [canAddMember, setCanAddMember] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
+  const [addForm, setAddForm] = useState({ nom: "", prenoms: "", phone: "", quartier: "", category: "membre" as "membre" | "partenaire" });
+  const [addSaving, setAddSaving] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
