@@ -208,8 +208,8 @@ const Membres = () => {
       {/* Search + list */}
       <section className="py-12 lg:py-16 bg-secondary/30">
         <div className="container">
-          <ScrollReveal className="mb-8 max-w-md">
-            <div className="relative">
+          <ScrollReveal className="mb-6 flex items-center gap-3 flex-wrap">
+            <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Rechercher un membre..."
@@ -218,7 +218,35 @@ const Membres = () => {
                 className="pl-10"
               />
             </div>
+            {canAddMember && (
+              <Button size="sm" variant="outline" onClick={() => setShowAdd(!showAdd)}>
+                <UserPlus className="w-4 h-4 mr-1" /> Ajouter
+              </Button>
+            )}
           </ScrollReveal>
+
+          {showAdd && canAddMember && (
+            <form onSubmit={handleAddMember} className="bg-card rounded-xl border border-border/50 p-4 mb-6 grid sm:grid-cols-2 gap-3 max-w-2xl">
+              <Input value={addForm.nom} onChange={(e) => setAddForm({ ...addForm, nom: e.target.value })} placeholder="Nom *" required />
+              <Input value={addForm.prenoms} onChange={(e) => setAddForm({ ...addForm, prenoms: e.target.value })} placeholder="Prénoms *" required />
+              <Input value={addForm.phone} onChange={(e) => setAddForm({ ...addForm, phone: e.target.value })} placeholder="Téléphone" />
+              <Input value={addForm.quartier} onChange={(e) => setAddForm({ ...addForm, quartier: e.target.value })} placeholder="Quartier" />
+              <select
+                value={addForm.category}
+                onChange={(e) => setAddForm({ ...addForm, category: e.target.value as "membre" | "partenaire" })}
+                className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option value="membre">Membre</option>
+                <option value="partenaire">Partenaire</option>
+              </select>
+              <Button type="submit" size="sm" disabled={addSaving} className="sm:col-span-2">
+                {addSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Enregistrer"}
+              </Button>
+              <p className="text-xs text-muted-foreground sm:col-span-2">
+                Vous ne pouvez pas ajouter de membre du bureau, ni supprimer un membre.
+              </p>
+            </form>
+          )}
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {members?.map((m, i) => (
