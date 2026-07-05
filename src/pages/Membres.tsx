@@ -3,14 +3,16 @@ import { SEO } from "@/components/SEO";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Lock, Search, CreditCard } from "lucide-react";
+import { Lock, Search, CreditCard, UserPlus, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { VirtualCard } from "@/components/VirtualCard";
 import { MyProfileEditor } from "@/components/MyProfileEditor";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Session } from "@supabase/supabase-js";
+import { toast } from "sonner";
 
 const Membres = () => {
   const [session, setSession] = useState<Session | null>(null);
