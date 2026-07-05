@@ -30,7 +30,7 @@ const Annuaire = () => {
   const [selectedCat, setSelectedCat] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [canEdit, setCanEdit] = useState(false);
   const [form, setForm] = useState({ name: "", category: "sanitaire", address: "", phone: "", description: "" });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -38,8 +38,14 @@ const Annuaire = () => {
     const check = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
-      const { data } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id);
-      setIsAdmin(!!data?.some(r => ["admin", "moderator"].includes(r.role)));
+      const [{ data: roles }, { data: me }] = await Promise.all([
+        supabase.from("user_roles").select("role").eq("user_id", session.user.id),
+        supabase.from("members").select("poste").eq("user_id", session.user.id).maybeSingle(),
+      ]);
+      const hasRole = !!roles?.some((r) => ["admin", "moderator", "super_admin"].includes(r.role));
+      const poste = (me?.poste ?? "").toLowerCase();
+      const isVP = poste.startsWith("vice-président") || poste.startsWith("vice-president") || poste.startsWith("vice président") || poste.startsWith("vice president");
+      setCanEdit(hasRole || isVP);
     };
     check();
   }, []);
