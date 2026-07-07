@@ -8,3 +8,7 @@ verify_jwt = false
 
 [functions.generate-cahier]
 verify_jwt = false
+
+[functions.tts-article]
+verify_jwt = false
+
