@@ -45,7 +45,8 @@ const Annuaire = () => {
       const hasRole = !!roles?.some((r) => ["admin", "moderator", "super_admin"].includes(r.role));
       const poste = (me?.poste ?? "").toLowerCase();
       const isVP = poste.startsWith("vice-président") || poste.startsWith("vice-president") || poste.startsWith("vice président") || poste.startsWith("vice president");
-      setCanEdit(hasRole || isVP);
+      const isSG = poste.startsWith("secrétaire général") || poste.startsWith("secretaire general") || poste.startsWith("secrétaire generale") || poste.startsWith("secretaire générale");
+      setCanEdit(hasRole || isVP || isSG);
     };
     check();
   }, []);

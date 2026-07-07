@@ -402,7 +402,7 @@ const Chat = () => {
               NovalimIA
             </span>
             <h1 className="mt-2 text-2xl lg:text-3xl font-display font-bold text-foreground leading-tight">
-              Chat Intelligent
+              Quoi de neuf
             </h1>
             <p className="mt-1 text-muted-foreground text-sm">
               Questions, images, fichiers — NovalimIA répond à tout.

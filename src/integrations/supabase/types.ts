@@ -402,6 +402,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_bureau_editor: { Args: { _user_id: string }; Returns: boolean }
       is_vice_president: { Args: { _user_id: string }; Returns: boolean }
       public_stats: {
         Args: never
