@@ -116,8 +116,8 @@ export const ArticleAudio = ({ title, content }: Props) => {
   const ensureAudio = async (): Promise<HTMLAudioElement> => {
     if (audioRef.current && blobRef.current) return audioRef.current;
     const { data: { session } } = await supabase.auth.getSession();
-    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tts-article`;
-    const resp = await fetch(url, {
+    const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tts-article`;
+    const resp = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -129,9 +129,9 @@ export const ArticleAudio = ({ title, content }: Props) => {
     if (!resp.ok) throw new Error(`TTS ${resp.status}`);
     const blob = await resp.blob();
     blobRef.current = blob;
-    const url = URL.createObjectURL(blob);
-    audioUrlRef.current = url;
-    const el = new Audio(url);
+    const objUrl = URL.createObjectURL(blob);
+    audioUrlRef.current = objUrl;
+    const el = new Audio(objUrl);
     el.preload = "auto";
     el.onended = () => { ambientRef.current?.stop(); ambientRef.current = null; setState("idle"); };
     el.onerror = () => { ambientRef.current?.stop(); ambientRef.current = null; setState("idle"); toast.error("Lecture audio impossible"); };
