@@ -115,11 +115,19 @@ export const ArticleAudio = ({ title, content }: Props) => {
 
   const ensureAudio = async (): Promise<HTMLAudioElement> => {
     if (audioRef.current && blobRef.current) return audioRef.current;
-    const { data, error } = await supabase.functions.invoke("tts-article", {
-      body: { title, content },
+    const { data: { session } } = await supabase.auth.getSession();
+    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tts-article`;
+    const resp = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        Authorization: `Bearer ${session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ title, content }),
     });
-    if (error) throw error;
-    const blob = data instanceof Blob ? data : new Blob([data], { type: "audio/mpeg" });
+    if (!resp.ok) throw new Error(`TTS ${resp.status}`);
+    const blob = await resp.blob();
     blobRef.current = blob;
     const url = URL.createObjectURL(blob);
     audioUrlRef.current = url;
