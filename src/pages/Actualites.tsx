@@ -132,6 +132,7 @@ const Actualites = () => {
                     )}
                     <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-border/40">
                       <PostReactions actualiteId={article.id} />
+                      <ArticleAudio title={article.title} content={article.content} />
                       <a
                         href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`*${article.title}*\n\n${article.content}\n\n— District Cité Novalim-CIE\nhttps://districtcitenovalim-cie.lovable.app`)}`}
                         target="_blank" rel="noopener noreferrer"
