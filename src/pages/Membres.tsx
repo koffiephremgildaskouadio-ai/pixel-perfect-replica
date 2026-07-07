@@ -35,7 +35,8 @@ const Membres = () => {
     const isAdmin = !!roles?.some((r) => ["admin", "super_admin", "moderator"].includes(r.role));
     const poste = (me?.poste ?? "").toLowerCase();
     const isVP = poste.startsWith("vice-président") || poste.startsWith("vice-president") || poste.startsWith("vice président") || poste.startsWith("vice president");
-    setCanAddMember(isAdmin || isVP);
+    const isSG = poste.startsWith("secrétaire général") || poste.startsWith("secretaire general") || poste.startsWith("secrétaire generale") || poste.startsWith("secretaire générale");
+    setCanAddMember(isAdmin || isVP || isSG);
   };
 
   useEffect(() => {
