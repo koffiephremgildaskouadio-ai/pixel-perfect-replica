@@ -10,6 +10,7 @@ import { fr } from "date-fns/locale";
 import { useEffect } from "react";
 import { Comments } from "@/components/Comments";
 import { PostReactions } from "@/components/PostReactions";
+import { ArticleAudio } from "@/components/ArticleAudio";
 
 const Actualites = () => {
   useEffect(() => {
