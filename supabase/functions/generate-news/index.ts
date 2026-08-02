@@ -142,6 +142,8 @@ Photos, vidéos et live seront publiés tout au long de la journée. Partagez ma
 
     const prompt = `Tu es le community manager du District Cité Novalim-CIE (CCJY, Yopougon, Côte d'Ivoire).
 Aujourd'hui : ${dateStr}. Génère EXACTEMENT 1 publication COURTE et percutante pour la jeunesse.
+Ancre la publication dans la vie locale de Yopougon : actions de la Mairie de Yopougon, du Conseil Communal des Jeunes de Yopougon (CCJY), festivités de l'indépendance (7 août), civisme, entrepreneuriat et engagement des jeunes du district.
+N'invente JAMAIS de date précise, de communiqué officiel ni de nom de personne.
 Contraintes STRICTES :
 - title : max 10 mots, accrocheur (1 emoji max).
 - content : 2 à 3 phrases MAXIMUM, directes, motivantes, sans blabla, sans salutations.
@@ -150,11 +152,13 @@ Format JSON: [{"title":"...","content":"...","type":"ai_daily","image_prompt":".
 Réponds UNIQUEMENT avec le JSON.`;
 
     const NEWS_MODELS = [
+      "google/gemini-3.6-flash",
       "google/gemini-3-flash-preview",
       "google/gemini-2.5-flash",
       "google/gemini-2.5-flash-lite",
       "openai/gpt-5-mini",
     ];
+
     let response: Response | null = null;
     let lastErr = "";
     for (const model of NEWS_MODELS) {
