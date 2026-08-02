@@ -105,12 +105,23 @@
 
 @layer utilities {
   .text-gradient-primary {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-primary to-accent;
   }
   .bg-hero-gradient {
-    background: radial-gradient(ellipse at top left, hsl(var(--primary) / 0.18), transparent 55%),
-                radial-gradient(ellipse at bottom right, hsl(var(--accent) / 0.15), transparent 60%),
-                hsl(var(--background));
+    background:
+      radial-gradient(1200px 600px at 10% -10%, hsl(var(--primary) / 0.22), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, hsl(var(--accent) / 0.18), transparent 60%),
+      radial-gradient(700px 500px at 50% 120%, hsl(var(--primary) / 0.12), transparent 65%),
+      hsl(var(--background));
+  }
+  .bg-mesh {
+    background-image:
+      radial-gradient(hsl(var(--primary) / 0.10) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  .glass-panel {
+    @apply bg-card/70 backdrop-blur-xl border border-border/60 rounded-2xl;
+    box-shadow: 0 18px 50px -24px hsl(var(--primary) / 0.35);
   }
   .shadow-glow {
     box-shadow: 0 10px 40px -12px hsl(var(--primary) / 0.35), 0 4px 12px -4px hsl(var(--accent) / 0.15);
@@ -118,7 +129,19 @@
   .card-hover {
     @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-glow;
   }
+  .ring-accent-soft {
+    box-shadow: 0 0 0 1px hsl(var(--accent) / 0.35), 0 12px 30px -18px hsl(var(--accent) / 0.6);
+  }
+  .animate-float {
+    animation: float 7s ease-in-out infinite;
+  }
 }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
 
 /* Smooth scroll & selection */
 html { scroll-behavior: smooth; }
