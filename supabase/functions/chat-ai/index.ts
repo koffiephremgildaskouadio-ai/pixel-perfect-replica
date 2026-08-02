@@ -107,16 +107,16 @@ serve(async (req) => {
 
     // Modèles ultra-performants avec fallback intelligent (catalogue Lovable AI Gateway validé)
     const MODELS = [
+      "google/gemini-3.6-flash",
       "google/gemini-3-flash-preview",
       "google/gemini-3.5-flash",
       "openai/gpt-5.4",
-      "google/gemini-2.5-pro",
-      "openai/gpt-5",
       "google/gemini-2.5-flash",
       "openai/gpt-5-mini",
       "google/gemini-2.5-flash-lite",
     ];
 
+    const SYSTEM_PROMPT = buildSystemPrompt();
     let response: Response | null = null;
     let lastErr = "";
     for (const model of MODELS) {
@@ -125,10 +125,11 @@ serve(async (req) => {
           model,
           messages: [{ role: "system", content: SYSTEM_PROMPT }, ...safeMessages],
           stream,
-          temperature: 0.7,
         };
-        // Reasoning effort pour les modèles GPT-5 (réponses plus profondes)
-        if (model.startsWith("openai/gpt-5")) payload.reasoning_effort = "medium";
+        // Les modèles OpenAI GPT-5 refusent temperature/max_tokens personnalisés
+        if (!model.startsWith("openai/")) payload.temperature = 0.7;
+        if (model.startsWith("openai/gpt-5.6")) payload.reasoning_effort = "none";
+
 
         const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
