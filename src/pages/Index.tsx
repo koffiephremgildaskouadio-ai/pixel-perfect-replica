@@ -1,46 +1,78 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { VisitorModal } from "@/components/VisitorModal";
 import { SEO } from "@/components/SEO";
-import { Users, Newspaper, MessageCircle, Shield, ArrowRight, Info } from "lucide-react";
+import { SiteFooter } from "@/components/SiteFooter";
+import {
+  ArrowRight, ChevronLeft, ChevronRight, GraduationCap, Briefcase,
+  CalendarDays, MapPin, Quote, Handshake,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-district.jpg";
 import aboutImage from "@/assets/about-community.jpg";
+import action1 from "@/assets/nova_action1.jpg";
+import action2 from "@/assets/nova_action2.jpg";
+import investiture from "@/assets/investiture_event.jpg";
 import logo from "@/assets/logo_novalim.png";
 import logoCcjy from "@/assets/logo_ccjy.jpg";
+import logoFranceVille from "@/assets/franceville_logo.jpg";
+import logoNova from "@/assets/nova_logo_official.jpg";
 
-const features = [
+const slides = [
   {
-    icon: Users,
-    title: "Identification Digitale",
-    description: "Cartes virtuelles avec QR code pour chaque membre du district.",
-    link: "/membres",
+    image: heroImage,
+    title: "District Cité Novalim-CIE",
+    subtitle: "La plateforme officielle de notre communauté, Zone 7 du CCJY Yopougon.",
+    cta: { label: "Découvrir le District", to: "/a-propos" },
   },
   {
-    icon: Newspaper,
-    title: "Actualités Officielles",
-    description: "Restez informé des dernières nouvelles et activités du district.",
-    link: "/actualites",
+    image: action1,
+    title: "Une jeunesse engagée",
+    subtitle: "Actions sociales, salubrité, solidarité : nos membres au service des résidents.",
+    cta: { label: "Nos activités", to: "/actualites" },
   },
   {
-    icon: MessageCircle,
-    title: "Chat Communautaire",
-    description: "Posez vos questions et échangez avec l'assistant IA du district.",
-    link: "/chat",
+    image: action2,
+    title: "Un bureau au service de tous",
+    subtitle: "Bureau, cabinet, coordinations et commissions pour piloter le district.",
+    cta: { label: "Voir le Bureau", to: "/bureau" },
   },
   {
-    icon: Shield,
-    title: "Espace Sécurisé",
-    description: "Base de données protégée et accès contrôlé par rôle.",
-    link: "/connexion",
+    image: aboutImage,
+    title: "Rejoignez le mouvement",
+    subtitle: "Carte de membre digitale, réunions virtuelles et informations en temps réel.",
+    cta: { label: "Espace Membre", to: "/connexion" },
   },
+];
+
+const partners = [
+  { name: "CCJY Yopougon", logo: logoCcjy },
+  { name: "District Cité Novalim-CIE", logo: logo },
+  { name: "District France-Ville", logo: logoFranceVille },
+  { name: "Novalim-City", logo: logoNova },
+];
+
+const agenda = [
+  { date: "03 Mai 2026", title: "Cérémonie d'investiture des présidents de district", place: "Espace communautaire, Yopougon" },
+  { date: "17 Mai 2026", title: "Assemblée générale ordinaire du district", place: "Salle de réunion, Cité Novalim" },
+  { date: "07 Juin 2026", title: "Journée de salubrité et de sensibilisation", place: "Cité CIE Novalim-City" },
+  { date: "28 Juin 2026", title: "Rencontre partenaires & opérateurs économiques", place: "En ligne (réunion virtuelle)" },
 ];
 
 const Index = () => {
   const [showModal, setShowModal] = useState(false);
+  const [slide, setSlide] = useState(0);
+
+  const next = useCallback(() => setSlide((s) => (s + 1) % slides.length), []);
+  const prev = useCallback(() => setSlide((s) => (s - 1 + slides.length) % slides.length), []);
+
+  useEffect(() => {
+    const t = setInterval(next, 7000);
+    return () => clearInterval(t);
+  }, [next]);
 
   const { data: stats } = useQuery({
     queryKey: ["public-stats"],
@@ -53,6 +85,30 @@ const Index = () => {
         news: Number(row.news_count ?? 0),
         directory: Number(row.directory_count ?? 0),
       };
+    },
+  });
+
+  const { data: news } = useQuery({
+    queryKey: ["home-news"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("actualites")
+        .select("id, title, content, image_url, created_at")
+        .order("created_at", { ascending: false })
+        .limit(3);
+      return data ?? [];
+    },
+  });
+
+  const { data: president } = useQuery({
+    queryKey: ["home-president"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("members")
+        .select("nom, prenoms, poste, photo_url, bio")
+        .ilike("poste", "%président%")
+        .limit(5);
+      return data?.find((m) => /^pr[ée]sident/i.test(m.poste ?? "")) ?? data?.[0] ?? null;
     },
   });
 
@@ -75,183 +131,337 @@ const Index = () => {
       />
       <VisitorModal open={showModal} onSubmit={handleVisitorSubmit} />
 
-      {/* Hero */}
-      <section className="relative min-h-[85vh] flex items-center overflow-hidden">
-        <div className="absolute inset-0">
-          <img src={heroImage} alt="Vue aérienne du district Novalim-City" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-[hsl(var(--hero-overlay))]/70" />
+      {/* 2. HERO / CARROUSEL */}
+      <section className="relative h-[62vh] min-h-[440px] overflow-hidden">
+        {slides.map((s, i) => (
+          <div
+            key={s.title}
+            className={`absolute inset-0 transition-opacity duration-1000 ${i === slide ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+          >
+            <img src={s.image} alt={s.title} className="w-full h-full object-cover" loading={i === 0 ? "eager" : "lazy"} />
+            <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--hero-overlay))]/85 via-[hsl(var(--hero-overlay))]/60 to-transparent" />
+            <div className="absolute inset-0 flex items-center">
+              <div className="container">
+                <div className="max-w-2xl space-y-5">
+                  <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent text-accent-foreground text-xs font-semibold uppercase tracking-wide">
+                    CCJY · Zone 7 · Yopougon
+                  </span>
+                  <h1 className="text-3xl md:text-5xl font-display font-bold text-primary-foreground leading-tight">
+                    {s.title}
+                  </h1>
+                  <p className="text-base md:text-lg text-primary-foreground/80 max-w-lg leading-relaxed">
+                    {s.subtitle}
+                  </p>
+                  <Link to={s.cta.to}>
+                    <Button variant="hero" size="xl" className="mt-2">
+                      {s.cta.label}
+                      <ArrowRight className="w-5 h-5" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <button
+          onClick={prev}
+          aria-label="Slide précédent"
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-card/80 backdrop-blur flex items-center justify-center text-foreground hover:bg-card transition-colors shadow-lg"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <button
+          onClick={next}
+          aria-label="Slide suivant"
+          className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-card/80 backdrop-blur flex items-center justify-center text-foreground hover:bg-card transition-colors shadow-lg"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
+          {slides.map((s, i) => (
+            <button
+              key={s.title}
+              onClick={() => setSlide(i)}
+              aria-label={`Aller au slide ${i + 1}`}
+              className={`h-2 rounded-full transition-all ${i === slide ? "w-8 bg-accent" : "w-2 bg-primary-foreground/50"}`}
+            />
+          ))}
         </div>
-        <div className="container relative z-10 py-32 lg:py-40">
-          <div className="max-w-2xl space-y-6">
-            <div
-              className="opacity-0 animate-fade-up"
-              style={{ animationDelay: "100ms" }}
-            >
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/20 text-primary-foreground/90 text-sm font-medium backdrop-blur-sm border border-primary/20">
-                District Cité Novalim-CIE
-              </span>
-            </div>
-            <h1
-              className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-primary-foreground leading-[1.1] opacity-0 animate-fade-up"
-              style={{ animationDelay: "250ms" }}
-            >
-              Votre communauté,
-              <br />connectée.
-            </h1>
-            <p
-              className="text-lg text-primary-foreground/75 max-w-lg leading-relaxed opacity-0 animate-fade-up"
-              style={{ animationDelay: "400ms" }}
-            >
-              Plateforme officielle du District Cité Novalim-CIE. Identification, communication
-              et engagement de tous les membres.
+      </section>
+
+      {/* 3. PARTENAIRES */}
+      <section className="py-14 bg-card border-b border-border">
+        <div className="container">
+          <div className="text-center mb-8">
+            <h2 className="text-xl md:text-2xl font-display font-bold text-foreground">
+              Partenaires &amp; soutiens institutionnels
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Ils accompagnent le District Cité Novalim-CIE au quotidien.
             </p>
-            <div
-              className="flex flex-wrap gap-3 pt-2 opacity-0 animate-fade-up"
-              style={{ animationDelay: "550ms" }}
-            >
-              <Link to="/bureau">
-                <Button variant="hero" size="xl">
-                  Découvrir le Bureau
-                  <ArrowRight className="w-5 h-5" />
-                </Button>
-              </Link>
-              <Link to="/connexion">
-                <Button variant="hero-outline" size="xl" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10">
-                  Espace Membre
-                </Button>
-              </Link>
-            </div>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10">
+            {partners.map((p) => (
+              <div
+                key={p.name}
+                className="flex items-center justify-center w-32 h-24 rounded-2xl border border-border bg-background shadow-sm hover:shadow-md transition-shadow p-3"
+                title={p.name}
+              >
+                <img src={p.logo} alt={`Logo ${p.name}`} className="max-h-14 max-w-full object-contain" loading="lazy" />
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 text-center">
+            <Link to="/annuaire">
+              <Button variant="outline" size="lg" className="gap-2">
+                <Handshake className="w-4 h-4" />
+                Devenir partenaire
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-24 lg:py-32 bg-background">
+      {/* 4. MOT DU PRÉSIDENT */}
+      <section className="py-20 bg-background">
         <div className="container">
-          <ScrollReveal className="text-center max-w-xl mx-auto mb-16">
-            <span className="text-sm font-semibold text-primary tracking-wide uppercase">Nos services</span>
+          <div className="grid lg:grid-cols-[380px_1fr] gap-10 items-center">
+            <ScrollReveal direction="left">
+              <div className="rounded-3xl overflow-hidden border border-border shadow-lg bg-card">
+                <img
+                  src={president?.photo_url || aboutImage}
+                  alt={president ? `${president.prenoms} ${president.nom}` : "Président du district"}
+                  className="w-full h-[380px] object-cover"
+                  loading="lazy"
+                />
+                <div className="p-5 text-center">
+                  <p className="font-display font-bold text-lg text-foreground">
+                    {president ? `${president.prenoms} ${president.nom}` : "Le Président du District"}
+                  </p>
+                  <p className="text-sm text-accent font-medium mt-1">
+                    {president?.poste || "Président du District Cité Novalim-CIE"}
+                  </p>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            <ScrollReveal delay={120}>
+              <div className="space-y-5">
+                <span className="text-sm font-semibold text-accent tracking-wide uppercase">Mot du Président</span>
+                <h2 className="text-3xl lg:text-4xl font-display font-bold text-foreground leading-tight">
+                  Bienvenue sur la plateforme de notre district
+                </h2>
+                <div className="relative pl-8">
+                  <Quote className="absolute left-0 top-1 w-5 h-5 text-accent" />
+                  <div className="space-y-4 text-muted-foreground leading-relaxed">
+                    <p>
+                      {president?.bio ||
+                        "Chers membres, chers partenaires, chers résidents, cette plateforme est le reflet de notre ambition commune : un district organisé, solidaire et tourné vers l'avenir. Elle rassemble en un seul lieu l'identification de nos membres, l'information officielle et les outils de travail de notre bureau."}
+                    </p>
+                    <p>
+                      Ensemble, faisons du District Cité Novalim-CIE une référence au sein du Conseil
+                      Communal des Jeunes de Yopougon et de la commune tout entière.
+                    </p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4 pt-2 max-w-lg">
+                  {[
+                    { value: stats ? `${stats.members}+` : "…", label: "Membres" },
+                    { value: stats ? `${stats.news}` : "…", label: "Publications" },
+                    { value: stats ? `${stats.directory}` : "…", label: "Partenaires" },
+                  ].map((s) => (
+                    <div key={s.label} className="text-center p-4 rounded-2xl bg-card border border-border shadow-sm">
+                      <div className="text-2xl font-display font-bold text-primary">{s.value}</div>
+                      <div className="text-xs text-muted-foreground mt-1">{s.label}</div>
+                    </div>
+                  ))}
+                </div>
+                <Link to="/bureau">
+                  <Button size="lg" className="mt-2 gap-2">
+                    Découvrir le Bureau &amp; le Cabinet
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </Link>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. OPPORTUNITÉS */}
+      <section className="py-20 bg-secondary/50">
+        <div className="container">
+          <ScrollReveal className="text-center max-w-xl mx-auto mb-12">
+            <span className="text-sm font-semibold text-primary tracking-wide uppercase">Opportunités</span>
             <h2 className="mt-3 text-3xl lg:text-4xl font-display font-bold text-foreground leading-tight">
-              Tout ce dont vous avez besoin
+              Formations &amp; emplois pour nos membres
             </h2>
-            <p className="mt-4 text-muted-foreground leading-relaxed">
-              Une plateforme complète pour la gestion et l'engagement communautaire du district.
-            </p>
           </ScrollReveal>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, i) => (
-              <ScrollReveal key={feature.title} delay={i * 80}>
-                <Link to={feature.link}>
-                  <div className="group p-6 rounded-2xl bg-card border border-border/50 shadow-sm hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 h-full cursor-pointer">
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/15 transition-colors">
-                      <feature.icon className="w-6 h-6 text-primary" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
+          <div className="grid md:grid-cols-2 gap-6">
+            {[
+              {
+                icon: GraduationCap,
+                title: "Offres de formations",
+                empty: "Aucune offre de formation disponible pour le moment. Les prochaines sessions seront publiées ici.",
+              },
+              {
+                icon: Briefcase,
+                title: "Offres d'emplois & opportunités",
+                empty: "Aucune offre d'emploi disponible pour le moment. Restez connectés au fil d'actualités.",
+              },
+            ].map((b, i) => (
+              <ScrollReveal key={b.title} delay={i * 100}>
+                <div className="h-full p-8 rounded-3xl bg-card border border-border shadow-sm hover:shadow-lg transition-shadow">
+                  <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4">
+                    <b.icon className="w-6 h-6 text-accent" />
                   </div>
-                </Link>
+                  <h3 className="text-xl font-display font-bold text-foreground mb-3">{b.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{b.empty}</p>
+                  <Link to="/actualites">
+                    <Button variant="outline" size="sm" className="mt-6 gap-2">
+                      Voir les publications
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </Link>
+                </div>
               </ScrollReveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* About */}
-      <section className="py-24 lg:py-32 bg-secondary/50">
+      {/* 6. ACTUALITÉS */}
+      <section className="py-20 bg-background">
         <div className="container">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            <ScrollReveal direction="left">
-              <div className="space-y-6">
-                <div className="rounded-2xl overflow-hidden shadow-xl">
-                  <img src={aboutImage} alt="Communauté Novalim-City" className="w-full h-80 lg:h-96 object-cover" />
-                </div>
-                <div className="flex items-center justify-center gap-6">
-                  <img src={logo} alt="Logo District" className="w-16 h-16 object-contain" />
-                  <img src={logoCcjy} alt="Logo CCJY" className="w-16 h-16 object-contain rounded-lg" />
-                </div>
-              </div>
-            </ScrollReveal>
-            <ScrollReveal delay={150}>
-              <div className="space-y-5">
-                <span className="text-sm font-semibold text-accent tracking-wide uppercase">Notre mission</span>
-                <h2 className="text-3xl lg:text-4xl font-display font-bold text-foreground leading-tight">
-                  Unir et servir notre communauté
-                </h2>
-                <p className="text-muted-foreground leading-relaxed">
-                  Le District Cité Novalim-CIE est l'un des <strong>87 districts</strong> et 11 villages
-                  de la commune de Yopougon, rattaché au <strong>Conseil Communal des Jeunes de Yopougon (CCJY)</strong>.
-                  Composé à 95 % de cités résidentielles, notre district se distingue par une organisation
-                  exemplaire, chaque cité étant dirigée par un président élu.
-                </p>
-                <p className="text-muted-foreground leading-relaxed">
-                  Membre de la <strong>Zone 7</strong>, nous bénéficions d'un réseau de partenaires
-                  sanitaires de qualité et d'acteurs économiques engagés pour le bien-être de nos résidents.
-                </p>
-                <div className="grid grid-cols-3 gap-4 pt-4">
-                  {[
-                    { value: stats ? `${stats.members}+` : "…", label: "Membres actifs" },
-                    { value: stats ? `${stats.news}` : "…", label: "Publications" },
-                    { value: stats ? `${stats.directory}` : "…", label: "Partenaires" },
-                  ].map((stat) => (
-                    <div key={stat.label} className="text-center p-3 rounded-xl bg-card border border-border/50">
-                      <div className="text-2xl font-display font-bold text-primary">{stat.value}</div>
-                      <div className="text-xs text-muted-foreground mt-1">{stat.label}</div>
-                    </div>
-                  ))}
-                </div>
-                <Link to="/a-propos">
-                  <Button variant="outline" size="lg" className="mt-4 gap-2">
-                    <Info className="w-4 h-4" />
-                    En savoir plus
-                  </Button>
-                </Link>
-              </div>
-            </ScrollReveal>
+          <div className="flex flex-wrap items-end justify-between gap-4 mb-10">
+            <div>
+              <span className="text-sm font-semibold text-primary tracking-wide uppercase">Actualités</span>
+              <h2 className="mt-2 text-3xl lg:text-4xl font-display font-bold text-foreground">
+                Les dernières informations du district
+              </h2>
+            </div>
+            <Link to="/actualites">
+              <Button variant="outline" className="gap-2">
+                Toutes les actualités
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {(news?.length ? news : []).map((n, i) => (
+              <ScrollReveal key={n.id} delay={i * 90}>
+                <article className="h-full rounded-3xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col">
+                  <img
+                    src={n.image_url || investiture}
+                    alt={n.title}
+                    className="w-full h-48 object-cover"
+                    loading="lazy"
+                  />
+                  <div className="p-6 flex flex-col flex-1">
+                    <time className="text-xs text-muted-foreground">
+                      {new Date(n.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                    </time>
+                    <h3 className="mt-2 text-lg font-semibold text-foreground line-clamp-2">{n.title}</h3>
+                    <p className="mt-2 text-sm text-muted-foreground line-clamp-3 flex-1">{n.content}</p>
+                    <Link to="/actualites" className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:text-accent transition-colors">
+                      Lire l'actualité <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                </article>
+              </ScrollReveal>
+            ))}
+            {!news?.length && (
+              <p className="text-muted-foreground">Aucune actualité publiée pour le moment.</p>
+            )}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-24 lg:py-32">
+      {/* 7. ÉVÉNEMENT PHARE */}
+      <section className="py-20 bg-secondary/50">
         <div className="container">
           <ScrollReveal>
-            <div className="relative rounded-3xl bg-primary overflow-hidden px-8 py-16 lg:py-20 text-center">
-              <div className="relative z-10 max-w-lg mx-auto space-y-5">
-                <h2 className="text-3xl lg:text-4xl font-display font-bold text-primary-foreground leading-tight">
-                  Rejoignez le mouvement
+            <div className="grid lg:grid-cols-2 gap-0 rounded-3xl overflow-hidden border border-border shadow-lg bg-card">
+              <img src={investiture} alt="Cérémonie d'investiture" className="w-full h-full min-h-[280px] object-cover" loading="lazy" />
+              <div className="p-8 lg:p-12 space-y-4">
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-semibold uppercase tracking-wide">
+                  Événement phare
+                </span>
+                <h2 className="text-2xl lg:text-3xl font-display font-bold text-foreground leading-tight">
+                  Cérémonie d'investiture des Présidents de District
                 </h2>
-                <p className="text-primary-foreground/75 leading-relaxed">
-                  Contactez l'administration pour devenir membre officiel et recevoir votre carte d'identification digitale.
+                <p className="text-muted-foreground leading-relaxed">
+                  Investiture officielle des présidents du District Cité Novalim-CIE et du District
+                  France-Ville, en présence des autorités du Conseil Communal des Jeunes de Yopougon.
                 </p>
-                <Link to="/connexion">
-                  <Button
-                    size="xl"
-                    className="bg-card text-primary hover:bg-card/90 shadow-lg mt-2"
-                  >
-                    Devenir Membre
-                    <ArrowRight className="w-5 h-5" />
-                  </Button>
-                </Link>
+                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                  <span className="inline-flex items-center gap-2"><CalendarDays className="w-4 h-4 text-accent" /> 03 Mai 2026</span>
+                  <span className="inline-flex items-center gap-2"><MapPin className="w-4 h-4 text-accent" /> Yopougon, Abidjan</span>
+                </div>
+                <div className="flex flex-wrap gap-3 pt-2">
+                  <Link to="/connexion">
+                    <Button size="lg" className="gap-2">
+                      S'inscrire à l'événement
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </Link>
+                  <Link to="/actualites">
+                    <Button variant="outline" size="lg">En savoir plus</Button>
+                  </Link>
+                </div>
               </div>
             </div>
           </ScrollReveal>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-card py-12">
+      {/* 8. AGENDA */}
+      <section className="py-20 bg-background">
         <div className="container">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-2.5">
-              <img src={logo} alt="Logo Novalim-City" className="w-9 h-9 object-contain" />
-              <span className="font-display font-semibold text-foreground">CIE Novalim-City</span>
+          <div className="flex flex-wrap items-end justify-between gap-4 mb-10">
+            <div>
+              <span className="text-sm font-semibold text-primary tracking-wide uppercase">Agenda</span>
+              <h2 className="mt-2 text-3xl lg:text-4xl font-display font-bold text-foreground">
+                Prochaines activités
+              </h2>
             </div>
-            <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} District Cité Novalim-CIE. Tous droits réservés.
-            </p>
+            <Link to="/actualites">
+              <Button variant="outline" className="gap-2">
+                Voir tout l'agenda
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
+
+          <div className="space-y-4">
+            {agenda.map((a, i) => (
+              <ScrollReveal key={a.title} delay={i * 70}>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 rounded-2xl bg-card border border-border shadow-sm hover:shadow-md transition-shadow">
+                  <div className="shrink-0 w-full sm:w-40 px-4 py-3 rounded-xl bg-primary/10 text-primary text-sm font-semibold text-center">
+                    {a.date}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-foreground">{a.title}</h3>
+                    <p className="mt-1 text-sm text-muted-foreground inline-flex items-center gap-2">
+                      <MapPin className="w-3.5 h-3.5 text-accent" /> {a.place}
+                    </p>
+                  </div>
+                  <Link to="/conference">
+                    <Button variant="ghost" size="sm" className="gap-1 text-primary">
+                      Participer <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </ScrollReveal>
+            ))}
           </div>
         </div>
-      </footer>
+      </section>
+
+      <SiteFooter />
     </>
   );
 };

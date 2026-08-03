@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, User, LogOut, ShieldCheck, BookOpen } from "lucide-react";
+import { Menu, X, User, LogOut, ShieldCheck, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InstallPWA } from "@/components/InstallPWA";
 import { GlobalSearch } from "@/components/GlobalSearch";
@@ -10,15 +10,33 @@ import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo_novalim.png";
 import type { Session } from "@supabase/supabase-js";
 
-const navLinks = [
+type NavItem = {
+  label: string;
+  path?: string;
+  children?: { label: string; path: string }[];
+};
+
+const navItems: NavItem[] = [
   { label: "Accueil", path: "/" },
-  { label: "À propos", path: "/a-propos" },
-  { label: "Bureau & Cabinet", path: "/bureau" },
-  { label: "Membres", path: "/membres" },
+  {
+    label: "Le District",
+    children: [
+      { label: "À propos", path: "/a-propos" },
+      { label: "Bureau & Cabinet", path: "/bureau" },
+      { label: "Membres", path: "/membres" },
+      { label: "District France-Ville", path: "/france-ville" },
+    ],
+  },
+  {
+    label: "Nos Activités",
+    children: [
+      { label: "Réunions virtuelles", path: "/conference" },
+      { label: "Quoi de neuf", path: "/chat" },
+      { label: "Annuaire des partenaires", path: "/annuaire" },
+    ],
+  },
   { label: "Actualités", path: "/actualites" },
-  { label: "Quoi de neuf", path: "/chat" },
-  { label: "Conférence", path: "/conference" },
-  { label: "Annuaire", path: "/annuaire" },
+  { label: "Contact", path: "/#contact" },
 ];
 
 export const Navbar = () => {
@@ -51,37 +69,65 @@ export const Navbar = () => {
     navigate("/");
   };
 
+  const isActive = (path?: string) => !!path && location.pathname === path;
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-xl border-b border-border shadow-sm">
+
       <div className="container flex items-center justify-between h-16">
         <Link to="/" className="flex items-center gap-2.5">
-          <img src={logo} alt="Logo Novalim-City" className="w-10 h-10 object-contain" />
-          <span className="font-display font-bold text-lg text-foreground hidden sm:block">
-            Novalim-City
+          <img src={logo} alt="Logo District Cité Novalim-CIE" className="w-11 h-11 object-contain" />
+          <span className="hidden 2xl:flex flex-col leading-tight whitespace-nowrap">
+            <span className="font-display font-bold text-base text-foreground">District Cité Novalim-CIE</span>
+            <span className="text-[11px] text-muted-foreground">Yopougon · CCJY</span>
           </span>
         </Link>
 
         <nav className="hidden lg:flex items-center gap-1">
-          {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                location.pathname === link.path
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navItems.map((item) =>
+            item.children ? (
+              <div key={item.label} className="relative group">
+                <button className="px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex items-center gap-1">
+                  {item.label}
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+                <div className="absolute left-0 top-full pt-2 hidden group-hover:block">
+                  <div className="min-w-56 rounded-xl border border-border bg-card shadow-lg p-2">
+                    {item.children.map((child) => (
+                      <Link
+                        key={child.path}
+                        to={child.path}
+                        className={`block px-3 py-2 rounded-lg text-sm transition-colors ${
+                          isActive(child.path)
+                            ? "bg-primary/10 text-primary"
+                            : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                        }`}
+                      >
+                        {child.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <Link
+                key={item.path}
+                to={item.path!}
+                className={`px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                  isActive(item.path)
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                }`}
+              >
+                {item.label}
+              </Link>
+            ),
+          )}
           {isAdmin && (
             <Link
               to="/admin"
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-1 ${
-                location.pathname === "/admin"
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${
+                isActive("/admin") ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-secondary"
               }`}
             >
               <ShieldCheck className="w-3.5 h-3.5" /> Admin
@@ -100,16 +146,25 @@ export const Navbar = () => {
               Déconnexion
             </Button>
           ) : (
-            <Link to="/connexion">
-              <Button variant="outline" size="sm" className="hidden sm:flex gap-2">
-                <User className="w-4 h-4" />
-                Connexion
-              </Button>
-            </Link>
+            <>
+              <Link to="/connexion" className="hidden lg:block">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <User className="w-4 h-4" />
+                  Espace Membre
+                </Button>
+              </Link>
+              <Link to="/connexion?espace=bureau" className="hidden lg:block">
+                <Button size="sm" className="gap-2">
+                  <ShieldCheck className="w-4 h-4" />
+                  Espace Bureau
+                </Button>
+              </Link>
+            </>
           )}
           <button
             className="lg:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Menu"
           >
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -117,31 +172,43 @@ export const Navbar = () => {
       </div>
 
       {mobileOpen && (
-        <div className="lg:hidden bg-card border-b border-border animate-fade-in">
+        <div className="lg:hidden bg-card border-b border-border animate-fade-in max-h-[80vh] overflow-y-auto">
           <nav className="container py-4 flex flex-col gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                onClick={() => setMobileOpen(false)}
-                className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                  location.pathname === link.path
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-secondary"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navItems.map((item) =>
+              item.children ? (
+                <div key={item.label} className="pt-2">
+                  <div className="px-4 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {item.label}
+                  </div>
+                  {item.children.map((child) => (
+                    <Link
+                      key={child.path}
+                      to={child.path}
+                      onClick={() => setMobileOpen(false)}
+                      className="block px-4 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary"
+                    >
+                      {child.label}
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <Link
+                  key={item.path}
+                  to={item.path!}
+                  onClick={() => setMobileOpen(false)}
+                  className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    isActive(item.path) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-secondary"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ),
+            )}
             {isAdmin && (
               <Link
                 to="/admin"
                 onClick={() => setMobileOpen(false)}
-                className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
-                  location.pathname === "/admin"
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-secondary"
-                }`}
+                className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary flex items-center gap-2"
               >
                 <ShieldCheck className="w-4 h-4" /> Administration
               </Link>
@@ -155,12 +222,14 @@ export const Navbar = () => {
                 </Button>
               </>
             ) : (
-              <Link to="/connexion" onClick={() => setMobileOpen(false)}>
-                <Button variant="outline" size="sm" className="mt-2 w-full gap-2">
-                  <User className="w-4 h-4" />
-                  Connexion
-                </Button>
-              </Link>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <Link to="/connexion" onClick={() => setMobileOpen(false)}>
+                  <Button variant="outline" size="sm" className="w-full">Espace Membre</Button>
+                </Link>
+                <Link to="/connexion?espace=bureau" onClick={() => setMobileOpen(false)}>
+                  <Button size="sm" className="w-full">Espace Bureau</Button>
+                </Link>
+              </div>
             )}
           </nav>
         </div>
