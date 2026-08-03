@@ -73,13 +73,6 @@ export const Navbar = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-xl border-b border-border shadow-sm">
-      {/* Bandeau institutionnel */}
-      <div className="hidden md:block bg-primary text-primary-foreground text-xs">
-        <div className="container flex items-center justify-between h-8">
-          <span>Conseil Communal des Jeunes de Yopougon — Zone 7</span>
-          <span className="opacity-90">contact@novalim-cie.org</span>
-        </div>
-      </div>
 
       <div className="container flex items-center justify-between h-16">
         <Link to="/" className="flex items-center gap-2.5">
