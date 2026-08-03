@@ -77,7 +77,7 @@ export const Navbar = () => {
       <div className="container flex items-center justify-between h-16">
         <Link to="/" className="flex items-center gap-2.5">
           <img src={logo} alt="Logo District Cité Novalim-CIE" className="w-11 h-11 object-contain" />
-          <span className="hidden sm:flex flex-col leading-tight">
+          <span className="hidden xl:flex flex-col leading-tight whitespace-nowrap">
             <span className="font-display font-bold text-base text-foreground">District Cité Novalim-CIE</span>
             <span className="text-[11px] text-muted-foreground">Yopougon · CCJY</span>
           </span>
@@ -147,13 +147,13 @@ export const Navbar = () => {
             </Button>
           ) : (
             <>
-              <Link to="/connexion" className="hidden md:block">
+              <Link to="/connexion" className="hidden lg:block">
                 <Button variant="outline" size="sm" className="gap-2">
                   <User className="w-4 h-4" />
                   Espace Membre
                 </Button>
               </Link>
-              <Link to="/connexion?espace=bureau" className="hidden md:block">
+              <Link to="/connexion?espace=bureau" className="hidden lg:block">
                 <Button size="sm" className="gap-2">
                   <ShieldCheck className="w-4 h-4" />
                   Espace Bureau
