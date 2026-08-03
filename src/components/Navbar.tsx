@@ -77,7 +77,7 @@ export const Navbar = () => {
       <div className="container flex items-center justify-between h-16">
         <Link to="/" className="flex items-center gap-2.5">
           <img src={logo} alt="Logo District Cité Novalim-CIE" className="w-11 h-11 object-contain" />
-          <span className="hidden xl:flex flex-col leading-tight whitespace-nowrap">
+          <span className="hidden 2xl:flex flex-col leading-tight whitespace-nowrap">
             <span className="font-display font-bold text-base text-foreground">District Cité Novalim-CIE</span>
             <span className="text-[11px] text-muted-foreground">Yopougon · CCJY</span>
           </span>
@@ -87,7 +87,7 @@ export const Navbar = () => {
           {navItems.map((item) =>
             item.children ? (
               <div key={item.label} className="relative group">
-                <button className="px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex items-center gap-1">
+                <button className="px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex items-center gap-1">
                   {item.label}
                   <ChevronDown className="w-3.5 h-3.5" />
                 </button>
@@ -113,7 +113,7 @@ export const Navbar = () => {
               <Link
                 key={item.path}
                 to={item.path!}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
                   isActive(item.path)
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:text-foreground hover:bg-secondary"
