@@ -94,7 +94,7 @@ export const SiteFooter = () => (
       </div>
     </div>
 
-    <div className="border-t border-border">
+    <div className="border-t border-navy-foreground/15">
       <div className="container py-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-navy-foreground/60">
         <p>© {new Date().getFullYear()} District Cité Novalim-CIE. Tous droits réservés.</p>
         <p>Mentions légales · Politique de confidentialité</p>
