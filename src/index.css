@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -48,6 +48,8 @@
     /* Custom tokens */
     --hero-overlay: 140 30% 8%;
     --surface-warm: 35 30% 96%;
+    --navy: 218 62% 17%;
+    --navy-foreground: 0 0% 100%;
     --success: 140 55% 22%;
     --success-foreground: 0 0% 100%;
   }

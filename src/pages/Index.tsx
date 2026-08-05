@@ -132,96 +132,95 @@ const Index = () => {
       <VisitorModal open={showModal} onSubmit={handleVisitorSubmit} />
 
       {/* 2. HERO / CARROUSEL */}
-      <section className="relative h-[62vh] min-h-[440px] overflow-hidden">
-        {slides.map((s, i) => (
-          <div
-            key={s.title}
-            className={`absolute inset-0 transition-opacity duration-1000 ${i === slide ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-          >
-            <img src={s.image} alt={s.title} className="w-full h-full object-cover" loading={i === 0 ? "eager" : "lazy"} />
-            <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--hero-overlay))]/85 via-[hsl(var(--hero-overlay))]/60 to-transparent" />
-            <div className="absolute inset-0 flex items-center">
-              <div className="container">
-                <div className="max-w-2xl space-y-5">
-                  <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent text-accent-foreground text-xs font-semibold uppercase tracking-wide">
-                    CCJY · Zone 7 · Yopougon
-                  </span>
-                  <h1 className="text-3xl md:text-5xl font-display font-bold text-primary-foreground leading-tight">
-                    {s.title}
-                  </h1>
-                  <p className="text-base md:text-lg text-primary-foreground/80 max-w-lg leading-relaxed">
-                    {s.subtitle}
-                  </p>
-                  <Link to={s.cta.to}>
-                    <Button variant="hero" size="xl" className="mt-2">
-                      {s.cta.label}
-                      <ArrowRight className="w-5 h-5" />
-                    </Button>
-                  </Link>
+      <section className="pt-[84px] pb-6 bg-[hsl(var(--surface-warm))]">
+        <div className="container px-3 sm:px-4">
+          <div className="relative overflow-hidden rounded-[28px] bg-card ring-1 ring-border shadow-[0_24px_60px_-30px_hsl(var(--foreground)/0.45)] h-[52vh] min-h-[320px] md:h-[62vh]">
+            {slides.map((s, i) => (
+              <div
+                key={s.title}
+                className={`absolute inset-0 transition-opacity duration-[900ms] ${i === slide ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+              >
+                <img src={s.image} alt={s.title} className="w-full h-full object-cover" loading={i === 0 ? "eager" : "lazy"} />
+                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[hsl(var(--navy))]/70 to-transparent" />
+                <div className="absolute inset-x-4 md:inset-x-16 bottom-16 md:bottom-20">
+                  <div className="rounded-2xl bg-[hsl(var(--navy))]/70 backdrop-blur-sm px-5 py-4 md:px-8 md:py-6 text-center">
+                    <h1 className="text-lg md:text-3xl font-display font-bold text-navy-foreground leading-snug">
+                      {s.title}
+                    </h1>
+                    <p className="hidden md:block mt-2 text-sm text-navy-foreground/80">{s.subtitle}</p>
+                    <Link to={s.cta.to} className="inline-block mt-3">
+                      <Button size="sm" className="rounded-full px-5 bg-accent text-accent-foreground hover:bg-accent/90">
+                        {s.cta.label}
+                        <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </div>
+            ))}
+
+            <button
+              onClick={prev}
+              aria-label="Slide précédent"
+              className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-muted/80 backdrop-blur flex items-center justify-center text-foreground hover:bg-muted transition-colors"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              onClick={next}
+              aria-label="Slide suivant"
+              className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-muted/80 backdrop-blur flex items-center justify-center text-foreground hover:bg-muted transition-colors"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
+              {slides.map((s, i) => (
+                <button
+                  key={s.title}
+                  onClick={() => setSlide(i)}
+                  aria-label={`Aller au slide ${i + 1}`}
+                  className={`h-2.5 w-2.5 rounded-full transition-all ${i === slide ? "bg-accent scale-110" : "bg-card/70"}`}
+                />
+              ))}
             </div>
           </div>
-        ))}
-
-        <button
-          onClick={prev}
-          aria-label="Slide précédent"
-          className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-card/80 backdrop-blur flex items-center justify-center text-foreground hover:bg-card transition-colors shadow-lg"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-        <button
-          onClick={next}
-          aria-label="Slide suivant"
-          className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-card/80 backdrop-blur flex items-center justify-center text-foreground hover:bg-card transition-colors shadow-lg"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
-          {slides.map((s, i) => (
-            <button
-              key={s.title}
-              onClick={() => setSlide(i)}
-              aria-label={`Aller au slide ${i + 1}`}
-              className={`h-2 rounded-full transition-all ${i === slide ? "w-8 bg-accent" : "w-2 bg-primary-foreground/50"}`}
-            />
-          ))}
         </div>
       </section>
+
 
       {/* 3. PARTENAIRES */}
-      <section className="py-14 bg-card border-b border-border">
-        <div className="container">
-          <div className="text-center mb-8">
-            <h2 className="text-xl md:text-2xl font-display font-bold text-foreground">
-              Partenaires &amp; soutiens institutionnels
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Ils accompagnent le District Cité Novalim-CIE au quotidien.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10">
-            {partners.map((p) => (
-              <div
-                key={p.name}
-                className="flex items-center justify-center w-32 h-24 rounded-2xl border border-border bg-background shadow-sm hover:shadow-md transition-shadow p-3"
-                title={p.name}
+      <section className="pb-14 bg-[hsl(var(--surface-warm))]">
+        <div className="container px-3 sm:px-4">
+          <div className="rounded-[28px] bg-navy text-navy-foreground px-5 py-10 md:px-12 md:py-12">
+            <div className="text-center mb-8">
+              <p className="text-[11px] md:text-xs font-semibold uppercase tracking-[0.25em] text-navy-foreground/70">
+                Partenaires &amp; soutiens institutionnels
+              </p>
+              <div className="mx-auto mt-4 h-px w-24 bg-navy-foreground/20" />
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
+              {partners.map((p) => (
+                <div
+                  key={p.name}
+                  className="flex flex-col items-center justify-center gap-2 w-32 md:w-40 rounded-2xl bg-card p-4 shadow-sm"
+                  title={p.name}
+                >
+                  <img src={p.logo} alt={`Logo ${p.name}`} className="h-14 max-w-full object-contain" loading="lazy" />
+                  <span className="text-[11px] text-center text-muted-foreground leading-tight">{p.name}</span>
+                </div>
+              ))}
+              <Link
+                to="/annuaire"
+                className="flex flex-col items-center justify-center gap-2 w-32 md:w-40 min-h-[112px] rounded-2xl border-2 border-dashed border-navy-foreground/40 text-navy-foreground/90 hover:bg-navy-foreground/10 transition-colors p-4"
               >
-                <img src={p.logo} alt={`Logo ${p.name}`} className="max-h-14 max-w-full object-contain" loading="lazy" />
-              </div>
-            ))}
-          </div>
-          <div className="mt-8 text-center">
-            <Link to="/annuaire">
-              <Button variant="outline" size="lg" className="gap-2">
-                <Handshake className="w-4 h-4" />
-                Devenir partenaire
-              </Button>
-            </Link>
+                <Handshake className="w-5 h-5" />
+                <span className="text-xs font-medium text-center underline underline-offset-4">Devenir partenaire</span>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
+
 
       {/* 4. MOT DU PRÉSIDENT */}
       <section className="py-20 bg-background">

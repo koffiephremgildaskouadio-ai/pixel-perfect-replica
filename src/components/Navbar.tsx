@@ -72,16 +72,18 @@ export const Navbar = () => {
   const isActive = (path?: string) => !!path && location.pathname === path;
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-xl border-b border-border shadow-sm">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-b border-border shadow-[0_2px_20px_-12px_hsl(var(--foreground)/0.35)]">
 
-      <div className="container flex items-center justify-between h-16">
+      <div className="container flex items-center justify-between h-[68px]">
         <Link to="/" className="flex items-center gap-2.5">
           <img src={logo} alt="Logo District Cité Novalim-CIE" className="w-11 h-11 object-contain" />
           <span className="hidden 2xl:flex flex-col leading-tight whitespace-nowrap">
-            <span className="font-display font-bold text-base text-foreground">District Cité Novalim-CIE</span>
-            <span className="text-[11px] text-muted-foreground">Yopougon · CCJY</span>
+            <span className="font-display font-bold text-[14px] tracking-tight text-foreground">Plateforme Digitale du District</span>
+            <span className="text-[11px] text-muted-foreground">Cité Novalim-CIE · Yopougon</span>
           </span>
+
         </Link>
+
 
         <nav className="hidden lg:flex items-center gap-1">
           {navItems.map((item) =>
@@ -113,15 +115,16 @@ export const Navbar = () => {
               <Link
                 key={item.path}
                 to={item.path!}
-                className={`px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                className={`px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors border-b-2 ${
                   isActive(item.path)
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                    ? "border-accent text-accent"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {item.label}
               </Link>
             ),
+
           )}
           {isAdmin && (
             <Link
@@ -139,7 +142,7 @@ export const Navbar = () => {
           <GlobalSearch />
           {session && <NotificationBell />}
           {session && <MyProfileButton variant="outline" />}
-          <InstallPWA />
+          <span className="hidden 2xl:block"><InstallPWA /></span>
           {session ? (
             <Button variant="outline" size="sm" className="hidden sm:flex gap-2" onClick={handleLogout}>
               <LogOut className="w-4 h-4" />
@@ -148,18 +151,19 @@ export const Navbar = () => {
           ) : (
             <>
               <Link to="/connexion" className="hidden lg:block">
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button size="sm" className="gap-2 rounded-full px-5 bg-accent text-accent-foreground hover:bg-accent/90 shadow-sm">
                   <User className="w-4 h-4" />
                   Espace Membre
                 </Button>
               </Link>
               <Link to="/connexion?espace=bureau" className="hidden lg:block">
-                <Button size="sm" className="gap-2">
+                <Button size="sm" className="gap-2 rounded-full px-5 shadow-sm">
                   <ShieldCheck className="w-4 h-4" />
                   Espace Bureau
                 </Button>
               </Link>
             </>
+
           )}
           <button
             className="lg:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
