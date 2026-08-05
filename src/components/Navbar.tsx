@@ -78,9 +78,10 @@ export const Navbar = () => {
         <Link to="/" className="flex items-center gap-2.5">
           <img src={logo} alt="Logo District Cité Novalim-CIE" className="w-11 h-11 object-contain" />
           <span className="hidden xl:flex flex-col leading-tight whitespace-nowrap">
-            <span className="font-display font-bold text-[15px] tracking-tight text-foreground">Plateforme Digitale du District Cité Novalim-CIE</span>
-            <span className="text-[11px] text-muted-foreground">Yopougon · CCJY · Zone 7</span>
+            <span className="font-display font-bold text-[14px] tracking-tight text-foreground">Plateforme Digitale du District</span>
+            <span className="text-[11px] text-muted-foreground">Cité Novalim-CIE · Yopougon</span>
           </span>
+
         </Link>
 
 
