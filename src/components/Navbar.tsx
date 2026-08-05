@@ -142,7 +142,7 @@ export const Navbar = () => {
           <GlobalSearch />
           {session && <NotificationBell />}
           {session && <MyProfileButton variant="outline" />}
-          <InstallPWA />
+          <span className="hidden 2xl:block"><InstallPWA /></span>
           {session ? (
             <Button variant="outline" size="sm" className="hidden sm:flex gap-2" onClick={handleLogout}>
               <LogOut className="w-4 h-4" />
