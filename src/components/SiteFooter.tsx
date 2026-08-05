@@ -27,11 +27,11 @@ export const SiteFooter = () => (
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <img src={logo} alt="Logo District Cité Novalim-CIE" className="w-12 h-12 object-contain" />
-            <span className="font-display font-bold text-foreground leading-tight">
+            <span className="font-display font-bold text-navy-foreground leading-tight">
               District Cité<br />Novalim-CIE
             </span>
           </div>
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          <p className="text-sm text-navy-foreground/70 leading-relaxed">
             Plateforme officielle du District Cité Novalim-CIE, Zone 7 du Conseil Communal
             des Jeunes de Yopougon.
           </p>
@@ -43,7 +43,7 @@ export const SiteFooter = () => (
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={s.label}
-                className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
+                className="w-9 h-9 rounded-full bg-navy-foreground/10 flex items-center justify-center text-navy-foreground/80 hover:bg-primary hover:text-primary-foreground transition-colors"
               >
                 <s.icon className="w-4 h-4" />
               </a>
@@ -52,11 +52,11 @@ export const SiteFooter = () => (
         </div>
 
         <div>
-          <h3 className="font-semibold text-foreground mb-4">Navigation</h3>
+          <h3 className="font-semibold text-navy-foreground mb-4">Navigation</h3>
           <ul className="space-y-2">
             {navLinks.map((l) => (
               <li key={l.path}>
-                <Link to={l.path} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to={l.path} className="text-sm text-navy-foreground/70 hover:text-accent transition-colors">
                   {l.label}
                 </Link>
               </li>
@@ -65,18 +65,18 @@ export const SiteFooter = () => (
         </div>
 
         <div>
-          <h3 className="font-semibold text-foreground mb-4">Espaces</h3>
+          <h3 className="font-semibold text-navy-foreground mb-4">Espaces</h3>
           <ul className="space-y-2">
-            <li><Link to="/connexion" className="text-sm text-muted-foreground hover:text-primary transition-colors">Espace Membre</Link></li>
-            <li><Link to="/connexion?espace=bureau" className="text-sm text-muted-foreground hover:text-primary transition-colors">Espace Bureau</Link></li>
-            <li><Link to="/france-ville" className="text-sm text-muted-foreground hover:text-primary transition-colors">District France-Ville</Link></li>
-            <li><Link to="/chat" className="text-sm text-muted-foreground hover:text-primary transition-colors">Quoi de neuf</Link></li>
+            <li><Link to="/connexion" className="text-sm text-navy-foreground/70 hover:text-accent transition-colors">Espace Membre</Link></li>
+            <li><Link to="/connexion?espace=bureau" className="text-sm text-navy-foreground/70 hover:text-accent transition-colors">Espace Bureau</Link></li>
+            <li><Link to="/france-ville" className="text-sm text-navy-foreground/70 hover:text-accent transition-colors">District France-Ville</Link></li>
+            <li><Link to="/chat" className="text-sm text-navy-foreground/70 hover:text-accent transition-colors">Quoi de neuf</Link></li>
           </ul>
         </div>
 
         <div>
-          <h3 className="font-semibold text-foreground mb-4">Contact</h3>
-          <ul className="space-y-3 text-sm text-muted-foreground">
+          <h3 className="font-semibold text-navy-foreground mb-4">Contact</h3>
+          <ul className="space-y-3 text-sm text-navy-foreground/70">
             <li className="flex gap-2">
               <MapPin className="w-4 h-4 text-accent shrink-0 mt-0.5" />
               Cité CIE Novalim-City, Yopougon, Abidjan — Côte d'Ivoire
@@ -95,7 +95,7 @@ export const SiteFooter = () => (
     </div>
 
     <div className="border-t border-border">
-      <div className="container py-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
+      <div className="container py-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-navy-foreground/60">
         <p>© {new Date().getFullYear()} District Cité Novalim-CIE. Tous droits réservés.</p>
         <p>Mentions légales · Politique de confidentialité</p>
       </div>
