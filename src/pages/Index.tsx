@@ -189,37 +189,38 @@ const Index = () => {
 
 
       {/* 3. PARTENAIRES */}
-      <section className="py-14 bg-card border-b border-border">
-        <div className="container">
-          <div className="text-center mb-8">
-            <h2 className="text-xl md:text-2xl font-display font-bold text-foreground">
-              Partenaires &amp; soutiens institutionnels
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Ils accompagnent le District Cité Novalim-CIE au quotidien.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10">
-            {partners.map((p) => (
-              <div
-                key={p.name}
-                className="flex items-center justify-center w-32 h-24 rounded-2xl border border-border bg-background shadow-sm hover:shadow-md transition-shadow p-3"
-                title={p.name}
+      <section className="pb-14 bg-[hsl(var(--surface-warm))]">
+        <div className="container px-3 sm:px-4">
+          <div className="rounded-[28px] bg-navy text-navy-foreground px-5 py-10 md:px-12 md:py-12">
+            <div className="text-center mb-8">
+              <p className="text-[11px] md:text-xs font-semibold uppercase tracking-[0.25em] text-navy-foreground/70">
+                Partenaires &amp; soutiens institutionnels
+              </p>
+              <div className="mx-auto mt-4 h-px w-24 bg-navy-foreground/20" />
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
+              {partners.map((p) => (
+                <div
+                  key={p.name}
+                  className="flex flex-col items-center justify-center gap-2 w-32 md:w-40 rounded-2xl bg-card p-4 shadow-sm"
+                  title={p.name}
+                >
+                  <img src={p.logo} alt={`Logo ${p.name}`} className="h-14 max-w-full object-contain" loading="lazy" />
+                  <span className="text-[11px] text-center text-muted-foreground leading-tight">{p.name}</span>
+                </div>
+              ))}
+              <Link
+                to="/annuaire"
+                className="flex flex-col items-center justify-center gap-2 w-32 md:w-40 min-h-[112px] rounded-2xl border-2 border-dashed border-navy-foreground/40 text-navy-foreground/90 hover:bg-navy-foreground/10 transition-colors p-4"
               >
-                <img src={p.logo} alt={`Logo ${p.name}`} className="max-h-14 max-w-full object-contain" loading="lazy" />
-              </div>
-            ))}
-          </div>
-          <div className="mt-8 text-center">
-            <Link to="/annuaire">
-              <Button variant="outline" size="lg" className="gap-2">
-                <Handshake className="w-4 h-4" />
-                Devenir partenaire
-              </Button>
-            </Link>
+                <Handshake className="w-5 h-5" />
+                <span className="text-xs font-medium text-center underline underline-offset-4">Devenir partenaire</span>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
+
 
       {/* 4. MOT DU PRÉSIDENT */}
       <section className="py-20 bg-background">
