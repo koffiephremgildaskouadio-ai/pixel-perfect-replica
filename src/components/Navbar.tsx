@@ -150,18 +150,19 @@ export const Navbar = () => {
           ) : (
             <>
               <Link to="/connexion" className="hidden lg:block">
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button size="sm" className="gap-2 rounded-full px-5 bg-accent text-accent-foreground hover:bg-accent/90 shadow-sm">
                   <User className="w-4 h-4" />
                   Espace Membre
                 </Button>
               </Link>
               <Link to="/connexion?espace=bureau" className="hidden lg:block">
-                <Button size="sm" className="gap-2">
+                <Button size="sm" className="gap-2 rounded-full px-5 shadow-sm">
                   <ShieldCheck className="w-4 h-4" />
                   Espace Bureau
                 </Button>
               </Link>
             </>
+
           )}
           <button
             className="lg:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
