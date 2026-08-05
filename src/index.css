@@ -48,6 +48,8 @@
     /* Custom tokens */
     --hero-overlay: 140 30% 8%;
     --surface-warm: 35 30% 96%;
+    --navy: 218 62% 17%;
+    --navy-foreground: 0 0% 100%;
     --success: 140 55% 22%;
     --success-foreground: 0 0% 100%;
   }
