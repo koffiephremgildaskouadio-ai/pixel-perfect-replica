@@ -20,7 +20,8 @@ const socials = [
 ];
 
 export const SiteFooter = () => (
-  <footer id="contact" className="border-t border-border bg-card">
+  <footer id="contact" className="bg-navy text-navy-foreground">
+
     <div className="container py-14">
       <div className="grid gap-10 md:grid-cols-4">
         <div className="space-y-4">
