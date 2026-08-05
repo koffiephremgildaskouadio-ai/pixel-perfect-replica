@@ -114,15 +114,16 @@ export const Navbar = () => {
               <Link
                 key={item.path}
                 to={item.path!}
-                className={`px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                className={`px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors border-b-2 ${
                   isActive(item.path)
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                    ? "border-accent text-accent"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {item.label}
               </Link>
             ),
+
           )}
           {isAdmin && (
             <Link
