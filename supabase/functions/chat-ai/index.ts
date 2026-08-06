@@ -11,7 +11,37 @@ const json = (body: Record<string, unknown>, status = 200) =>
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
-const buildSystemPrompt = () => {
+// Récupère les vraies actualités publiées sur le site officiel du CCJY
+const fetchCcjyHeadlines = async (): Promise<string> => {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 6000);
+    const r = await fetch("https://ccj-yop.org", {
+      signal: ctrl.signal,
+      headers: { "User-Agent": "Mozilla/5.0 DistrictNovalimBot" },
+    });
+    clearTimeout(t);
+    if (!r.ok) return "";
+    const html = await r.text();
+    const titles = [...html.matchAll(/<h5[^>]*class="fw-bold text-dark"[^>]*>([\s\S]*?)<\/h5>/g)]
+      .map((m) =>
+        m[1]
+          .replace(/<[^>]+>/g, "")
+          .replace(/&#0?39;/g, "'")
+          .replace(/&rsquo;/g, "’")
+          .replace(/&amp;/g, "&")
+          .replace(/\s+/g, " ")
+          .trim(),
+      )
+      .filter(Boolean)
+      .slice(0, 8);
+    return titles.length ? titles.map((t) => `• ${t}`).join("\n") : "";
+  } catch {
+    return "";
+  }
+};
+
+const buildSystemPrompt = (liveNews = "") => {
   const now = new Date();
   const dateStr = now.toLocaleDateString("fr-FR", {
     weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Africa/Abidjan",
