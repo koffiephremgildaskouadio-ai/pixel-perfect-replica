@@ -148,7 +148,10 @@ serve(async (req) => {
       "google/gemini-2.5-flash-lite",
     ];
 
-    const SYSTEM_PROMPT = buildSystemPrompt();
+    const lastUser = [...safeMessages].reverse().find((m: any) => m.role === "user");
+    const lastText = typeof lastUser?.content === "string" ? lastUser.content.toLowerCase() : "";
+    const wantsNews = /actualit|news|nouvelle|ccjy|mairie|yopougon|événement|evenement|info/.test(lastText);
+    const SYSTEM_PROMPT = buildSystemPrompt(wantsNews ? await fetchCcjyHeadlines() : "");
     let response: Response | null = null;
     let lastErr = "";
     for (const model of MODELS) {
