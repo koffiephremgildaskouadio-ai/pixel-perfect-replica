@@ -6,8 +6,89 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const INVESTITURE_IMAGE = "https://districtcitenovalim-cie.lovable.app/images/investiture_event.jpg";
-const EVENT_DATE = new Date("2026-05-03T14:00:00+00:00");
+const CCJY_BASE = "https://ccj-yop.org";
+const SRC_CCJY = "CCJY — ccj-yop.org";
+const SRC_AI = "IA District Novalim-CIE";
+
+const decode = (s: string) =>
+  s
+    .replace(/&#0?39;/g, "'")
+    .replace(/&rsquo;/g, "’")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&nbsp;/g, " ")
+    .replace(/&laquo;/g, "«")
+    .replace(/&raquo;/g, "»")
+    .replace(/<[^>]+>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+type Scraped = { title: string; content: string; image: string | null; link: string | null };
+
+async function scrapeCcjy(): Promise<Scraped[]> {
+  const res = await fetch(CCJY_BASE, { headers: { "User-Agent": "Mozilla/5.0 DistrictNovalimBot" } });
+  if (!res.ok) return [];
+  const html = await res.text();
+  const section = html.split("<!-- ACTUALITÉS -->")[1] ?? html;
+  const cards = section.split('class="col-md-6 col-xl-3"').slice(1);
+  const out: Scraped[] = [];
+  for (const card of cards.slice(0, 8)) {
+    const img = card.match(/src="(uploads\/actualites\/[^"]+)"/)?.[1] ?? null;
+    const title = decode(card.match(/<h5[^>]*>([\s\S]*?)<\/h5>/)?.[1] ?? "");
+    const excerpt = decode(card.match(/<p class="text-muted[^"]*">([\s\S]*?)<\/p>/)?.[1] ?? "");
+    const href = card.match(/href="(actualite\/[^"]+)"/)?.[1] ?? null;
+    if (!title) continue;
+    out.push({
+      title,
+      content: excerpt,
+      image: img ? `${CCJY_BASE}/${img}` : null,
+      link: href ? `${CCJY_BASE}/${href}` : null,
+    });
+  }
+  return out;
+}
+
+async function fetchDetail(url: string): Promise<string | null> {
+  try {
+    const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 DistrictNovalimBot" } });
+    if (!r.ok) return null;
+    const h = await r.text();
+    const body = h.match(/<article[\s\S]*?<\/article>/)?.[0] ?? h.match(/<div class="card-body[\s\S]*?<\/div>/)?.[0];
+    if (!body) return null;
+    const txt = decode(body);
+    return txt.length > 120 ? txt.slice(0, 1800) : null;
+  } catch {
+    return null;
+  }
+}
+
+const NEWS_MODELS = [
+  "google/gemini-3.6-flash",
+  "google/gemini-3-flash-preview",
+  "google/gemini-2.5-flash",
+  "google/gemini-2.5-flash-lite",
+  "openai/gpt-5-mini",
+];
+
+async function askAI(key: string, prompt: string): Promise<string | null> {
+  for (const model of NEWS_MODELS) {
+    try {
+      const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ model, messages: [{ role: "user", content: prompt }] }),
+      });
+      if (r.ok) {
+        const d = await r.json();
+        return d.choices?.[0]?.message?.content ?? null;
+      }
+      console.warn("news model failed", model, r.status);
+    } catch (e) {
+      console.warn("news model error", model, e instanceof Error ? e.message : e);
+    }
+  }
+  return null;
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -16,234 +97,82 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if (!LOVABLE_API_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      throw new Error("Missing env vars");
-    }
+    if (!LOVABLE_API_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error("Missing env vars");
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    const today = new Date();
-    const daysUntilEvent = Math.ceil((EVENT_DATE.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
-    // === PRIORITY: Investiture event communication (today and tomorrow only) ===
-    // Saturday May 2 2026 = J-1, Sunday May 3 2026 = J0
-    const isPriorityWindow = daysUntilEvent >= 0 && daysUntilEvent <= 1;
-
-    if (isPriorityWindow) {
-      // Check if we already pushed an investiture post today
-      const startOfDay = new Date(today);
-      startOfDay.setHours(0, 0, 0, 0);
-      const { data: existing } = await supabase
-        .from("actualites")
-        .select("id")
-        .eq("type", "event")
-        .gte("created_at", startOfDay.toISOString())
-        .ilike("title", "%investiture%");
-
-      if (!existing || existing.length < 2) {
-        const investiturePosts = daysUntilEvent === 1 ? [
-          {
-            title: "🔥 J-1 — Demain, Cérémonie Historique d'Investiture des Présidents !",
-            content: `Chers membres, chers partenaires, chères populations du District Cité Novalim-CIE,
-
-C'est avec une immense fierté et une joie profonde que nous vous annonçons que demain, **Dimanche 03 Mai 2026 à partir de 14H00**, se tiendra la **Cérémonie d'Investiture Conjointe** des Présidents des Districts CITÉ NOVALIM-CIE et FRANCE-VILLE.
-
-📍 **Lieu : Terrain sable, ruelle du carrefour maquis (Yopougon)**
-
-🎩 Sous le **Haut Patronage** de l'Honorable **Adama BICTOGO**, Député-Maire de Yopougon
-🌟 Sous la **Présidence** de M. **Assim SABA**, Président du CCJY
-💎 Sous le **Parrainage** de M. **KARIMU Waidi Abiola**, PDG de **JUMBO STORE CI**
-
-Seront officiellement investis :
-• **M. Kouadio Koffi Éphrem Gildas** — Président du District Cité Novalim-CIE
-• **M. Bamba Adama** — Président du District Franceville
-
-📞 Infoline : 07 07 11 73 20 / 07 99 04 38 56
-
-Mobilisons-nous massivement ! Votre présence est notre force. À demain pour écrire ensemble une nouvelle page de l'histoire de la jeunesse yopougonnaise. 🇨🇮`,
-            type: "event",
-            image_url: INVESTITURE_IMAGE,
-          },
-          {
-            title: "📣 Invitation Officielle — Investiture des Présidents (Demain 14H)",
-            content: `À tous les habitants du District Cité Novalim-CIE, aux jeunes de Yopougon, aux partenaires institutionnels et aux amis du district :
-
-**Vous êtes cordialement invités** à la cérémonie d'investiture conjointe de nos Présidents, demain **Dimanche 03 Mai 2026 dès 14H00**, au Terrain sable (ruelle du carrefour maquis).
-
-🎉 Au programme :
-• Discours officiels des autorités
-• Investiture solennelle des Présidents
-• Présentation des bureaux exécutifs
-• Animations culturelles et prestations d'artistes
-• Cocktail et moments d'échange
-
-Tenue recommandée : élégante. Venez nombreux, venez en famille !
-
-Avec nos remerciements anticipés.
-La Commission d'Organisation.`,
-            type: "event",
-            image_url: INVESTITURE_IMAGE,
-          },
-        ] : [
-          {
-            title: "🎊 C'EST AUJOURD'HUI ! Investiture des Présidents — Rendez-vous à 14H !",
-            content: `Le grand jour est arrivé ! 🇨🇮
-
-**AUJOURD'HUI Dimanche 03 Mai 2026, dès 14H00**, le District Cité Novalim-CIE et le District Franceville célèbrent l'investiture officielle de leurs Présidents.
-
-📍 **Terrain sable, ruelle du carrefour maquis (Yopougon)**
-
-Une journée historique pour la jeunesse yopougonnaise, sous le Haut Patronage du Député-Maire **Adama BICTOGO**, présidée par M. **Assim SABA** (Président du CCJY) et parrainée par M. **KARIMU Waidi Abiola** (PDG de JUMBO STORE CI).
-
-🎤 Investiture de :
-• **M. Kouadio Koffi Éphrem Gildas** — Président du District Cité Novalim-CIE
-• **M. Bamba Adama** — Président du District Franceville
-
-Soyons tous présents pour soutenir nos leaders ! 💪
-
-📞 Infoline : 07 07 11 73 20 / 07 99 04 38 56`,
-            type: "event",
-            image_url: INVESTITURE_IMAGE,
-          },
-          {
-            title: "📸 Investiture en Direct — Suivez l'événement aujourd'hui !",
-            content: `Chers membres et sympathisants,
-
-La cérémonie d'investiture commence dans quelques heures. Si vous ne pouvez pas être physiquement présents, **suivez l'événement en direct** sur notre page Facebook officielle : **District Cité Novalim-CIE**.
-
-Photos, vidéos et live seront publiés tout au long de la journée. Partagez massivement, taguez vos amis, montrons la force et l'unité du District Cité Novalim-CIE !
-
-#InvestitureNovalim2026 #JeunesseYopougon #CCJY #DistrictCiteNovalimCIE`,
-            type: "event",
-            image_url: INVESTITURE_IMAGE,
-          },
-        ];
-
-        for (const post of investiturePosts) {
-          await supabase.from("actualites").insert({
-            ...post,
-            source: "Commission d'Organisation — Investiture 2026",
-            media: [{ type: "image", url: INVESTITURE_IMAGE }],
-          });
-        }
+    // 1) Sources officielles : actualités réelles du CCJY (avec vraies images)
+    const scraped = await scrapeCcjy();
+    const enriched: Scraped[] = [];
+    for (const item of scraped.slice(0, 6)) {
+      let content = item.content;
+      if (item.link) {
+        const full = await fetchDetail(item.link);
+        if (full) content = full;
       }
+      enriched.push({ ...item, content });
     }
 
-    // === Daily AI generic posts (1 only to keep feed fresh, not noisy) ===
+    // 2) Publication IA du jour (contexte local : Mairie de Yopougon, ministères)
     const dayNames = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
     const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+    const today = new Date();
     const dateStr = `${dayNames[today.getDay()]} ${today.getDate()} ${monthNames[today.getMonth()]} ${today.getFullYear()}`;
 
-    // Skip generic AI posts during priority window to keep focus on event
-    if (isPriorityWindow) {
-      return new Response(JSON.stringify({ success: true, mode: "investiture_priority", days: daysUntilEvent }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     const prompt = `Tu es le community manager du District Cité Novalim-CIE (CCJY, Yopougon, Côte d'Ivoire).
-Aujourd'hui : ${dateStr}. Génère EXACTEMENT 1 publication COURTE et percutante pour la jeunesse.
-Ancre la publication dans la vie locale de Yopougon : actions de la Mairie de Yopougon, du Conseil Communal des Jeunes de Yopougon (CCJY), festivités de l'indépendance (7 août), civisme, entrepreneuriat et engagement des jeunes du district.
+Aujourd'hui : ${dateStr}.
+Contexte des actualités réelles du CCJY à ta disposition :
+${enriched.map((e, i) => `${i + 1}. ${e.title}`).join("\n") || "(aucune)"}
+
+Génère EXACTEMENT 1 publication COURTE et percutante pour la jeunesse du district, ancrée dans la vie locale de Yopougon : Mairie de Yopougon, CCJY, Ministère de la Promotion de la Jeunesse et de l'Emploi, Ministère de l'Hydraulique/Assainissement/Salubrité, Ministère de l'Intérieur (civisme, sécurité, état civil).
 N'invente JAMAIS de date précise, de communiqué officiel ni de nom de personne.
 Contraintes STRICTES :
 - title : max 10 mots, accrocheur (1 emoji max).
-- content : 2 à 3 phrases MAXIMUM, directes, motivantes, sans blabla, sans salutations.
-- image_prompt : description courte en anglais.
-Format JSON: [{"title":"...","content":"...","type":"ai_daily","image_prompt":"..."}]
+- content : 2 à 3 phrases MAXIMUM, directes, motivantes, sans salutations.
+Format JSON: [{"title":"...","content":"...","type":"ai_daily"}]
 Réponds UNIQUEMENT avec le JSON.`;
 
-    const NEWS_MODELS = [
-      "google/gemini-3.6-flash",
-      "google/gemini-3-flash-preview",
-      "google/gemini-2.5-flash",
-      "google/gemini-2.5-flash-lite",
-      "openai/gpt-5-mini",
-    ];
-
-    let response: Response | null = null;
-    let lastErr = "";
-    for (const model of NEWS_MODELS) {
+    let aiPosts: any[] = [];
+    const raw = await askAI(LOVABLE_API_KEY, prompt);
+    if (raw) {
       try {
-        const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model,
-            messages: [{ role: "user", content: prompt }],
-          }),
-        });
-        if (r.ok) { response = r; break; }
-        lastErr = `${model}: ${r.status}`;
-        console.warn("news model failed", lastErr);
-      } catch (err) {
-        lastErr = `${model}: ${err instanceof Error ? err.message : "fetch"}`;
+        aiPosts = JSON.parse(raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim());
+      } catch {
+        aiPosts = [];
       }
     }
-    if (!response) {
-      console.error("All news models failed:", lastErr);
-      return new Response(JSON.stringify({ success: false, error: "AI gateway indisponible", detail: lastErr }), {
-        status: 200,
+
+    const rows = [
+      ...enriched.map((e) => ({
+        title: e.title.slice(0, 200),
+        content: `${e.content}${e.link ? `\n\n🔗 Lire l'article officiel : ${e.link}` : ""}`,
+        source: SRC_CCJY,
+        type: "ccjy",
+        image_url: e.image,
+        media: e.image ? [{ type: "image", url: e.image }] : [],
+      })),
+      ...aiPosts.slice(0, 1).map((a: any) => ({
+        title: String(a.title || "").slice(0, 200),
+        content: String(a.content || ""),
+        source: SRC_AI,
+        type: "ai_daily",
+        image_url: null,
+        media: [],
+      })),
+    ].filter((r) => r.title && r.content);
+
+    if (rows.length === 0) {
+      return new Response(JSON.stringify({ success: false, error: "Aucune source disponible" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const data = await response.json();
-    let raw = data.choices?.[0]?.message?.content || "[]";
-    raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-    const articles = JSON.parse(raw);
+    // 3) Purge des anciennes publications automatiques AVANT insertion (évite doublons / surcharge serveur)
+    await supabase.from("actualites").delete().in("source", [SRC_CCJY, SRC_AI]);
 
-    for (const article of articles) {
-      let imageUrl: string | null = null;
-      if (article.image_prompt) {
-        try {
-          const imgResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-            method: "POST",
-            headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-              model: "google/gemini-2.5-flash-image",
-              messages: [{ role: "user", content: article.image_prompt }],
-              modalities: ["image", "text"],
-            }),
-          });
-          if (imgResponse.ok) {
-            const imgData = await imgResponse.json();
-            const base64Url = imgData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-            if (base64Url) {
-              const base64Data = base64Url.split(",")[1];
-              const binaryData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-              const filename = `news/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
-              const { error: uploadError } = await supabase.storage
-                .from("member-photos")
-                .upload(filename, binaryData, { contentType: "image/png" });
-              if (!uploadError) {
-                const { data: urlData } = supabase.storage.from("member-photos").getPublicUrl(filename);
-                imageUrl = urlData.publicUrl;
-              }
-            }
-          }
-        } catch (imgErr) { console.error("img fail", imgErr); }
-      }
+    await supabase.from("actualites").insert(rows);
 
-      await supabase.from("actualites").insert({
-        title: article.title,
-        content: article.content,
-        source: "IA District Novalim-CIE",
-        type: article.type || "ai_daily",
-        image_url: imageUrl,
-      });
-    }
-
-    // === Rotation: garder seulement les 30 actualités IA les plus récentes ===
-    const { data: aiPosts } = await supabase
-      .from("actualites")
-      .select("id, created_at")
-      .eq("source", "IA District Novalim-CIE")
-      .order("created_at", { ascending: false });
-    if (aiPosts && aiPosts.length > 30) {
-      const toDelete = aiPosts.slice(30).map((p: any) => p.id);
-      await supabase.from("actualites").delete().in("id", toDelete);
-    }
-
-    return new Response(JSON.stringify({ success: true, count: articles.length }), {
+    return new Response(JSON.stringify({ success: true, count: rows.length, ccjy: enriched.length }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

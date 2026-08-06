@@ -11,7 +11,37 @@ const json = (body: Record<string, unknown>, status = 200) =>
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
-const buildSystemPrompt = () => {
+// Récupère les vraies actualités publiées sur le site officiel du CCJY
+const fetchCcjyHeadlines = async (): Promise<string> => {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 6000);
+    const r = await fetch("https://ccj-yop.org", {
+      signal: ctrl.signal,
+      headers: { "User-Agent": "Mozilla/5.0 DistrictNovalimBot" },
+    });
+    clearTimeout(t);
+    if (!r.ok) return "";
+    const html = await r.text();
+    const titles = [...html.matchAll(/<h5[^>]*class="fw-bold text-dark"[^>]*>([\s\S]*?)<\/h5>/g)]
+      .map((m) =>
+        m[1]
+          .replace(/<[^>]+>/g, "")
+          .replace(/&#0?39;/g, "'")
+          .replace(/&rsquo;/g, "’")
+          .replace(/&amp;/g, "&")
+          .replace(/\s+/g, " ")
+          .trim(),
+      )
+      .filter(Boolean)
+      .slice(0, 8);
+    return titles.length ? titles.map((t) => `• ${t}`).join("\n") : "";
+  } catch {
+    return "";
+  }
+};
+
+const buildSystemPrompt = (liveNews = "") => {
   const now = new Date();
   const dateStr = now.toLocaleDateString("fr-FR", {
     weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Africa/Abidjan",
@@ -34,7 +64,9 @@ ACTUALITÉ LOCALE À SUIVRE (Yopougon) :
   • Mairie de Yopougon : page Facebook officielle et site de la commune.
   • Conseil Communal des Jeunes de Yopougon (CCJY) : page Facebook officielle du CCJY.
   • Page Facebook du District Cité Novalim-CIE.
-- Tu n'as pas d'accès direct à internet : donne le contexte connu, puis invite à consulter ces pages pour l'info la plus fraîche. N'invente jamais une date, un communiqué ou un nom.
+  • Ministère de la Promotion de la Jeunesse et de l'Emploi, Ministère de l'Hydraulique/Assainissement/Salubrité, Ministère de l'Intérieur.
+${liveNews ? `\nACTUALITÉS RÉELLES PUBLIÉES AUJOURD'HUI SUR ccj-yop.org (source vérifiée, utilise-les en priorité) :\n${liveNews}\n` : "- Aucune actualité récupérée à l'instant : invite à consulter ccj-yop.org."}
+- N'invente jamais une date, un communiqué ou un nom qui ne figure pas ci-dessus.
 
 CONTEXTE DISTRICT (à utiliser uniquement quand la question porte dessus) :
 - Président : Kouadio Koffi Ephrem Gildas (0789536318). Bureau : 27 membres élus, 6 cabinet, 4 coordonnateurs de zone.
@@ -116,7 +148,10 @@ serve(async (req) => {
       "google/gemini-2.5-flash-lite",
     ];
 
-    const SYSTEM_PROMPT = buildSystemPrompt();
+    const lastUser = [...safeMessages].reverse().find((m: any) => m.role === "user");
+    const lastText = typeof lastUser?.content === "string" ? lastUser.content.toLowerCase() : "";
+    const wantsNews = /actualit|news|nouvelle|ccjy|mairie|yopougon|événement|evenement|info/.test(lastText);
+    const SYSTEM_PROMPT = buildSystemPrompt(wantsNews ? await fetchCcjyHeadlines() : "");
     let response: Response | null = null;
     let lastErr = "";
     for (const model of MODELS) {

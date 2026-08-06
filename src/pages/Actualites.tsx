@@ -51,22 +51,24 @@ const Actualites = () => {
 
   return (
     <div className="pt-16"><SEO title="Actualités du District Novalim-CIE" description="Toutes les actualités officielles du District Cité Novalim-CIE : événements, communiqués, activités du CCJY Zone 7 Yopougon." path="/actualites" />
-      <section className="py-16 lg:py-24 bg-secondary/50">
-        <div className="container">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-6 transition-colors">
+      <section className="relative py-16 lg:py-24 bg-navy text-navy-foreground overflow-hidden">
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_20%_20%,hsl(var(--primary))_0%,transparent_45%),radial-gradient(circle_at_80%_0%,hsl(var(--accent))_0%,transparent_40%)]" />
+        <div className="container relative">
+          <Link to="/" className="inline-flex items-center gap-2 text-sm text-navy-foreground/70 hover:text-navy-foreground mb-6 transition-colors">
             <ArrowLeft className="w-4 h-4" /> Retour à l'accueil
           </Link>
           <ScrollReveal className="text-center max-w-2xl mx-auto">
-            <span className="text-sm font-semibold text-primary tracking-wide uppercase">Informations</span>
-            <h1 className="mt-3 text-3xl lg:text-5xl font-display font-bold text-foreground leading-tight">
+            <span className="text-sm font-semibold tracking-wide uppercase text-navy-foreground/70">Informations vérifiées</span>
+            <h1 className="mt-3 text-3xl lg:text-5xl font-display font-bold leading-tight">
               Fil d'Actualités
             </h1>
-            <p className="mt-4 text-muted-foreground leading-relaxed">
-              Messages quotidiens, événements, informations du ministère, du CCJY et de la Mairie de Yopougon.
+            <p className="mt-4 text-navy-foreground/80 leading-relaxed">
+              Actualités officielles du CCJY (ccj-yop.org), de la Mairie de Yopougon et des ministères, mises à jour automatiquement chaque jour.
             </p>
           </ScrollReveal>
         </div>
       </section>
+
 
       <section className="py-12 lg:py-20">
         <div className="container max-w-3xl space-y-6">
@@ -96,7 +98,7 @@ const Actualites = () => {
 
             return (
               <ScrollReveal key={article.id} delay={i * 60}>
-                <article className="rounded-2xl bg-card border border-border/50 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                <article className="rounded-3xl bg-card border border-border/60 shadow-sm overflow-hidden hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
                   {fallbackMedia.length > 0 && (
                     <div className={`grid gap-1 bg-secondary ${fallbackMedia.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
                       {fallbackMedia.map((m, idx) => (
