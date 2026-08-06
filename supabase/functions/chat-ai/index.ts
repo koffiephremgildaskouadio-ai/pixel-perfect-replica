@@ -64,7 +64,9 @@ ACTUALITÉ LOCALE À SUIVRE (Yopougon) :
   • Mairie de Yopougon : page Facebook officielle et site de la commune.
   • Conseil Communal des Jeunes de Yopougon (CCJY) : page Facebook officielle du CCJY.
   • Page Facebook du District Cité Novalim-CIE.
-- Tu n'as pas d'accès direct à internet : donne le contexte connu, puis invite à consulter ces pages pour l'info la plus fraîche. N'invente jamais une date, un communiqué ou un nom.
+  • Ministère de la Promotion de la Jeunesse et de l'Emploi, Ministère de l'Hydraulique/Assainissement/Salubrité, Ministère de l'Intérieur.
+${liveNews ? `\nACTUALITÉS RÉELLES PUBLIÉES AUJOURD'HUI SUR ccj-yop.org (source vérifiée, utilise-les en priorité) :\n${liveNews}\n` : "- Aucune actualité récupérée à l'instant : invite à consulter ccj-yop.org."}
+- N'invente jamais une date, un communiqué ou un nom qui ne figure pas ci-dessus.
 
 CONTEXTE DISTRICT (à utiliser uniquement quand la question porte dessus) :
 - Président : Kouadio Koffi Ephrem Gildas (0789536318). Bureau : 27 membres élus, 6 cabinet, 4 coordonnateurs de zone.
