@@ -98,7 +98,7 @@ const Actualites = () => {
 
             return (
               <ScrollReveal key={article.id} delay={i * 60}>
-                <article className="rounded-2xl bg-card border border-border/50 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                <article className="rounded-3xl bg-card border border-border/60 shadow-sm overflow-hidden hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
                   {fallbackMedia.length > 0 && (
                     <div className={`grid gap-1 bg-secondary ${fallbackMedia.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
                       {fallbackMedia.map((m, idx) => (
