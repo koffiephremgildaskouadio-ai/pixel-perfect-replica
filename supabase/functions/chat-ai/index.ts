@@ -140,13 +140,14 @@ serve(async (req) => {
     // Modèles ultra-performants avec fallback intelligent (catalogue Lovable AI Gateway validé)
     const MODELS = [
       "google/gemini-3.6-flash",
-      "google/gemini-3-flash-preview",
+      "openai/gpt-5.6-terra",
       "google/gemini-3.5-flash",
       "openai/gpt-5.4",
       "google/gemini-2.5-flash",
       "openai/gpt-5-mini",
       "google/gemini-2.5-flash-lite",
     ];
+
 
     const lastUser = [...safeMessages].reverse().find((m: any) => m.role === "user");
     const lastText = typeof lastUser?.content === "string" ? lastUser.content.toLowerCase() : "";
