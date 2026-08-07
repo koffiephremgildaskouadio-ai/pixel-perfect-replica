@@ -71,7 +71,7 @@ const Bureau = () => {
     queryKey: ["bureau-members"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("members")
+        .from("members_public")
         .select("id, nom, prenoms, poste, member_number, category, photo_url")
         .in("category", ["bureau", "cabinet", "coordonnateur", "commission"])
         .eq("is_active", true)

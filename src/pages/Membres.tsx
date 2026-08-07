@@ -95,7 +95,7 @@ const Membres = () => {
     queryKey: ["all-members", search],
     queryFn: async () => {
       let query = supabase
-        .from("members")
+        .from("members_public")
         .select("*")
         .eq("is_active", true)
         .order("member_number");
