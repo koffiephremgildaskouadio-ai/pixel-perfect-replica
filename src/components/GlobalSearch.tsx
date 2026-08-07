@@ -40,7 +40,7 @@ export const GlobalSearch = () => {
     if (!open) return;
     setLoading(true);
     Promise.all([
-      supabase.from("members").select("id,nom,prenoms,poste,member_number").limit(200),
+      supabase.from("members_public").select("id,nom,prenoms,poste,member_number").limit(200),
       supabase.from("actualites").select("id,title,content").order("created_at", { ascending: false }).limit(50),
       supabase.from("portals").select("id,slug,title,subtitle").limit(50),
       supabase.from("directory_entries").select("id,name,category,address").limit(100),

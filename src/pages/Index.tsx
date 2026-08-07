@@ -104,7 +104,7 @@ const Index = () => {
     queryKey: ["home-president"],
     queryFn: async () => {
       const { data } = await supabase
-        .from("members")
+        .from("members_public")
         .select("nom, prenoms, poste, photo_url, bio")
         .ilike("poste", "%président%")
         .limit(5);

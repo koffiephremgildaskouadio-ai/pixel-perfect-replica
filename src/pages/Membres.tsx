@@ -95,7 +95,7 @@ const Membres = () => {
     queryKey: ["all-members", search],
     queryFn: async () => {
       let query = supabase
-        .from("members")
+        .from("members_public")
         .select("*")
         .eq("is_active", true)
         .order("member_number");
@@ -109,8 +109,20 @@ const Membres = () => {
     enabled: !!session,
   });
 
-  // Find the current user's member card
-  const myCard = members?.find((m) => m.user_id === session?.user?.id);
+  // Fiche personnelle complète (accessible uniquement à son propriétaire)
+  const { data: myCard } = useQuery({
+    queryKey: ["my-member-card", session?.user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("members")
+        .select("*")
+        .eq("user_id", session!.user.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!session?.user?.id,
+  });
+
 
   if (loading) return null;
 

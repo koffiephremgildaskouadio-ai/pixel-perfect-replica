@@ -51,7 +51,7 @@ export const PortalsManager = () => {
     setLoading(true);
     const [{ data: p }, { data: m }] = await Promise.all([
       supabase.from("portals" as any).select("*").order("display_order"),
-      supabase.from("members").select("id,nom,prenoms").order("nom"),
+      supabase.from("members_public").select("id,nom,prenoms").order("nom"),
     ]);
     setPortals((p as any[]) ?? []);
     setMembers((m as Member[]) ?? []);

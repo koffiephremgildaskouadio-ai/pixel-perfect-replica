@@ -58,8 +58,8 @@ const Portail = () => {
     const ids = Array.isArray(p.member_ids) ? p.member_ids : [];
     if (ids.length) {
       const { data: ms } = await supabase
-        .from("members")
-        .select("id,member_number,nom,prenoms,poste,photo_url,phone,category,cahier_charges")
+        .from("members_public")
+        .select("id,member_number,nom,prenoms,poste,photo_url,category,cahier_charges")
         .in("id", ids);
       setMembers((ms as Member[]) ?? []);
     } else {

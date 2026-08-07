@@ -12,7 +12,7 @@ const FranceVille = () => {
     queryKey: ["franceville-members"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("members")
+        .from("members_public")
         .select("id, nom, prenoms, poste, member_number, photo_url, category")
         .eq("district", "France-ville")
         .eq("is_active", true)
