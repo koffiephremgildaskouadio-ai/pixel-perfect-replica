@@ -392,7 +392,69 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      members_public: {
+        Row: {
+          bio: string | null
+          cahier_charges: string | null
+          category: string | null
+          created_at: string | null
+          district: string | null
+          facebook: string | null
+          id: string | null
+          is_active: boolean | null
+          linkedin: string | null
+          member_number: string | null
+          nom: string | null
+          photo_url: string | null
+          poste: string | null
+          prenoms: string | null
+          quartier: string | null
+          skills: string[] | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          bio?: string | null
+          cahier_charges?: string | null
+          category?: string | null
+          created_at?: string | null
+          district?: string | null
+          facebook?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          linkedin?: string | null
+          member_number?: string | null
+          nom?: string | null
+          photo_url?: string | null
+          poste?: string | null
+          prenoms?: string | null
+          quartier?: string | null
+          skills?: string[] | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          bio?: string | null
+          cahier_charges?: string | null
+          category?: string | null
+          created_at?: string | null
+          district?: string | null
+          facebook?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          linkedin?: string | null
+          member_number?: string | null
+          nom?: string | null
+          photo_url?: string | null
+          poste?: string | null
+          prenoms?: string | null
+          quartier?: string | null
+          skills?: string[] | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
