@@ -172,6 +172,7 @@ const Membres = () => {
 
   return (
     <div className="pt-16">
+      <PortalNav activeSlug="membres" />
       <section className="py-16 lg:py-24 bg-secondary/50">
         <div className="container">
           <ScrollReveal className="text-center max-w-2xl mx-auto">

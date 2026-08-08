@@ -21,6 +21,7 @@ const Admin = lazy(() => import("./pages/Admin.tsx"));
 const Annuaire = lazy(() => import("./pages/Annuaire.tsx"));
 const FranceVille = lazy(() => import("./pages/FranceVille.tsx"));
 const Portail = lazy(() => import("./pages/Portail.tsx"));
+const Portails = lazy(() => import("./pages/Portails.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
 const queryClient = new QueryClient();
@@ -51,6 +52,7 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/a-propos" element={<APropos />} />
             <Route path="/france-ville" element={<FranceVille />} />
+            <Route path="/portails" element={<Portails />} />
             <Route path="/portail/:slug" element={<Portail />} />
             <Route path="/conference" element={<Conference />} />
             <Route path="/admin" element={<Admin />} />
