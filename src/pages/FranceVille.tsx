@@ -1,5 +1,6 @@
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { SEO } from "@/components/SEO";
+import { PortalNav } from "@/components/PortalNav";
 import { ArrowLeft, User as UserIcon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +25,7 @@ const FranceVille = () => {
 
   return (
     <div className="pt-16"><SEO title="Cité France-Ville — District Novalim-CIE" description="Présentation de la Cité France-Ville, membre du District Cité Novalim-CIE (Zone 7, CCJY Yopougon)." path="/france-ville" />
+      <PortalNav activeSlug="france-ville" />
       <section className="py-16 lg:py-24 bg-secondary/50">
         <div className="container">
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-6 transition-colors">

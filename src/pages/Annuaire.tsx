@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { SEO } from "@/components/SEO";
+import { PortalNav } from "@/components/PortalNav";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ScrollReveal } from "@/components/ScrollReveal";
@@ -100,6 +101,7 @@ const Annuaire = () => {
 
   return (
     <div className="pt-16"><SEO title="Annuaire local — Novalim-City Yopougon" description="Annuaire des commerces, santé, pharmacies, restauration, éducation et services du district Novalim-City à Yopougon." path="/annuaire" />
+      <PortalNav activeSlug="annuaire" />
       <section className="py-12 lg:py-16 bg-secondary/50">
         <div className="container">
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-4 transition-colors">

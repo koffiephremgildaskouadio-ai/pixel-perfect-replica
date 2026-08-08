@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { PortalNav } from "@/components/PortalNav";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -166,6 +167,7 @@ const Conference = () => {
 
   return (
     <div className="pt-16 min-h-screen bg-gradient-to-b from-secondary/30 to-background">
+      <PortalNav activeSlug="conference" />
       <div className="container max-w-3xl py-10 lg:py-16">
         <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-8 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Retour à l'accueil
