@@ -100,6 +100,18 @@ const Index = () => {
     },
   });
 
+  const { data: portals } = useQuery({
+    queryKey: ["home-portals"],
+    queryFn: async () => {
+      const { data } = await (supabase as any)
+        .from("portals")
+        .select("id, slug, title, subtitle, color, logo_url, cover_url")
+        .eq("is_published", true)
+        .order("display_order", { ascending: true });
+      return (data ?? []) as any[];
+    },
+  });
+
   const { data: president } = useQuery({
     queryKey: ["home-president"],
     queryFn: async () => {
@@ -111,6 +123,7 @@ const Index = () => {
       return data?.find((m) => /^pr[ée]sident/i.test(m.poste ?? "")) ?? data?.[0] ?? null;
     },
   });
+
 
   useEffect(() => {
     const visited = sessionStorage.getItem("novalim_visitor");
@@ -217,6 +230,57 @@ const Index = () => {
                 <span className="text-xs font-medium text-center underline underline-offset-4">Devenir partenaire</span>
               </Link>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3bis. PORTAILS */}
+      <section className="py-16 lg:py-20 bg-background">
+        <div className="container px-3 sm:px-4">
+          <ScrollReveal className="text-center max-w-xl mx-auto mb-10">
+            <span className="text-sm font-semibold text-accent tracking-wide uppercase">Nos portails</span>
+            <h2 className="mt-3 text-3xl lg:text-4xl font-display font-bold text-foreground leading-tight">
+              Accédez à chaque espace du district
+            </h2>
+            <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-gradient-to-r from-primary to-accent" />
+          </ScrollReveal>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            {[
+              { slug: "france-ville", title: "District France-Ville", subtitle: "Bureau & membres", logo_url: logoFranceVille, path: "/france-ville" },
+              { slug: "bureau", title: "Bureau & Cabinet", subtitle: "Organisation du district", logo_url: logo, path: "/bureau" },
+              { slug: "annuaire", title: "Annuaire", subtitle: "Partenaires & services", logo_url: logoNova, path: "/annuaire" },
+              { slug: "conference", title: "Conférences", subtitle: "Réunions en ligne", logo_url: logoCcjy, path: "/conference" },
+              ...(portals ?? []).map((p) => ({
+                slug: p.slug,
+                title: p.title,
+                subtitle: p.subtitle ?? "Portail du district",
+                logo_url: p.logo_url || p.cover_url || logo,
+                path: `/portail/${p.slug}`,
+              })),
+            ].map((p, i) => (
+              <ScrollReveal key={p.slug} delay={i * 70}>
+                <Link
+                  to={p.path}
+                  className="group relative block aspect-square rounded-3xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-[0_24px_50px_-24px_hsl(var(--primary)/0.55)] hover:-translate-y-1 transition-all duration-300"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/10" />
+                  <div className="relative h-full flex flex-col items-center justify-center text-center gap-3 p-4">
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-secondary ring-1 ring-border overflow-hidden flex items-center justify-center">
+                      <img src={p.logo_url} alt={p.title} className="w-full h-full object-cover" loading="lazy" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm md:text-base font-display font-bold text-foreground leading-tight">{p.title}</h3>
+                      <p className="mt-1 text-[11px] md:text-xs text-muted-foreground line-clamp-2">{p.subtitle}</p>
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-accent opacity-0 group-hover:opacity-100 transition-opacity">
+                      Ouvrir <ArrowRight className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
+                  <span className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary via-accent to-primary scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300" />
+                </Link>
+              </ScrollReveal>
+            ))}
           </div>
         </div>
       </section>
