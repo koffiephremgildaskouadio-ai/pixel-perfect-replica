@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { SEO } from "@/components/SEO";
+import { PortalNav } from "@/components/PortalNav";
 import { supabase } from "@/integrations/supabase/client";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -56,6 +57,7 @@ const Actualites = () => {
 
   return (
     <div className="pt-16"><SEO title="Actualités du District Novalim-CIE" description="Toutes les actualités officielles du District Cité Novalim-CIE : événements, communiqués, activités du CCJY Zone 7 Yopougon." path="/actualites" />
+      <PortalNav activeSlug="actualites" />
       <section className="relative py-16 lg:py-24 bg-navy text-navy-foreground overflow-hidden">
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_20%_20%,hsl(var(--primary))_0%,transparent_45%),radial-gradient(circle_at_80%_0%,hsl(var(--accent))_0%,transparent_40%)]" />
         <div className="container relative">

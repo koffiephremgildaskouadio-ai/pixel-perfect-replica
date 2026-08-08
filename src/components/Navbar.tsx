@@ -35,6 +35,7 @@ const navItems: NavItem[] = [
       { label: "Annuaire des partenaires", path: "/annuaire" },
     ],
   },
+  { label: "Portails", path: "/portails" },
   { label: "Actualités", path: "/actualites" },
   { label: "Contact", path: "/#contact" },
 ];

@@ -6,6 +6,7 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import { VisitorModal } from "@/components/VisitorModal";
 import { SEO } from "@/components/SEO";
 import { SiteFooter } from "@/components/SiteFooter";
+import { STATIC_PORTALS, mapDynamicPortal } from "@/lib/portals";
 import {
   ArrowRight, ChevronLeft, ChevronRight, GraduationCap, Briefcase,
   CalendarDays, MapPin, Quote, Handshake,
@@ -247,17 +248,8 @@ const Index = () => {
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {[
-              { slug: "france-ville", title: "District France-Ville", subtitle: "Bureau & membres", logo_url: logoFranceVille, path: "/france-ville" },
-              { slug: "bureau", title: "Bureau & Cabinet", subtitle: "Organisation du district", logo_url: logo, path: "/bureau" },
-              { slug: "annuaire", title: "Annuaire", subtitle: "Partenaires & services", logo_url: logoNova, path: "/annuaire" },
-              { slug: "conference", title: "Conférences", subtitle: "Réunions en ligne", logo_url: logoCcjy, path: "/conference" },
-              ...(portals ?? []).map((p) => ({
-                slug: p.slug,
-                title: p.title,
-                subtitle: p.subtitle ?? "Portail du district",
-                logo_url: p.logo_url || p.cover_url || logo,
-                path: `/portail/${p.slug}`,
-              })),
+              ...STATIC_PORTALS,
+              ...((portals ?? []).map((p: any) => mapDynamicPortal(p))),
             ].map((p, i) => (
               <ScrollReveal key={p.slug} delay={i * 70}>
                 <Link

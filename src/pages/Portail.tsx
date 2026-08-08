@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { generateCertificate } from "@/lib/certificate";
 import { VirtualCard } from "@/components/VirtualCard";
+import { PortalNav } from "@/components/PortalNav";
 
 type Portal = {
   id: string;
@@ -167,6 +168,7 @@ const Portail = () => {
 
   return (
     <div className="pt-16">
+      <PortalNav activeSlug={slug} />
       <section
         className="py-16 lg:py-24 text-white relative"
         style={{

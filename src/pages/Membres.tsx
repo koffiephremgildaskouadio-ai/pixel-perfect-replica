@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { SEO } from "@/components/SEO";
+import { PortalNav } from "@/components/PortalNav";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -129,6 +130,7 @@ const Membres = () => {
   if (!session) {
     return (
       <div className="pt-16"><SEO title="Base des membres — District Novalim-CIE" description="Espace membres du District Cité Novalim-CIE : recherche, cartes digitales et annuaire interne." path="/membres" />
+      <PortalNav activeSlug="membres" />
         <section className="py-16 lg:py-24 bg-secondary/50">
           <div className="container">
             <ScrollReveal className="text-center max-w-2xl mx-auto">
@@ -170,6 +172,7 @@ const Membres = () => {
 
   return (
     <div className="pt-16">
+      <PortalNav activeSlug="membres" />
       <section className="py-16 lg:py-24 bg-secondary/50">
         <div className="container">
           <ScrollReveal className="text-center max-w-2xl mx-auto">
