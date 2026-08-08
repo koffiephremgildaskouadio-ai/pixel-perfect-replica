@@ -6,6 +6,7 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import { VisitorModal } from "@/components/VisitorModal";
 import { SEO } from "@/components/SEO";
 import { SiteFooter } from "@/components/SiteFooter";
+import { STATIC_PORTALS, mapDynamicPortal } from "@/lib/portals";
 import {
   ArrowRight, ChevronLeft, ChevronRight, GraduationCap, Briefcase,
   CalendarDays, MapPin, Quote, Handshake,
