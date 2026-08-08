@@ -100,6 +100,18 @@ const Index = () => {
     },
   });
 
+  const { data: portals } = useQuery({
+    queryKey: ["home-portals"],
+    queryFn: async () => {
+      const { data } = await (supabase as any)
+        .from("portals")
+        .select("id, slug, title, subtitle, color, logo_url, cover_url")
+        .eq("is_published", true)
+        .order("display_order", { ascending: true });
+      return (data ?? []) as any[];
+    },
+  });
+
   const { data: president } = useQuery({
     queryKey: ["home-president"],
     queryFn: async () => {
@@ -111,6 +123,7 @@ const Index = () => {
       return data?.find((m) => /^pr[ée]sident/i.test(m.poste ?? "")) ?? data?.[0] ?? null;
     },
   });
+
 
   useEffect(() => {
     const visited = sessionStorage.getItem("novalim_visitor");
