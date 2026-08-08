@@ -14,8 +14,13 @@ import { ArticleAudio } from "@/components/ArticleAudio";
 
 const Actualites = () => {
   useEffect(() => {
+    // Rafraîchissement au plus une fois par jour côté client (le serveur le fait aussi chaque matin)
+    const today = new Date().toISOString().slice(0, 10);
+    if (localStorage.getItem("news_refresh_day") === today) return;
+    localStorage.setItem("news_refresh_day", today);
     supabase.functions.invoke("generate-news").catch(() => {});
   }, []);
+
 
   const { data: articles, isLoading } = useQuery({
     queryKey: ["actualites"],
