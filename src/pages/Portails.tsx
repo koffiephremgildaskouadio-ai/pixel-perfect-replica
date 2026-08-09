@@ -14,7 +14,7 @@ const Portails = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from("portals")
-        .select("slug,title,subtitle,description,logo_url,cover_url")
+        .select("slug,title,subtitle,description,logo_url,cover_url,external_url,show_in_menu")
         .eq("is_published", true)
         .order("display_order", { ascending: true });
       return (data ?? []) as any[];
@@ -22,6 +22,7 @@ const Portails = () => {
   });
 
   const portals: PortalEntry[] = [...STATIC_PORTALS, ...((dynamic ?? []).map(mapDynamicPortal))];
+
 
   return (
     <div className="pt-16">
@@ -49,12 +50,19 @@ const Portails = () => {
 
       <section className="py-12 lg:py-16">
         <div className="container grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {portals.map((p, i) => (
+          {portals.map((p, i) => {
+            const cardClass =
+              "group relative block h-full rounded-3xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-[0_24px_50px_-24px_hsl(var(--primary)/0.55)] hover:-translate-y-1 transition-all duration-300";
+            const Wrapper = ({ children }: { children: React.ReactNode }) =>
+              p.external ? (
+                <a href={p.path} target="_blank" rel="noopener noreferrer" className={cardClass}>{children}</a>
+              ) : (
+                <Link to={p.path} className={cardClass}>{children}</Link>
+              );
+            return (
             <ScrollReveal key={p.slug} delay={i * 60}>
-              <Link
-                to={p.path}
-                className="group relative block h-full rounded-3xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-[0_24px_50px_-24px_hsl(var(--primary)/0.55)] hover:-translate-y-1 transition-all duration-300"
-              >
+              <Wrapper>
+
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/10" />
                 <div className="relative p-6 flex flex-col gap-4 h-full">
                   <div className="w-16 h-16 rounded-2xl bg-secondary ring-1 ring-border overflow-hidden flex items-center justify-center">
@@ -79,9 +87,11 @@ const Portails = () => {
                   </span>
                 </div>
                 <span className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary via-accent to-primary scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300" />
-              </Link>
+              </Wrapper>
             </ScrollReveal>
-          ))}
+            );
+          })}
+
         </div>
       </section>
 

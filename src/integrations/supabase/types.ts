@@ -232,10 +232,12 @@ export type Database = {
           custom_links: Json
           description: string | null
           display_order: number
+          external_url: string | null
           id: string
           is_published: boolean
           logo_url: string | null
           member_ids: Json
+          show_in_menu: boolean
           slug: string
           subtitle: string | null
           title: string
@@ -249,10 +251,12 @@ export type Database = {
           custom_links?: Json
           description?: string | null
           display_order?: number
+          external_url?: string | null
           id?: string
           is_published?: boolean
           logo_url?: string | null
           member_ids?: Json
+          show_in_menu?: boolean
           slug: string
           subtitle?: string | null
           title: string
@@ -266,10 +270,12 @@ export type Database = {
           custom_links?: Json
           description?: string | null
           display_order?: number
+          external_url?: string | null
           id?: string
           is_published?: boolean
           logo_url?: string | null
           member_ids?: Json
+          show_in_menu?: boolean
           slug?: string
           subtitle?: string | null
           title?: string

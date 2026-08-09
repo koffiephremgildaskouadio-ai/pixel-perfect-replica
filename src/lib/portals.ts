@@ -12,7 +12,10 @@ export type PortalEntry = {
   path: string;
   logo_url: string;
   highlights: string[];
+  external?: boolean;
+  show_in_menu?: boolean;
 };
+
 
 /** Portails officiels du district — source unique pour l'accueil, le menu et les pages. */
 export const STATIC_PORTALS: PortalEntry[] = [
@@ -85,6 +88,8 @@ export type DynamicPortalRow = {
   description?: string | null;
   logo_url: string | null;
   cover_url: string | null;
+  external_url?: string | null;
+  show_in_menu?: boolean | null;
 };
 
 export const mapDynamicPortal = (p: DynamicPortalRow): PortalEntry => ({
@@ -92,7 +97,10 @@ export const mapDynamicPortal = (p: DynamicPortalRow): PortalEntry => ({
   title: p.title,
   subtitle: p.subtitle ?? "Portail du district",
   description: p.description ?? p.subtitle ?? "Portail du district",
-  path: `/portail/${p.slug}`,
+  path: p.external_url || `/portail/${p.slug}`,
   logo_url: p.logo_url || p.cover_url || logo,
   highlights: [],
+  external: Boolean(p.external_url),
+  show_in_menu: p.show_in_menu ?? true,
 });
+

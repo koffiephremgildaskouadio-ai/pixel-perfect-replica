@@ -12,7 +12,7 @@ export const PortalNav = ({ activeSlug }: { activeSlug?: string }) => {
     queryFn: async () => {
       const { data } = await supabase
         .from("portals")
-        .select("slug,title,subtitle,description,logo_url,cover_url")
+        .select("slug,title,subtitle,description,logo_url,cover_url,external_url,show_in_menu")
         .eq("is_published", true)
         .order("display_order", { ascending: true });
       return (data ?? []) as any[];
@@ -22,7 +22,7 @@ export const PortalNav = ({ activeSlug }: { activeSlug?: string }) => {
 
   const all: PortalEntry[] = [
     ...STATIC_PORTALS,
-    ...((dynamic ?? []).map(mapDynamicPortal)),
+    ...((dynamic ?? []).map(mapDynamicPortal).filter((p) => p.show_in_menu !== false)),
   ];
 
   const current = activeSlug ?? all.find((p) => p.path === location.pathname)?.slug;
@@ -36,19 +36,23 @@ export const PortalNav = ({ activeSlug }: { activeSlug?: string }) => {
         >
           <LayoutGrid className="w-3.5 h-3.5 text-accent" /> Tous les portails
         </Link>
-        {all.map((p) => (
-          <Link
-            key={p.slug}
-            to={p.path}
-            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors border ${
-              current === p.slug
-                ? "bg-primary text-primary-foreground border-primary"
-                : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary"
-            }`}
-          >
-            {p.title}
-          </Link>
-        ))}
+        {all.map((p) => {
+          const cls = `shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors border ${
+            current === p.slug
+              ? "bg-primary text-primary-foreground border-primary"
+              : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary"
+          }`;
+          return p.external ? (
+            <a key={p.slug} href={p.path} target="_blank" rel="noopener noreferrer" className={cls}>
+              {p.title}
+            </a>
+          ) : (
+            <Link key={p.slug} to={p.path} className={cls}>
+              {p.title}
+            </Link>
+          );
+        })}
+
       </div>
     </div>
   );
