@@ -12,7 +12,10 @@ export type PortalEntry = {
   path: string;
   logo_url: string;
   highlights: string[];
+  external?: boolean;
+  show_in_menu?: boolean;
 };
+
 
 /** Portails officiels du district — source unique pour l'accueil, le menu et les pages. */
 export const STATIC_PORTALS: PortalEntry[] = [
