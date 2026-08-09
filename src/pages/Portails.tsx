@@ -87,9 +87,11 @@ const Portails = () => {
                   </span>
                 </div>
                 <span className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary via-accent to-primary scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300" />
-              </Link>
+              </Wrapper>
             </ScrollReveal>
-          ))}
+            );
+          })}
+
         </div>
       </section>
 
