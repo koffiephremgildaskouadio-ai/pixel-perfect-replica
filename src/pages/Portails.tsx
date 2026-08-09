@@ -14,7 +14,7 @@ const Portails = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from("portals")
-        .select("slug,title,subtitle,description,logo_url,cover_url")
+        .select("slug,title,subtitle,description,logo_url,cover_url,external_url,show_in_menu")
         .eq("is_published", true)
         .order("display_order", { ascending: true });
       return (data ?? []) as any[];
@@ -22,6 +22,7 @@ const Portails = () => {
   });
 
   const portals: PortalEntry[] = [...STATIC_PORTALS, ...((dynamic ?? []).map(mapDynamicPortal))];
+
 
   return (
     <div className="pt-16">
