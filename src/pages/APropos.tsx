@@ -109,7 +109,8 @@ const APropos = () => {
                 </div>
                 <div className="text-center">
                   <h3 className="text-lg font-display font-bold text-foreground">Kouadio Koffi Ephrem Gildas</h3>
-                  <p className="text-primary font-medium text-sm">Président du District</p>
+                  <p className="text-primary font-medium text-sm">Président du District Cité Novalim-CIE</p>
+                  <p className="text-muted-foreground text-sm mt-2 max-w-sm">Coordonnateur du club CCJY dans les établissements scolaires et universitaires de la commune de Yopougon</p>
                 </div>
               </div>
             </ScrollReveal>

@@ -6,6 +6,7 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import { VisitorModal } from "@/components/VisitorModal";
 import { SEO } from "@/components/SEO";
 import { SiteFooter } from "@/components/SiteFooter";
+import { DistrictExperience } from "@/components/DistrictExperience";
 import { STATIC_PORTALS, mapDynamicPortal } from "@/lib/portals";
 import {
   ArrowRight, ChevronLeft, ChevronRight, GraduationCap, Briefcase,
@@ -106,7 +107,7 @@ const Index = () => {
     queryFn: async () => {
       const { data } = await (supabase as any)
         .from("portals")
-        .select("id, slug, title, subtitle, color, logo_url, cover_url")
+        .select("id, slug, title, subtitle, description, color, logo_url, cover_url, external_url, show_in_menu")
         .eq("is_published", true)
         .order("display_order", { ascending: true });
       return (data ?? []) as any[];
@@ -119,6 +120,8 @@ const Index = () => {
       const { data } = await supabase
         .from("members_public")
         .select("nom, prenoms, poste, photo_url, bio")
+        .eq("district", "Novalim-CIE")
+        .eq("member_number", "NCV-2025-001")
         .ilike("poste", "%président%")
         .limit(5);
       return data?.find((m) => /^pr[ée]sident/i.test(m.poste ?? "")) ?? data?.[0] ?? null;
@@ -201,7 +204,6 @@ const Index = () => {
         </div>
       </section>
 
-
       {/* 3. PARTENAIRES */}
       <section className="pb-14 bg-[hsl(var(--surface-warm))]">
         <div className="container px-3 sm:px-4">
@@ -235,6 +237,8 @@ const Index = () => {
         </div>
       </section>
 
+      <DistrictExperience />
+
       {/* 3bis. PORTAILS */}
       <section className="py-16 lg:py-20 bg-background">
         <div className="container px-3 sm:px-4">
@@ -252,8 +256,10 @@ const Index = () => {
               ...((portals ?? []).map((p: any) => mapDynamicPortal(p))),
             ].map((p, i) => (
               <ScrollReveal key={p.slug} delay={i * 70}>
-                <Link
-                  to={p.path}
+                <a
+                  href={p.path}
+                  target={p.external ? "_blank" : undefined}
+                  rel={p.external ? "noopener noreferrer" : undefined}
                   className="group relative block aspect-square rounded-3xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-[0_24px_50px_-24px_hsl(var(--primary)/0.55)] hover:-translate-y-1 transition-all duration-300"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/10" />
@@ -270,7 +276,7 @@ const Index = () => {
                     </span>
                   </div>
                   <span className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary via-accent to-primary scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300" />
-                </Link>
+                </a>
               </ScrollReveal>
             ))}
           </div>

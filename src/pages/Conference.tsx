@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   ArrowLeft, Video, Phone, Users, Copy, Check,
-  Sparkles, ShieldCheck, Infinity as InfinityIcon, MessageCircle, Share2,
+  Sparkles, ShieldCheck, Infinity as InfinityIcon, MessageCircle, Share2, X,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -19,8 +19,10 @@ const Conference = () => {
   const [copied, setCopied] = useState(false);
   const jitsiContainer = useRef<HTMLDivElement>(null);
   const apiRef = useRef<any>(null);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
+    mountedRef.current = true;
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
         const meta = data.user.user_metadata;
@@ -29,12 +31,13 @@ const Conference = () => {
     });
     const params = new URLSearchParams(window.location.search);
     const room = params.get("room");
+    let invitationTimer: ReturnType<typeof setTimeout> | undefined;
     if (room) {
       setRoomName(room);
       // auto-join when invited via link
-      setTimeout(() => startCall(false, room), 200);
+      invitationTimer = setTimeout(() => startCall(false, room), 200);
     }
-    return () => { apiRef.current?.dispose(); };
+    return () => { mountedRef.current = false; clearTimeout(invitationTimer); apiRef.current?.dispose(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -47,8 +50,16 @@ const Conference = () => {
     // Serveur Jitsi libre SANS limite de temps (meet.jit.si impose 5 min aux invités non-auth)
     const JITSI_DOMAIN = "meet.ffmuc.net";
 
+    const fail = () => {
+      if (!mountedRef.current) return;
+      setInCall(false);
+      setActiveRoom(null);
+      toast.error("Le service de conférence est indisponible. Veuillez réessayer plus tard.");
+    };
     const launch = () => {
-      if (!jitsiContainer.current) return;
+      if (!mountedRef.current) return;
+      if (!jitsiContainer.current) { requestAnimationFrame(launch); return; }
+      try {
       // @ts-ignore
       apiRef.current = new JitsiMeetExternalAPI(JITSI_DOMAIN, {
         roomName: `NovalimCIE_${room}`,
@@ -96,6 +107,7 @@ const Conference = () => {
         apiRef.current?.dispose();
         apiRef.current = null;
       });
+      } catch { fail(); }
     };
 
     if ((window as any).JitsiMeetExternalAPI) {
@@ -104,19 +116,13 @@ const Conference = () => {
       const script = document.createElement("script");
       script.src = `https://${JITSI_DOMAIN}/external_api.js`;
       script.onload = launch;
-      script.onerror = () => {
-        // Fallback : repli sur meet.jit.si si ffmuc indisponible
-        const s2 = document.createElement("script");
-        s2.src = "https://meet.jit.si/external_api.js";
-        s2.onload = launch;
-        document.head.appendChild(s2);
-      };
+      script.onerror = fail;
       document.head.appendChild(script);
     }
   };
 
   const buildLink = (room: string) =>
-    `${window.location.origin}/conference?room=${room}`;
+    `${window.location.origin}/conference?room=${encodeURIComponent(room)}`;
 
   const copyLink = async (room: string) => {
     const link = buildLink(room);
@@ -148,7 +154,7 @@ const Conference = () => {
           <div className="bg-primary text-primary-foreground px-3 py-2 flex items-center gap-2 flex-wrap text-xs sm:text-sm shadow-md">
             <Sparkles className="w-4 h-4 shrink-0" />
             <span className="font-semibold shrink-0">Lien d'invitation :</span>
-            <code className="bg-black/20 px-2 py-0.5 rounded truncate flex-1 min-w-0">
+            <code className="bg-primary-foreground/10 px-2 py-0.5 rounded truncate flex-1 min-w-0">
               {buildLink(activeRoom)}
             </code>
             <Button size="sm" variant="secondary" className="h-7 gap-1" onClick={() => copyLink(activeRoom)}>
@@ -158,6 +164,7 @@ const Conference = () => {
             <Button size="sm" variant="secondary" className="h-7 gap-1" onClick={() => shareLink(activeRoom)}>
               <Share2 className="w-3.5 h-3.5" /> Partager
             </Button>
+            <Button size="icon" variant="secondary" aria-label="Quitter la conférence" title="Quitter la conférence" className="h-7 w-7" onClick={() => { apiRef.current?.dispose(); apiRef.current = null; setInCall(false); setActiveRoom(null); }}><X /></Button>
           </div>
         )}
         <div ref={jitsiContainer} className="flex-1 w-full" />

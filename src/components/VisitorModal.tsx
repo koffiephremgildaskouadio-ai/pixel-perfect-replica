@@ -21,7 +21,7 @@ export const VisitorModal = ({ open, onSubmit }: VisitorModalProps) => {
   };
 
   return (
-    <Dialog open={open}>
+    <Dialog open={open} onOpenChange={(value) => { if (!value) onSubmit("", ""); }}>
       <DialogContent className="sm:max-w-md border-none shadow-2xl" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader className="text-center space-y-3">
           <img src={logo} alt="Logo Novalim-City" className="mx-auto w-20 h-20 object-contain" />
@@ -29,7 +29,7 @@ export const VisitorModal = ({ open, onSubmit }: VisitorModalProps) => {
             Bienvenue à CIE Novalim-City
           </DialogTitle>
           <p className="text-muted-foreground text-sm">
-            Pour accéder au portail, veuillez vous identifier.
+            Bienvenue dans notre communauté.
           </p>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
@@ -53,6 +53,9 @@ export const VisitorModal = ({ open, onSubmit }: VisitorModalProps) => {
           </div>
           <Button type="submit" variant="hero" size="lg" className="w-full">
             Entrer sur le portail
+          </Button>
+          <Button type="button" variant="ghost" className="w-full" onClick={() => onSubmit("", "")}>
+            Continuer sans identification
           </Button>
         </form>
       </DialogContent>
