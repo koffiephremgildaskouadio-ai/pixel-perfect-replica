@@ -53,7 +53,7 @@ const MemberCard = ({ member, index }: { member: Member; index: number }) => {
                 {member.nom} {member.prenoms}
               </h3>
               {member.poste && (
-                <p className="text-primary font-medium text-xs mt-1.5 leading-snug line-clamp-2">{member.poste}</p>
+                <p className="text-primary font-medium text-xs mt-1.5 leading-snug">{member.poste}</p>
               )}
             </div>
             <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
