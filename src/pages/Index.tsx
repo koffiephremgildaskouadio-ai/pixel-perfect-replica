@@ -147,9 +147,10 @@ const Index = () => {
         path="/"
       />
       <VisitorModal open={showModal} onSubmit={handleVisitorSubmit} />
+      <DistrictExperience />
 
       {/* 2. HERO / CARROUSEL */}
-      <section className="pt-[84px] pb-6 bg-[hsl(var(--surface-warm))]">
+      <section className="pt-6 pb-6 bg-[hsl(var(--surface-warm))]">
         <div className="container px-3 sm:px-4">
           <div className="relative overflow-hidden rounded-[28px] bg-card ring-1 ring-border shadow-[0_24px_60px_-30px_hsl(var(--foreground)/0.45)] h-[52vh] min-h-[320px] md:h-[62vh]">
             {slides.map((s, i) => (
@@ -236,8 +237,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-
-      <DistrictExperience />
 
       {/* 3bis. PORTAILS */}
       <section className="py-16 lg:py-20 bg-background">
