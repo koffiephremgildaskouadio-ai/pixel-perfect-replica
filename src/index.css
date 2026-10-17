@@ -161,3 +161,14 @@ html { scroll-behavior: smooth; }
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Large photographic welcome, with a separately rendered dimensional emblem. */
+.district-welcome { height: min(820px, calc(100svh - 110px)); min-height: 640px; }
+.district-welcome-content { height: 100%; }
+.district-logo-view { flex: 1; min-height: 240px; max-height: 440px; }
+.district-welcome-copy { position: relative; }
+@media (max-width: 640px) {
+  .district-welcome { height: calc(100svh - 100px); min-height: 570px; max-height: 760px; }
+  .district-logo-view { max-height: 340px; }
+  .district-welcome-copy { padding: 18px 12px 24px; }
+}

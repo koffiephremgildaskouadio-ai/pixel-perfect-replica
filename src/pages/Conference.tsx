@@ -1,14 +1,15 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { PortalNav } from "@/components/PortalNav";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   ArrowLeft, Video, Phone, Users, Copy, Check,
-  Sparkles, ShieldCheck, Infinity as InfinityIcon, MessageCircle, Share2, X,
+  Sparkles, ShieldCheck, ExternalLink, MessageCircle, Share2, X,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { conferenceInvitationUrl, conferenceMeetingUrl } from "@/lib/conference";
 import { supabase } from "@/integrations/supabase/client";
 
 const Conference = () => {
@@ -17,112 +18,37 @@ const Conference = () => {
   const [inCall, setInCall] = useState(false);
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const jitsiContainer = useRef<HTMLDivElement>(null);
-  const apiRef = useRef<any>(null);
-  const mountedRef = useRef(true);
+  const [audioOnly, setAudioOnly] = useState(false);
 
   useEffect(() => {
-    mountedRef.current = true;
+    let cancelled = false;
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) {
-        const meta = data.user.user_metadata;
-        setUserName(`${meta?.nom || ""} ${meta?.prenoms || ""}`.trim() || data.user.email || "Membre");
-      }
+      if (cancelled || !data.user) return;
+      const meta = data.user.user_metadata;
+      setUserName(`${meta?.nom || ""} ${meta?.prenoms || ""}`.trim() || "Membre Novalim");
     });
-    const params = new URLSearchParams(window.location.search);
-    const room = params.get("room");
-    let invitationTimer: ReturnType<typeof setTimeout> | undefined;
-    if (room) {
-      setRoomName(room);
-      // auto-join when invited via link
-      invitationTimer = setTimeout(() => startCall(false, room), 200);
-    }
-    return () => { mountedRef.current = false; clearTimeout(invitationTimer); apiRef.current?.dispose(); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const room = new URLSearchParams(window.location.search).get("room");
+    if (room) setRoomName(room);
+    return () => { cancelled = true; };
   }, []);
 
-  const startCall = (audioOnly = false, override?: string) => {
-    const room = (override ?? roomName).trim() || `novalim-${Date.now().toString(36)}`;
-    setRoomName(room);
-    setActiveRoom(room);
-    setInCall(true);
-
-    // Serveur Jitsi libre SANS limite de temps (meet.jit.si impose 5 min aux invités non-auth)
-    const JITSI_DOMAIN = "meet.ffmuc.net";
-
-    const fail = () => {
-      if (!mountedRef.current) return;
-      setInCall(false);
-      setActiveRoom(null);
-      toast.error("Le service de conférence est indisponible. Veuillez réessayer plus tard.");
-    };
-    const launch = () => {
-      if (!mountedRef.current) return;
-      if (!jitsiContainer.current) { requestAnimationFrame(launch); return; }
-      try {
-      // @ts-ignore
-      apiRef.current = new JitsiMeetExternalAPI(JITSI_DOMAIN, {
-        roomName: `NovalimCIE_${room}`,
-        parentNode: jitsiContainer.current,
-        width: "100%",
-        height: "100%",
-        configOverwrite: {
-          startWithAudioMuted: false,
-          startWithVideoMuted: audioOnly,
-          prejoinPageEnabled: false,
-          disableDeepLinking: true,
-          enableWelcomePage: false,
-          enableClosePage: false,
-          subject: "District Cité Novalim - CIE",
-          disableReactions: false,
-          disablePolls: false,
-          enableEmojiReactions: true,
-          requireDisplayName: false,
-          disableProfile: true,
-          hideConferenceTimer: false,
-          conferenceInfo: { autoHide: ["conference-timer"] },
-          toolbarButtons: [
-            "microphone", "camera", "desktop", "chat", "raisehand",
-            "participants-pane", "tileview", "hangup", "recording",
-            "settings", "fullscreen", "select-background", "videoquality",
-            "reactions", "emoji", "invite", "shareaudio", "sharedvideo",
-            "livestreaming", "stats", "security", "mute-everyone", "etherpad",
-            "filmstrip", "closedcaptions", "whiteboard", "noisesuppression",
-          ],
-        },
-        interfaceConfigOverwrite: {
-          SHOW_JITSI_WATERMARK: false,
-          SHOW_BRAND_WATERMARK: false,
-          DEFAULT_BACKGROUND: "#0f3a26",
-          TOOLBAR_ALWAYS_VISIBLE: true,
-          MOBILE_APP_PROMO: false,
-          DISABLE_JOIN_LEAVE_NOTIFICATIONS: false,
-        },
-        userInfo: { displayName: userName || "Membre Novalim" },
-      });
-
-      apiRef.current.addListener("readyToClose", () => {
-        setInCall(false);
-        setActiveRoom(null);
-        apiRef.current?.dispose();
-        apiRef.current = null;
-      });
-      } catch { fail(); }
-    };
-
-    if ((window as any).JitsiMeetExternalAPI) {
-      launch();
-    } else {
-      const script = document.createElement("script");
-      script.src = `https://${JITSI_DOMAIN}/external_api.js`;
-      script.onload = launch;
-      script.onerror = fail;
-      document.head.appendChild(script);
-    }
+  const openMeeting = (room: string, audio: boolean) => {
+    const popup = window.open(conferenceMeetingUrl(room, audio, userName), "novalim-conference");
+    if (!popup) { toast.error("Autorisez l’ouverture d’un nouvel onglet pour rejoindre la conférence."); return false; }
+    popup.opener = null;
+    return true;
   };
 
-  const buildLink = (room: string) =>
-    `${window.location.origin}/conference?room=${encodeURIComponent(room)}`;
+  const startCall = (audio = false) => {
+    const room = roomName.trim() || `novalim-${crypto.randomUUID()}`;
+    if (!openMeeting(room, audio)) return;
+    setRoomName(room);
+    setAudioOnly(audio);
+    setActiveRoom(room);
+    setInCall(true);
+  };
+
+  const buildLink = (room: string) => conferenceInvitationUrl(window.location.origin, room);
 
   const copyLink = async (room: string) => {
     const link = buildLink(room);
@@ -164,10 +90,17 @@ const Conference = () => {
             <Button size="sm" variant="secondary" className="h-7 gap-1" onClick={() => shareLink(activeRoom)}>
               <Share2 className="w-3.5 h-3.5" /> Partager
             </Button>
-            <Button size="icon" variant="secondary" aria-label="Quitter la conférence" title="Quitter la conférence" className="h-7 w-7" onClick={() => { apiRef.current?.dispose(); apiRef.current = null; setInCall(false); setActiveRoom(null); }}><X /></Button>
+            <Button size="icon" variant="secondary" aria-label="Retour à la préparation" title="Retour à la préparation" className="h-7 w-7" onClick={() => { setInCall(false); setActiveRoom(null); }}><X /></Button>
           </div>
         )}
-        <div ref={jitsiContainer} className="flex-1 w-full" />
+        <div className="flex-1 flex flex-col items-center justify-center text-center px-6 gap-5">
+          <Video className="h-14 w-14 text-primary" />
+          <h1 className="text-2xl md:text-3xl font-bold">Votre salle de conférence</h1>
+          <p className="text-muted-foreground max-w-lg">La salle s’ouvre dans un autre onglet. Rejoignez-la pour activer votre micro et votre caméra.</p>
+          <p className="text-sm font-medium break-all">{activeRoom}</p>
+          {activeRoom && <Button size="lg" onClick={() => openMeeting(activeRoom, audioOnly)}><ExternalLink /> Ouvrir la salle</Button>}
+          <Button variant="outline" onClick={() => { setInCall(false); setActiveRoom(null); }}>Retour</Button>
+        </div>
       </div>
     );
   }
@@ -182,13 +115,13 @@ const Conference = () => {
 
         <ScrollReveal className="text-center mb-8">
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">
-            <InfinityIcon className="w-3.5 h-3.5" /> Sans limite de temps · Gratuit
+            <Video className="w-3.5 h-3.5" /> Réunions audio & vidéo · Gratuit
           </span>
           <h1 className="mt-4 text-3xl lg:text-4xl font-display font-bold text-foreground">
             Salle de Conférence Novalim
           </h1>
           <p className="mt-3 text-muted-foreground leading-relaxed max-w-xl mx-auto">
-            Lancez une visioconférence professionnelle en un clic. Le lien d'invitation sera généré
+            Ouvrez votre visioconférence dans un nouvel onglet. Le lien d'invitation sera généré
             <strong> automatiquement après le démarrage</strong>.
           </p>
         </ScrollReveal>
@@ -207,6 +140,7 @@ const Conference = () => {
               </p>
             </div>
 
+            <p className="text-xs text-muted-foreground">La durée et la disponibilité dépendent du service de conférence externe.</p>
             <div className="grid sm:grid-cols-2 gap-3">
               <Button
                 variant="hero" size="lg" className="gap-2 w-full text-base h-14"
@@ -226,10 +160,10 @@ const Conference = () => {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-border/30">
               {[
-                { icon: InfinityIcon, label: "Durée illimitée" },
+                { icon: ExternalLink, label: "Salle dédiée" },
                 { icon: ShieldCheck, label: "Chiffré & sécurisé" },
                 { icon: MessageCircle, label: "Chat & emojis" },
-                { icon: Users, label: "Jusqu'à 100 pers." },
+                { icon: Users, label: "Réunion de groupe" },
               ].map((f) => (
                 <div key={f.label} className="text-center p-3 rounded-xl bg-secondary/60 border border-border/30">
                   <f.icon className="w-5 h-5 mx-auto mb-1.5 text-primary" />
@@ -248,10 +182,10 @@ const Conference = () => {
             </div>
             <ol className="space-y-3 text-sm text-muted-foreground">
               {[
-                "Cliquez sur Démarrer Vidéo ou Démarrer Audio. La conférence s'ouvre instantanément.",
+                "Cliquez sur Démarrer Vidéo ou Démarrer Audio pour ouvrir la salle dans un nouvel onglet.",
                 "Une fois en salle, le lien d'invitation s'affiche en haut de l'écran.",
                 "Cliquez sur Copier ou Partager pour inviter d'autres membres (WhatsApp, e-mail…).",
-                "Tous ceux qui ouvrent le lien rejoignent automatiquement la même salle.",
+                "Les invités ouvrent le lien puis cliquent sur Démarrer pour rejoindre la même salle.",
               ].map((t, i) => (
                 <li key={i} className="flex gap-3">
                   <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground font-bold text-xs flex items-center justify-center shrink-0">{i + 1}</span>

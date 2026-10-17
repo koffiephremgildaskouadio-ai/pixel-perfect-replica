@@ -162,9 +162,9 @@ const Index = () => {
                 <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[hsl(var(--navy))]/70 to-transparent" />
                 <div className="absolute inset-x-4 md:inset-x-16 bottom-16 md:bottom-20">
                   <div className="rounded-2xl bg-[hsl(var(--navy))]/70 backdrop-blur-sm px-5 py-4 md:px-8 md:py-6 text-center">
-                    <h1 className="text-lg md:text-3xl font-display font-bold text-navy-foreground leading-snug">
+                    <h2 className="text-lg md:text-3xl font-display font-bold text-navy-foreground leading-snug">
                       {s.title}
-                    </h1>
+                    </h2>
                     <p className="hidden md:block mt-2 text-sm text-navy-foreground/80">{s.subtitle}</p>
                     <Link to={s.cta.to} className="inline-block mt-3">
                       <Button size="sm" className="rounded-full px-5 bg-accent text-accent-foreground hover:bg-accent/90">
