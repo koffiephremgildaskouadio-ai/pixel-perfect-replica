@@ -2,6 +2,7 @@ import { Component, lazy, Suspense, useCallback, useEffect, useRef, useState, ty
 import { Link } from "react-router-dom";
 import { ArrowRight, Rotate3D, Pause, Play, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Menu3D } from "@/components/Menu3D";
 import logo from "@/assets/logo_novalim.png";
 import stage from "@/assets/district-welcome-stage.jpg";
 
@@ -57,6 +58,7 @@ export function DistrictExperience() {
               <Button variant="outline" size="icon" className="rounded-full bg-card/90" onClick={() => setPaused(!paused)} aria-label={paused ? "Reprendre l’animation" : "Mettre l’animation en pause"} title={paused ? "Reprendre l’animation" : "Mettre l’animation en pause"}>{paused ? <Play /> : <Pause />}</Button>
             </>}
           </div>
+          <Menu3D />
         </div>
       </div>
     </section>
