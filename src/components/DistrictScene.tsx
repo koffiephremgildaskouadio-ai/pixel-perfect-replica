@@ -24,8 +24,10 @@ function Emblem({ animated, greeting, onReady, palette }: Omit<SceneProps, "onFa
     group.current.rotation.x += (-state.pointer.y * 0.1 - group.current.rotation.x) * (1 - Math.exp(-4 * dt));
     group.current.position.y = Math.sin(elapsed.current * 0.8) * 0.035;
   });
-  return <group ref={group}><mesh geometry={geometry}>
-    <meshStandardMaterial attach="material-0" map={texture} roughness={0.35} metalness={0.12} />
+  return <group ref={group}><mesh geometry={geometry} scale={1.014} position-z={-0.035}>
+    <meshStandardMaterial color={palette.paper} metalness={0.2} roughness={0.4} />
+  </mesh><mesh geometry={geometry}>
+    <meshStandardMaterial attach="material-0" map={texture} emissiveMap={texture} emissive={palette.paper} emissiveIntensity={0.35} roughness={0.55} metalness={0.05} />
     <meshStandardMaterial attach="material-1" color={palette.primary} metalness={0.65} roughness={0.26} />
   </mesh></group>;
 }
