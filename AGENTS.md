@@ -3,3 +3,5 @@
 - Build the homepage emblem from the official logo’s bundled contours and texture; independent extrusion preserves the exact brand while bounded delta-clamped motion keeps it legible.
 - Keep the member record as the source of appointment titles so member pages, cards and certificates share the same information.
 - Open FFMUC conferences in a separate tab, not an iframe, because the service blocks embedding via frame-ancestors and SAMEORIGIN; invitation links retain the application room name.
+
+- Keep homepage menu destinations in readable DOM links with perspective depth and bounded pointer tilt; this preserves keyboard, touch, and no-WebGL navigation.
