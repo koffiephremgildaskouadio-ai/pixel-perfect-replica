@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { DistrictExperience } from "@/components/DistrictExperience";
 import { STATIC_PORTALS, mapDynamicPortal } from "@/lib/portals";
 import {
-  ArrowRight, ChevronLeft, ChevronRight, GraduationCap, Briefcase,
+  ArrowRight, GraduationCap, Briefcase,
   CalendarDays, MapPin, Quote, Handshake,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -66,16 +66,6 @@ const agenda = [
 
 const Index = () => {
   const [showModal, setShowModal] = useState(false);
-  const [slide, setSlide] = useState(0);
-
-  const next = useCallback(() => setSlide((s) => (s + 1) % slides.length), []);
-  const prev = useCallback(() => setSlide((s) => (s - 1 + slides.length) % slides.length), []);
-
-  useEffect(() => {
-    const t = setInterval(next, 7000);
-    return () => clearInterval(t);
-  }, [next]);
-
   const { data: stats } = useQuery({
     queryKey: ["public-stats"],
     queryFn: async () => {
@@ -149,68 +139,28 @@ const Index = () => {
       <VisitorModal open={showModal} onSubmit={handleVisitorSubmit} />
       <DistrictExperience />
 
-      {/* 2. HERO / CARROUSEL */}
-      <section className="pt-6 pb-6 bg-[hsl(var(--surface-warm))]">
-        <div className="container px-3 sm:px-4">
-          <div className="relative overflow-hidden rounded-[28px] bg-card ring-1 ring-border shadow-[0_24px_60px_-30px_hsl(var(--foreground)/0.45)] h-[52vh] min-h-[320px] md:h-[62vh]">
-            {slides.map((s, i) => (
-              <div
-                key={s.title}
-                className={`absolute inset-0 transition-opacity duration-[900ms] ${i === slide ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-              >
-                <img src={s.image} alt={s.title} className="w-full h-full object-cover" loading={i === 0 ? "eager" : "lazy"} />
-                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[hsl(var(--navy))]/70 to-transparent" />
-                <div className="absolute inset-x-4 md:inset-x-16 bottom-16 md:bottom-20">
-                  <div className="rounded-2xl bg-[hsl(var(--navy))]/70 backdrop-blur-sm px-5 py-4 md:px-8 md:py-6 text-center">
-                    <h2 className="text-lg md:text-3xl font-display font-bold text-navy-foreground leading-snug">
-                      {s.title}
-                    </h2>
-                    <p className="hidden md:block mt-2 text-sm text-navy-foreground/80">{s.subtitle}</p>
-                    <Link to={s.cta.to} className="inline-block mt-3">
-                      <Button size="sm" className="rounded-full px-5 bg-accent text-accent-foreground hover:bg-accent/90">
-                        {s.cta.label}
-                        <ArrowRight className="w-4 h-4" />
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            <button
-              onClick={prev}
-              aria-label="Slide précédent"
-              className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-muted/80 backdrop-blur flex items-center justify-center text-foreground hover:bg-muted transition-colors"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={next}
-              aria-label="Slide suivant"
-              className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-muted/80 backdrop-blur flex items-center justify-center text-foreground hover:bg-muted transition-colors"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
-              {slides.map((s, i) => (
-                <button
-                  key={s.title}
-                  onClick={() => setSlide(i)}
-                  aria-label={`Aller au slide ${i + 1}`}
-                  className={`h-2.5 w-2.5 rounded-full transition-all ${i === slide ? "bg-accent scale-110" : "bg-card/70"}`}
-                />
-              ))}
-            </div>
+      <section className="py-12 md:py-16 bg-background">
+        <div className="container">
+          <div className="flex items-center justify-between gap-4 mb-7">
+            <h2 className="text-2xl md:text-3xl font-semibold">La vie du District</h2>
+            <Button asChild variant="link" className="px-0"><Link to="/actualites">Tout voir <ArrowRight /></Link></Button>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5">
+            {slides.slice(1).map((item) => <Link key={item.title} to={item.cta.to} className="group relative overflow-hidden rounded-3xl aspect-[4/3] bg-navy">
+              <img src={item.image} alt={item.title} width={640} height={480} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/10 to-transparent" />
+              <div className="absolute inset-x-6 bottom-6 text-navy-foreground"><h3 className="text-xl font-semibold">{item.title}</h3><span className="mt-3 inline-flex items-center gap-2 text-sm text-navy-foreground/80">{item.cta.label} <ArrowRight className="w-4 h-4" /></span></div>
+            </Link>)}
           </div>
         </div>
       </section>
 
       {/* 3. PARTENAIRES */}
-      <section className="pb-14 bg-[hsl(var(--surface-warm))]">
+      <section className="py-10 bg-navy">
         <div className="container px-3 sm:px-4">
-          <div className="rounded-[28px] bg-navy text-navy-foreground px-5 py-10 md:px-12 md:py-12">
+          <div className="text-navy-foreground">
             <div className="text-center mb-8">
-              <p className="text-[11px] md:text-xs font-semibold uppercase tracking-[0.25em] text-navy-foreground/70">
+              <p className="text-[11px] md:text-xs font-semibold uppercase text-navy-foreground/70">
                 Partenaires &amp; soutiens institutionnels
               </p>
               <div className="mx-auto mt-4 h-px w-24 bg-navy-foreground/20" />

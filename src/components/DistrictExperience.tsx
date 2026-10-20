@@ -4,10 +4,10 @@ import { ArrowRight, Rotate3D, Pause, Play, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Menu3D } from "@/components/Menu3D";
 import logo from "@/assets/logo_novalim.png";
-import stage from "@/assets/district-welcome-stage.jpg";
+import stage from "@/assets/district-premium-stage.jpg";
 
 const DistrictScene = lazy(() => import("./DistrictScene"));
-const Fallback = () => <img src={logo} alt="Emblème du District Cité Novalim-CIE" className="h-full max-h-[420px] w-auto max-w-full object-contain" />;
+const Fallback = () => <img src={logo} alt="Emblème du District Cité Novalim-CIE" className="h-full max-h-[290px] w-auto max-w-full object-contain" />;
 
 class SceneBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
@@ -39,28 +39,34 @@ export function DistrictExperience() {
     return () => { observer.disconnect(); media.removeEventListener("change", update); };
   }, []);
   return (
-    <section ref={section} aria-labelledby="district-experience-title" className="district-welcome relative overflow-hidden mt-16 border-b border-border">
-      <img src={stage} alt="Décor architectural aux couleurs du District" width={1920} height={1088} fetchPriority="high" className="absolute inset-0 h-full w-full object-cover" />
-      <div className="district-welcome-content relative container flex flex-col items-center text-center">
-        <p className="text-primary text-xs font-semibold uppercase mt-6 md:mt-8">Zone 7 · CCJY · Yopougon</p>
-        <div role="img" aria-label="Logo officiel du District en relief trois dimensions" className="district-logo-view relative w-full max-w-2xl">
-          {(!ready || failed || reduced || !visible) && <div className="absolute inset-0 flex items-center justify-center"><Fallback /></div>}
-          {visible && !failed && !reduced && <SceneBoundary><Suspense fallback={null}><DistrictScene animated={!paused} greeting={greeting} onFailure={onFailure} onReady={onReady} /></Suspense></SceneBoundary>}
-        </div>
-        <div className="district-welcome-copy w-full pb-8">
-          <h1 id="district-experience-title" className="text-3xl md:text-5xl font-bold text-primary leading-tight">District Cité Novalim-CIE</h1>
-          <p role="status" className="mt-3 text-base md:text-lg text-foreground">Bienvenue dans notre communauté. Ensemble, faisons grandir notre district.</p>
-          <div className="flex flex-wrap justify-center items-center gap-3 mt-6">
-            <Button asChild size="lg" className="rounded-full bg-accent text-accent-foreground hover:bg-accent/90"><Link to="/portails">Entrer dans le District <ArrowRight /></Link></Button>
-            <Button asChild variant="outline" size="lg" className="rounded-full bg-card/90"><Link to="/conference"><Video /> Conférence</Link></Button>
-            {ready && !failed && !reduced && <>
-              <Button variant="outline" size="icon" className="rounded-full bg-card/90" onClick={() => { setPaused(false); setGreeting((value) => value + 1); }} aria-label="Faire pivoter le logo" title="Faire pivoter le logo"><Rotate3D /></Button>
-              <Button variant="outline" size="icon" className="rounded-full bg-card/90" onClick={() => setPaused(!paused)} aria-label={paused ? "Reprendre l’animation" : "Mettre l’animation en pause"} title={paused ? "Reprendre l’animation" : "Mettre l’animation en pause"}>{paused ? <Play /> : <Pause />}</Button>
-            </>}
+    <>
+      <section ref={section} aria-labelledby="district-experience-title" className="district-welcome relative overflow-hidden mt-16">
+        <img src={stage} alt="Architecture contemporaine aux couleurs du District" width={1920} height={1088} fetchPriority="high" className="absolute inset-0 h-full w-full object-cover" />
+        <div className="district-welcome-shade absolute inset-0" />
+        <div className="district-welcome-content relative container flex flex-col items-center text-center">
+          <p className="text-welcome-foreground/70 text-xs font-medium uppercase pt-8 md:pt-10">Conseil Communal des Jeunes de Yopougon · Zone 7</p>
+          <div role="img" aria-label="Logo officiel du District en relief trois dimensions" className="district-logo-view relative w-full max-w-xl">
+            {(!ready || failed || reduced || !visible) && <div className="absolute inset-0 flex items-center justify-center"><Fallback /></div>}
+            {visible && !failed && !reduced && <SceneBoundary><Suspense fallback={null}><DistrictScene animated={!paused} greeting={greeting} onFailure={onFailure} onReady={onReady} /></Suspense></SceneBoundary>}
           </div>
-          <Menu3D />
+          <div className="district-welcome-copy w-full">
+            <h1 id="district-experience-title" className="text-3xl md:text-5xl font-semibold text-welcome-foreground leading-tight">District Cité Novalim-CIE</h1>
+            <p role="status" className="mt-4 text-base md:text-lg text-welcome-foreground/75 max-w-lg mx-auto">Bienvenue chez vous. Une communauté unie, une jeunesse engagée.</p>
+            <div className="flex flex-wrap justify-center items-center gap-3 mt-7">
+              <Button asChild variant="accent" size="lg" className="rounded-full"><Link to="/connexion">Espace Membre <ArrowRight /></Link></Button>
+              <Button asChild variant="outline" size="lg" className="rounded-full border-welcome-foreground/30 bg-welcome-foreground/5 text-welcome-foreground hover:bg-welcome-foreground/15 hover:text-welcome-foreground"><Link to="/conference"><Video /> Rejoindre une conférence</Link></Button>
+            </div>
+          </div>
+          <div className="district-welcome-bottom w-full flex items-center justify-between pb-5 pt-7">
+            <span className="text-xs text-welcome-foreground/60">Yopougon · Abidjan, Côte d’Ivoire</span>
+            {ready && !failed && !reduced && <div className="flex gap-1">
+              <Button variant="ghost" size="icon" className="text-welcome-foreground/70 hover:text-welcome-foreground hover:bg-welcome-foreground/10 rounded-full" onClick={() => { setPaused(false); setGreeting((value) => value + 1); }} aria-label="Faire pivoter le logo" title="Faire pivoter le logo"><Rotate3D /></Button>
+              <Button variant="ghost" size="icon" className="text-welcome-foreground/70 hover:text-welcome-foreground hover:bg-welcome-foreground/10 rounded-full" onClick={() => setPaused(!paused)} aria-label={paused ? "Reprendre l’animation" : "Mettre l’animation en pause"} title={paused ? "Reprendre l’animation" : "Mettre l’animation en pause"}>{paused ? <Play /> : <Pause />}</Button>
+            </div>}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+      <Menu3D />
+    </>
   );
 }

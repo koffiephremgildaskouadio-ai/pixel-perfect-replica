@@ -1,54 +1,52 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, type PointerEvent } from "react";
 import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Info, Users, Landmark, Video, Newspaper, BookOpen, LayoutGrid, MessageCircle } from "lucide-react";
+import { ArrowUpRight, Info, Users, Landmark, Video, Newspaper, BookOpen, LayoutGrid, MessageCircle } from "lucide-react";
 
 const items = [
-  { label: "À propos", path: "/a-propos", icon: Info },
-  { label: "Bureau", path: "/bureau", icon: Landmark },
-  { label: "Membres", path: "/membres", icon: Users },
-  { label: "Conférence", path: "/conference", icon: Video },
-  { label: "Actualités", path: "/actualites", icon: Newspaper },
-  { label: "Annuaire", path: "/annuaire", icon: BookOpen },
-  { label: "Portails", path: "/portails", icon: LayoutGrid },
-  { label: "NovalimIA", path: "/chat", icon: MessageCircle },
+  { label: "À propos", detail: "Notre district", path: "/a-propos", icon: Info },
+  { label: "Bureau", detail: "Notre équipe", path: "/bureau", icon: Landmark },
+  { label: "Membres", detail: "La communauté", path: "/membres", icon: Users },
+  { label: "Conférence", detail: "Se retrouver", path: "/conference", icon: Video },
+  { label: "Actualités", detail: "La vie du district", path: "/actualites", icon: Newspaper },
+  { label: "Annuaire", detail: "Nos partenaires", path: "/annuaire", icon: BookOpen },
+  { label: "Portails", detail: "Tous nos espaces", path: "/portails", icon: LayoutGrid },
+  { label: "NovalimIA", detail: "Votre assistant", path: "/chat", icon: MessageCircle },
 ];
-const step = 360 / items.length;
+
+function MenuTile({ item, index }: { item: typeof items[number]; index: number }) {
+  const ref = useRef<HTMLAnchorElement>(null);
+  const tilt = (event: PointerEvent<HTMLAnchorElement>) => {
+    if (event.pointerType === "touch" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const box = event.currentTarget.getBoundingClientRect();
+    event.currentTarget.style.setProperty("--tilt-x", `${-(event.clientY - box.top - box.height / 2) / box.height * 12}deg`);
+    event.currentTarget.style.setProperty("--tilt-y", `${(event.clientX - box.left - box.width / 2) / box.width * 12}deg`);
+  };
+  const reset = () => { ref.current?.style.setProperty("--tilt-x", "0deg"); ref.current?.style.setProperty("--tilt-y", "0deg"); };
+  const Icon = item.icon;
+  return <Link ref={ref} to={item.path} className="district-menu-tile group" onPointerMove={tilt} onPointerLeave={reset} onBlur={reset}>
+    <div className="district-menu-face">
+      <div className="flex items-center justify-between">
+        <Icon className="h-6 w-6 text-primary" strokeWidth={1.6} />
+        <span className="text-xs text-muted-foreground group-hover:text-accent">0{index + 1}</span>
+      </div>
+      <div className="flex items-end justify-between gap-2 mt-5">
+        <div><span className="block font-semibold text-base text-foreground">{item.label}</span><span className="block mt-1 text-xs text-muted-foreground">{item.detail}</span></div>
+        <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-accent shrink-0" />
+      </div>
+    </div>
+  </Link>;
+}
 
 export function Menu3D() {
-  const [angle, setAngle] = useState(0);
-  const [auto, setAuto] = useState(true);
-  const drag = useRef<{ x: number; a: number } | null>(null);
-  useEffect(() => {
-    if (!auto || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let raf = 0, last = performance.now();
-    const tick = (t: number) => { const dt = Math.min((t - last) / 1000, 0.05); last = t; setAngle((a) => a - dt * 12); raf = requestAnimationFrame(tick); };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [auto]);
-  const go = (dir: number) => { setAuto(false); setAngle((a) => Math.round(a / step) * step + dir * step); };
-  return (
-    <nav aria-label="Menu 3D du District" className="relative w-full max-w-3xl mx-auto mt-8 select-none">
-      <div className="h-56 md:h-64 flex items-center justify-center [perspective:900px] touch-pan-y"
-        onPointerDown={(e) => { drag.current = { x: e.clientX, a: angle }; setAuto(false); }}
-        onPointerMove={(e) => { if (drag.current) setAngle(drag.current.a + (e.clientX - drag.current.x) * 0.4); }}
-        onPointerUp={() => { drag.current = null; setAngle((a) => Math.round(a / step) * step); }}
-        onPointerLeave={() => { drag.current = null; }}>
-        <div className="relative w-28 h-36 md:w-32 md:h-40 [transform-style:preserve-3d] transition-transform duration-500 ease-out"
-          style={{ transform: `translateZ(-220px) rotateX(-8deg) rotateY(${angle}deg)` }}>
-          {items.map(({ label, path, icon: Icon }, i) => (
-            <Link key={path} to={path} draggable={false}
-              className="absolute inset-0 rounded-3xl border border-border bg-card/95 shadow-xl flex flex-col items-center justify-center gap-3 text-foreground hover:text-accent hover:border-accent transition-colors [backface-visibility:hidden]"
-              style={{ transform: `rotateY(${i * step}deg) translateZ(230px)` }}>
-              <span className="w-12 h-12 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-lg"><Icon className="w-6 h-6" /></span>
-              <span className="text-sm font-semibold">{label}</span>
-            </Link>
-          ))}
-        </div>
+  return <section className="district-navigation bg-background border-b border-border" aria-labelledby="district-menu-title">
+    <div className="container py-9 md:py-12">
+      <div className="flex flex-wrap justify-between items-end gap-3 mb-7">
+        <h2 id="district-menu-title" className="text-2xl md:text-3xl font-semibold text-foreground">Votre district, à portée de main.</h2>
+        <span className="text-xs text-muted-foreground uppercase">Les espaces du District</span>
       </div>
-      <div className="flex justify-center gap-3">
-        <button onClick={() => go(1)} aria-label="Précédent" className="w-10 h-10 rounded-full border border-border bg-card/90 flex items-center justify-center hover:bg-secondary"><ChevronLeft className="w-5 h-5" /></button>
-        <button onClick={() => go(-1)} aria-label="Suivant" className="w-10 h-10 rounded-full border border-border bg-card/90 flex items-center justify-center hover:bg-secondary"><ChevronRight className="w-5 h-5" /></button>
-      </div>
-    </nav>
-  );
+      <nav aria-label="Espaces du District" className="district-menu-grid grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        {items.map((item, index) => <MenuTile key={item.path} item={item} index={index} />)}
+      </nav>
+    </div>
+  </section>;
 }

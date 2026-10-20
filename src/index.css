@@ -50,6 +50,10 @@
     --navy-foreground: 0 0% 100%;
     --success: 140 55% 22%;
     --success-foreground: 0 0% 100%;
+    --welcome: 150 15% 12%;
+    --welcome-foreground: 0 0% 100%;
+    --welcome-shade: linear-gradient(180deg, hsl(var(--welcome) / .08) 0%, hsl(var(--welcome) / .15) 40%, hsl(var(--welcome) / .9) 100%);
+    --menu-shadow: 0 8px 24px -16px hsl(var(--foreground) / .3);
   }
 
   .dark {
@@ -162,13 +166,33 @@ html { scroll-behavior: smooth; }
   }
 }
 
-/* Large photographic welcome, with a separately rendered dimensional emblem. */
-.district-welcome { height: min(820px, calc(100svh - 110px)); min-height: 640px; }
+/* The welcome image and the dimensional emblem share one unframed stage. */
+.district-welcome { min-height: 590px; height: min(690px, calc(100svh - 140px)); background: hsl(var(--welcome)); }
+.district-welcome-shade { background: var(--welcome-shade); }
 .district-welcome-content { height: 100%; }
-.district-logo-view { flex: 1; min-height: 240px; max-height: 440px; }
+.district-logo-view { flex: 1; min-height: 210px; max-height: 320px; }
 .district-welcome-copy { position: relative; }
+.district-welcome-bottom { margin-top: auto; }
+.district-menu-grid { perspective: 1100px; }
+.district-menu-tile { --tilt-x: 0deg; --tilt-y: 0deg; position: relative; display: block; border-radius: 16px; background: hsl(var(--primary)); transform-style: preserve-3d; transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y)); transition: transform 200ms ease-out; outline-offset: 5px; }
+.district-menu-face { position: relative; min-height: 142px; padding: 22px; border: 1px solid hsl(var(--border)); border-radius: 16px; background: hsl(var(--card)); transform: translateZ(5px); box-shadow: var(--menu-shadow); transition: transform 350ms ease, border-color 350ms ease; }
+.district-menu-tile:hover .district-menu-face, .district-menu-tile:focus-visible .district-menu-face { transform: translateZ(14px) translateY(-4px); border-color: hsl(var(--accent) / .5); }
+@media (prefers-reduced-motion: no-preference) {
+  .district-menu-tile { animation: menu-arrive 850ms both; }
+  .district-menu-tile:nth-child(2n) { animation-delay: 100ms; }
+  .district-menu-tile:nth-child(3n) { animation-delay: 200ms; }
+}
+@keyframes menu-arrive { from { opacity: 0; transform: translateY(24px) rotateX(16deg); } to { opacity: 1; transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y)); } }
 @media (max-width: 640px) {
-  .district-welcome { height: calc(100svh - 100px); min-height: 570px; max-height: 760px; }
-  .district-logo-view { max-height: 340px; }
-  .district-welcome-copy { padding: 18px 12px 24px; }
+  .district-welcome { height: auto; min-height: 600px; }
+  .district-welcome-content { min-height: 600px; }
+  .district-logo-view { flex: none; height: 235px; min-height: 235px; }
+  .district-welcome-copy { padding: 0 0 12px; }
+  .district-welcome-copy h1 { max-width: 340px; margin-inline: auto; }
+  .district-welcome-copy p { max-width: 290px; }
+  .district-welcome-bottom { padding-top: 15px; }
+  .district-menu-face { padding: 18px; min-height: 142px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .district-menu-tile, .district-menu-face { transform: none !important; }
 }
