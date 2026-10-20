@@ -50,9 +50,9 @@
     --navy-foreground: 0 0% 100%;
     --success: 140 55% 22%;
     --success-foreground: 0 0% 100%;
-    --welcome: 150 15% 12%;
-    --welcome-foreground: 0 0% 100%;
-    --welcome-shade: linear-gradient(180deg, hsl(var(--welcome) / .08) 0%, hsl(var(--welcome) / .15) 40%, hsl(var(--welcome) / .9) 100%);
+    --welcome: 120 15% 97%;
+    --welcome-foreground: 140 45% 16%;
+    --welcome-shade: linear-gradient(180deg, hsl(var(--welcome) / .05) 0%, hsl(var(--welcome) / .2) 40%, hsl(var(--welcome) / .94) 100%);
     --menu-shadow: 0 8px 24px -16px hsl(var(--foreground) / .3);
   }
 
@@ -174,24 +174,21 @@ html { scroll-behavior: smooth; }
 .district-welcome-copy { position: relative; }
 .district-welcome-bottom { margin-top: auto; }
 .district-menu-grid { perspective: 1100px; }
-.district-menu-tile { --tilt-x: 0deg; --tilt-y: 0deg; position: relative; display: block; border-radius: 16px; background: hsl(var(--primary)); transform-style: preserve-3d; transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y)); transition: transform 200ms ease-out; outline-offset: 5px; }
-.district-menu-face { position: relative; min-height: 142px; padding: 22px; border: 1px solid hsl(var(--border)); border-radius: 16px; background: hsl(var(--card)); transform: translateZ(5px); box-shadow: var(--menu-shadow); transition: transform 350ms ease, border-color 350ms ease; }
-.district-menu-tile:hover .district-menu-face, .district-menu-tile:focus-visible .district-menu-face { transform: translateZ(14px) translateY(-4px); border-color: hsl(var(--accent) / .5); }
-@media (prefers-reduced-motion: no-preference) {
-  .district-menu-tile { animation: menu-arrive 850ms both; }
-  .district-menu-tile:nth-child(2n) { animation-delay: 100ms; }
-  .district-menu-tile:nth-child(3n) { animation-delay: 200ms; }
-}
-@keyframes menu-arrive { from { opacity: 0; transform: translateY(24px) rotateX(16deg); } to { opacity: 1; transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y)); } }
+.district-menu-tile { --tilt-x: 0deg; --tilt-y: 0deg; position: relative; display: block; border-radius: 16px; outline-offset: 5px; }
+.district-menu-face { position: relative; min-height: 186px; padding: 22px; border: 1px solid hsl(var(--border)); border-radius: 16px; background: hsl(var(--card)); box-shadow: var(--menu-shadow); transition: border-color 350ms ease; }
+.district-menu-tile:hover .district-menu-face, .district-menu-tile:focus-visible .district-menu-face { border-color: hsl(var(--accent) / .5); }
+.district-menu-icon { width: 68px; height: 68px; display: flex; align-items: center; justify-content: center; }
+.sculptures-ready .district-menu-icon svg { visibility: hidden; }
+.district-menu-sculptures { z-index: 1; }
 @media (max-width: 640px) {
-  .district-welcome { height: auto; min-height: 600px; }
-  .district-welcome-content { min-height: 600px; }
-  .district-logo-view { flex: none; height: 235px; min-height: 235px; }
+  .district-welcome { height: auto; min-height: 510px; }
+  .district-welcome-content { min-height: 510px; }
+  .district-logo-view { flex: none; height: 185px; min-height: 185px; }
   .district-welcome-copy { padding: 0 0 12px; }
   .district-welcome-copy h1 { max-width: 340px; margin-inline: auto; }
   .district-welcome-copy p { max-width: 290px; }
   .district-welcome-bottom { padding-top: 15px; }
-  .district-menu-face { padding: 18px; min-height: 142px; }
+  .district-menu-face { padding: 16px; min-height: 186px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .district-menu-tile, .district-menu-face { transform: none !important; }

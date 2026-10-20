@@ -4,7 +4,7 @@ import { ArrowRight, Rotate3D, Pause, Play, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Menu3D } from "@/components/Menu3D";
 import logo from "@/assets/logo_novalim.png";
-import stage from "@/assets/district-premium-stage.jpg";
+import stage from "@/assets/district-daylight-stage.jpg";
 
 const DistrictScene = lazy(() => import("./DistrictScene"));
 const Fallback = () => <img src={logo} alt="Emblème du District Cité Novalim-CIE" className="h-full max-h-[290px] w-auto max-w-full object-contain" />;
@@ -54,7 +54,7 @@ export function DistrictExperience() {
             <p role="status" className="mt-4 text-base md:text-lg text-welcome-foreground/75 max-w-lg mx-auto">Bienvenue chez vous. Une communauté unie, une jeunesse engagée.</p>
             <div className="flex flex-wrap justify-center items-center gap-3 mt-7">
               <Button asChild variant="accent" size="lg" className="rounded-full"><Link to="/connexion">Espace Membre <ArrowRight /></Link></Button>
-              <Button asChild variant="outline" size="lg" className="rounded-full border-welcome-foreground/30 bg-welcome-foreground/5 text-welcome-foreground hover:bg-welcome-foreground/15 hover:text-welcome-foreground"><Link to="/conference"><Video /> Rejoindre une conférence</Link></Button>
+              <Button asChild variant="outline" size="lg" className="rounded-full border-primary/30 bg-card/80 text-primary hover:bg-secondary hover:text-primary"><Link to="/conference"><Video /> Rejoindre une conférence</Link></Button>
             </div>
           </div>
           <div className="district-welcome-bottom w-full flex items-center justify-between pb-5 pt-7">
