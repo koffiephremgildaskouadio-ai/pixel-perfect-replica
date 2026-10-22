@@ -41,14 +41,14 @@ export function DistrictExperience() {
   return (
     <>
       <section ref={section} aria-labelledby="district-experience-title" className="district-welcome relative overflow-hidden mt-16">
-        <img src={stage} alt="Architecture contemporaine aux couleurs du District" width={1920} height={1088} fetchPriority="high" className="absolute inset-0 h-full w-full object-cover" />
+        <img src={stage} alt="Architecture contemporaine aux couleurs du District" width={1920} height={1088} fetchPriority="high" className="district-welcome-drift absolute inset-0 h-full w-full object-cover" />
         <div className="district-welcome-shade absolute inset-0" />
         <div className="district-welcome-content relative container flex flex-col items-center text-center">
           <p className="text-welcome-foreground/70 text-xs font-medium uppercase pt-8 md:pt-10">Conseil Communal des Jeunes de Yopougon · Zone 7</p>
-          <div role="img" aria-label="Logo officiel du District en relief trois dimensions" className="district-logo-view relative w-full max-w-xl">
+          <Link to="/a-propos" aria-label="Découvrir le District — logo officiel en relief 3D" title="Découvrir le District" className="district-logo-view relative block w-full max-w-xl cursor-pointer">
             {(!ready || failed || reduced || !visible) && <div className="absolute inset-0 flex items-center justify-center"><Fallback /></div>}
             {visible && !failed && !reduced && <SceneBoundary><Suspense fallback={null}><DistrictScene animated={!paused} greeting={greeting} onFailure={onFailure} onReady={onReady} /></Suspense></SceneBoundary>}
-          </div>
+          </Link>
           <div className="district-welcome-copy w-full">
             <h1 id="district-experience-title" className="text-3xl md:text-5xl font-semibold text-welcome-foreground leading-tight">District Cité Novalim-CIE</h1>
             <p role="status" className="mt-4 text-base md:text-lg text-welcome-foreground/75 max-w-lg mx-auto">Bienvenue chez vous. Une communauté unie, une jeunesse engagée.</p>
