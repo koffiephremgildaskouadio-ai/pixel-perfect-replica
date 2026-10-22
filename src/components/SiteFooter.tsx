@@ -83,7 +83,7 @@ export const SiteFooter = () => (
             </li>
             <li className="flex gap-2">
               <Phone className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-              <a href="tel:+2250700000000" className="hover:text-primary transition-colors">+225 07 00 00 00 00</a>
+              <a href="tel:+2250789536319" className="hover:text-primary transition-colors">+225 07 89 53 63 19</a>
             </li>
             <li className="flex gap-2">
               <Mail className="w-4 h-4 text-accent shrink-0 mt-0.5" />
