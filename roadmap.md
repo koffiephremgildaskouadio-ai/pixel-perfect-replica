@@ -1,7 +1,8 @@
 # Améliorations
+- [x] Afficher le numéro officiel (+225) 0789536319 dans le pied de page et au dos de la carte.
 - [x] Logo 3D cliquable, accueil animé, actualités publiées 3 fois par jour.
 - [x] Remplacer le fond noir par un décor lumineux et ajouter une animation 3D visible aux huit accès du menu.
-- [ ] Vérifier l’animation automatique, les liens et le rendu sur téléphone et ordinateur.
+- [x] Vérifier l'animation automatique, les liens et le rendu sur téléphone et ordinateur.
 - [x] Recomposer l’accueil et remplacer le menu tournant par une navigation 3D lisible et élégante.
 - [x] Vérifier la navigation, l’animation et l’affichage sur ordinateur et téléphone.
 - [x] Ajouter une section 3D interactive à l’accueil, avec affichage de secours et mouvement réduit.

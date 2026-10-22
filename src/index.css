@@ -180,6 +180,7 @@ html { scroll-behavior: smooth; }
 .district-menu-icon { width: 68px; height: 68px; display: flex; align-items: center; justify-content: center; }
 .sculptures-ready .district-menu-icon svg { visibility: hidden; }
 .district-menu-sculptures { z-index: 1; }
+.district-menu-sculptures, .district-menu-sculptures * { pointer-events: none !important; }
 @media (max-width: 640px) {
   .district-welcome { height: auto; min-height: 510px; }
   .district-welcome-content { min-height: 510px; }
