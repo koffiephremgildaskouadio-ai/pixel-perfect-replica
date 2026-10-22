@@ -71,7 +71,7 @@ export const VirtualCard = ({
   const HEADER_TOP = settings.header_top || (isFranceVille ? "UNION DE LA JEUNESSE" : "CONSEIL COMMUNAL DES JEUNES DE YOPOUGON");
   const HEADER_MAIN = settings.header_main || (isFranceVille ? "DISTRICT FRANCE-VILLE" : "DISTRICT CITÉ NOVALIM - CIE");
   const VALIDITE = settings.validity || "2025 - 2026";
-  const EMERGENCY = settings.emergency_phone || "07 89 53 63 18";
+  const EMERGENCY = settings.emergency_phone || "07 89 53 63 19";
   const VERSO_TEXT = settings.verso_text || (isFranceVille
     ? "Cette carte est la propriété\ndu District France-ville.\nEn cas de perte, merci de nous contacter"
     : "Cette carte est la propriété\ndu District Cité Novalim - CIE.\nEn cas de perte, merci de nous contacter");
