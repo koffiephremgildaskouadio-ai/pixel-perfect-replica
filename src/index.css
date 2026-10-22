@@ -193,3 +193,9 @@ html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {
   .district-menu-tile, .district-menu-face { transform: none !important; }
 }
+
+@keyframes district-drift { from { transform: scale(1.04) translate3d(-1%, 0, 0); } to { transform: scale(1.12) translate3d(1.5%, -1%, 0); } }
+@keyframes district-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+.district-welcome-drift { animation: district-drift 22s ease-in-out infinite alternate; will-change: transform; }
+.district-welcome-copy { animation: district-rise 0.9s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .district-welcome-drift, .district-welcome-copy { animation: none; } }
