@@ -133,6 +133,7 @@ export type Database = {
       members: {
         Row: {
           bio: string | null
+          bureau_rank: number | null
           cahier_charges: string | null
           category: string
           created_at: string
@@ -156,6 +157,7 @@ export type Database = {
         }
         Insert: {
           bio?: string | null
+          bureau_rank?: number | null
           cahier_charges?: string | null
           category?: string
           created_at?: string
@@ -179,6 +181,7 @@ export type Database = {
         }
         Update: {
           bio?: string | null
+          bureau_rank?: number | null
           cahier_charges?: string | null
           category?: string
           created_at?: string
