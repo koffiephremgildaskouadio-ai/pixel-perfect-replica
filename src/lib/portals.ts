@@ -34,10 +34,10 @@ export const STATIC_PORTALS: PortalEntry[] = [
     title: "Bureau & Cabinet",
     subtitle: "Organisation du district",
     description:
-      "Bureau exécutif, cabinet, coordinations et commissions du District Cité Novalim-CIE.",
+      "Bureau exécutif, cabinet et coordinations du District Cité Novalim-CIE.",
     path: "/bureau",
     logo_url: logo,
-    highlights: ["Bureau exécutif", "Cabinet", "Commissions"],
+    highlights: ["Bureau exécutif", "Cabinet", "Coordination"],
   },
   {
     slug: "membres",
