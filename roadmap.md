@@ -1,4 +1,6 @@
 # Améliorations
+- [ ] Garder les 16 nouveaux titulaires dans l’ordre officiel et reclasser les autres membres du district comme simples membres.
+- [ ] Vérifier le bureau numéroté et la cohérence des fiches et certificats.
 - [x] Afficher le numéro officiel (+225) 0789536319 dans le pied de page et au dos de la carte.
 - [x] Logo 3D cliquable, accueil animé, actualités publiées 3 fois par jour.
 - [x] Remplacer le fond noir par un décor lumineux et ajouter une animation 3D visible aux huit accès du menu.
