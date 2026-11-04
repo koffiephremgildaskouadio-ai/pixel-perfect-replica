@@ -39,7 +39,7 @@ const slides = [
   {
     image: action2,
     title: "Un bureau au service de tous",
-    subtitle: "Bureau, cabinet, coordinations et commissions pour piloter le district.",
+    subtitle: "Bureau, cabinet et coordinations pour piloter le district.",
     cta: { label: "Voir le Bureau", to: "/bureau" },
   },
   {
