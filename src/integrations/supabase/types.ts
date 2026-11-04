@@ -404,6 +404,7 @@ export type Database = {
       members_public: {
         Row: {
           bio: string | null
+          bureau_rank: number | null
           cahier_charges: string | null
           category: string | null
           created_at: string | null
@@ -424,6 +425,7 @@ export type Database = {
         }
         Insert: {
           bio?: string | null
+          bureau_rank?: number | null
           cahier_charges?: string | null
           category?: string | null
           created_at?: string | null
@@ -444,6 +446,7 @@ export type Database = {
         }
         Update: {
           bio?: string | null
+          bureau_rank?: number | null
           cahier_charges?: string | null
           category?: string | null
           created_at?: string | null

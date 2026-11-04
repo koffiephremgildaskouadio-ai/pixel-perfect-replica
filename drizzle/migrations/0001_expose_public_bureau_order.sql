@@ -1,0 +1,1 @@
+CREATE OR REPLACE VIEW public.members_public AS SELECT id, user_id, member_number, nom, prenoms, poste, quartier, photo_url, category, is_active, district, bio, skills, facebook, linkedin, cahier_charges, created_at, updated_at, bureau_rank FROM public.members;

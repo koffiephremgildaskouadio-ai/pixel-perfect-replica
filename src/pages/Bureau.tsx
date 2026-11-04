@@ -1,7 +1,8 @@
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { SEO } from "@/components/SEO";
 import { PortalNav } from "@/components/PortalNav";
-import { User as UserIcon, MapPin, ArrowLeft } from "lucide-react";
+import { User as UserIcon, ArrowLeft } from "lucide-react";
+import { orderedBureau } from "@/lib/bureau";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
@@ -15,11 +16,12 @@ interface Member {
   member_number: string;
   category: string;
   photo_url: string | null;
+  bureau_rank: number | null;
 }
 
 const MemberCard = ({ member, index }: { member: Member; index: number }) => {
   const initials = `${member.nom[0]}${member.prenoms?.[0] || ""}`;
-  const isPresident = member.member_number === "NCV-2025-001";
+  const isPresident = member.bureau_rank === 1;
 
   return (
     <ScrollReveal delay={index * 80}>
@@ -34,6 +36,9 @@ const MemberCard = ({ member, index }: { member: Member; index: number }) => {
           {isPresident && (
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-accent" />
           )}
+          <span className="absolute top-3 left-3 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold" aria-label={`Rang ${member.bureau_rank}`}>
+            {member.bureau_rank}
+          </span>
           <div className="p-6 text-center space-y-3">
             {member.photo_url ? (
               <img src={member.photo_url} alt={`${member.nom} ${member.prenoms}`} className="mx-auto w-16 h-16 rounded-2xl object-cover" />
@@ -69,22 +74,22 @@ const MemberCard = ({ member, index }: { member: Member; index: number }) => {
 
 const Bureau = () => {
   const { data: members, isLoading } = useQuery({
-    queryKey: ["bureau-members"],
+    queryKey: ["bureau-members", "official-order"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("members_public")
-        .select("id, nom, prenoms, poste, member_number, category, photo_url")
-        .in("category", ["bureau", "cabinet", "coordonnateur"])
+        .select("id, nom, prenoms, poste, member_number, category, photo_url, bureau_rank, district")
+        .gte("bureau_rank", 1)
+        .lte("bureau_rank", 16)
+        .ilike("district", "%novalim%")
         .eq("is_active", true)
-        .order("member_number");
+        .order("bureau_rank");
       if (error) throw error;
-      return data;
+      return orderedBureau(data ?? []);
     },
   });
 
-  const bureauMembers = members?.filter((m) => m.category === "bureau") ?? [];
-  const cabinetMembers = members?.filter((m) => m.category === "cabinet") ?? [];
-  const coordMembers = members?.filter((m) => m.category === "coordonnateur") ?? [];
+  const bureauMembers = members ?? [];
 
   const LoadingSkeleton = () => (
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -116,7 +121,7 @@ const Bureau = () => {
               Organisation
             </span>
             <h1 className="mt-3 text-3xl lg:text-5xl font-display font-bold text-foreground leading-tight">
-              Bureau Exécutif & Cabinet
+              Bureau exécutif et de coordination
             </h1>
             <p className="mt-4 text-muted-foreground leading-relaxed">
               Les {(members?.length ?? 0)} membres élus et nommés qui dirigent et administrent le District Cité Novalim-CIE.
@@ -128,8 +133,8 @@ const Bureau = () => {
       <section className="py-16 lg:py-20">
         <div className="container">
           <SectionHeader
-            title="Bureau Exécutif"
-            description="Les membres dirigeants du district — président, vice-présidents et secrétaires."
+            title="Bureau du District"
+            description="Président, Haut Représentant et responsables du district."
           />
           {isLoading ? (
             <LoadingSkeleton />
@@ -143,41 +148,6 @@ const Bureau = () => {
         </div>
       </section>
 
-      <section className="py-16 lg:py-20 bg-secondary/30">
-        <div className="container">
-          <SectionHeader
-            title="Cabinet"
-            description="Les Dicap et Chefs de Cabinet du district."
-          />
-          {isLoading ? (
-            <LoadingSkeleton />
-          ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              {cabinetMembers.map((m, i) => (
-                <MemberCard key={m.id} member={m} index={i} />
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section className="py-16 lg:py-20">
-        <div className="container">
-          <SectionHeader
-            title="Coordonnateurs de Zones"
-            description="Les responsables de la coordination des zones du district."
-          />
-          {isLoading ? (
-            <LoadingSkeleton />
-          ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              {coordMembers.map((m, i) => (
-                <MemberCard key={m.id} member={m} index={i} />
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
     </div>
   );
 };
