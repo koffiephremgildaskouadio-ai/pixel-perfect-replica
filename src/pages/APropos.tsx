@@ -154,7 +154,7 @@ const APropos = () => {
               <Crown className="w-4 h-4" /> Communiqué officiel
             </div>
             <h2 className="text-2xl lg:text-3xl font-display font-bold text-foreground">Le nouveau Bureau exécutif et de coordination</h2>
-            <p className="mt-3 text-muted-foreground">Le District Cité Novalim-CIE annonce l'installation de son nouveau Bureau de 16 responsables, chacun doté de son certificat de nomination et de son cahier des charges.</p>
+            <p className="mt-3 text-muted-foreground">Le District Cité Novalim-CIE annonce l'installation de son nouveau Bureau de 18 responsables, chacun doté de son certificat de nomination et de son cahier des charges.</p>
           </ScrollReveal>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
             {(bureau ?? []).map((m: any) => (
