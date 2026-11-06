@@ -4,6 +4,7 @@ import { MapPin, Building2, Heart, Users, Shield, Handshake, Star, Crown, ArrowL
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { orderedBureau } from "@/lib/bureau";
 import logoNovalim from "@/assets/logo_novalim.png";
 import logoCcjy from "@/assets/logo_ccjy.jpg";
 import novaOfficial from "@/assets/nova_logo_official.jpg";
@@ -68,6 +69,13 @@ const APropos = () => {
     queryFn: async () => {
       const { data } = await (supabase as any).from("site_content").select("*");
       return data ?? [];
+    },
+  });
+  const { data: bureau } = useQuery({
+    queryKey: ["apropos-bureau"],
+    queryFn: async () => {
+      const { data } = await (supabase as any).from("members_public").select("id,nom,prenoms,poste,photo_url,bureau_rank,district,is_active").not("bureau_rank", "is", null);
+      return orderedBureau(data ?? []);
     },
   });
   const block = (key: string) => (blocks ?? []).find((b: any) => b.key === key);
@@ -135,6 +143,32 @@ const APropos = () => {
               </div>
             </ScrollReveal>
           </div>
+        </div>
+      </section>
+
+      {/* Nouveau Bureau */}
+      <section className="py-16 lg:py-20 bg-secondary/40">
+        <div className="container">
+          <ScrollReveal className="text-center mb-10 max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-semibold mb-4">
+              <Crown className="w-4 h-4" /> Communiqué officiel
+            </div>
+            <h2 className="text-2xl lg:text-3xl font-display font-bold text-foreground">Le nouveau Bureau exécutif et de coordination</h2>
+            <p className="mt-3 text-muted-foreground">Le District Cité Novalim-CIE annonce l'installation de son nouveau Bureau de 16 responsables, chacun doté de son certificat de nomination et de son cahier des charges.</p>
+          </ScrollReveal>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+            {(bureau ?? []).map((m: any) => (
+              <div key={m.id} className="rounded-3xl bg-card border border-border p-4 text-center shadow-sm">
+                <div className="mx-auto w-24 h-24 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center border-2 border-primary/20">
+                  {m.photo_url ? <img src={m.photo_url} alt={`${m.prenoms ?? ""} ${m.nom}`} loading="lazy" className="w-full h-full object-cover" /> : <Users className="w-8 h-8 text-primary" />}
+                </div>
+                <p className="mt-3 text-xs font-bold text-accent">N° {m.bureau_rank}</p>
+                <h3 className="font-display font-bold text-foreground text-sm">{`${m.nom ?? ""} ${m.prenoms ?? ""}`.trim()}</h3>
+                <p className="mt-1 text-xs text-muted-foreground line-clamp-3">{m.poste}</p>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-8"><Link to="/bureau" className="text-primary font-semibold hover:underline">Voir le bureau et les cahiers des charges →</Link></div>
         </div>
       </section>
 
