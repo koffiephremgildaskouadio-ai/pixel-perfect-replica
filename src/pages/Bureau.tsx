@@ -80,7 +80,7 @@ const Bureau = () => {
         .from("members_public")
         .select("id, nom, prenoms, poste, member_number, category, photo_url, bureau_rank, district")
         .gte("bureau_rank", 1)
-        .lte("bureau_rank", 16)
+        .lte("bureau_rank", 18)
         .ilike("district", "%novalim%")
         .eq("is_active", true)
         .order("bureau_rank");
