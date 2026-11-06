@@ -11,7 +11,7 @@ describe("nouveau bureau officiel", () => {
   it("exclut les simples membres et les postes extérieurs au nouveau bureau", () => {
     const members = [
       { id: "simple", bureau_rank: null, district: "Novalim-CIE" },
-      { id: "autre", bureau_rank: 17, district: "Novalim-CIE" },
+      { id: "autre", bureau_rank: 19, district: "Novalim-CIE" },
       { id: "france", bureau_rank: 1, district: "France-ville" },
       { id: "president", bureau_rank: 1, district: "Novalim-CIE" },
     ];
