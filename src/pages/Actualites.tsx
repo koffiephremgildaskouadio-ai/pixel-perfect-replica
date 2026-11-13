@@ -8,19 +8,12 @@ import { ArrowLeft, Newspaper, Sparkles, Calendar, Share2, Users } from "lucide-
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { useEffect } from "react";
+import { BureauPublish } from "@/components/BureauPublish";
 import { Comments } from "@/components/Comments";
 import { PostReactions } from "@/components/PostReactions";
 import { ArticleAudio } from "@/components/ArticleAudio";
 
 const Actualites = () => {
-  useEffect(() => {
-    // Rafraîchissement au plus une fois par jour côté client (le serveur le fait aussi chaque matin)
-    const today = new Date().toISOString().slice(0, 10);
-    if (localStorage.getItem("news_refresh_day") === today) return;
-    localStorage.setItem("news_refresh_day", today);
-    supabase.functions.invoke("generate-news").catch(() => {});
-  }, []);
 
 
   const { data: articles, isLoading } = useQuery({
@@ -79,6 +72,7 @@ const Actualites = () => {
 
       <section className="py-12 lg:py-20">
         <div className="container max-w-3xl space-y-6">
+          <BureauPublish />
           {isLoading && (
             <>
               {[1, 2, 3].map((i) => (

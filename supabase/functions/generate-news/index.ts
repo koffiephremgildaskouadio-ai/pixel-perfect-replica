@@ -101,6 +101,13 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // Protection : au plus une publication automatique toutes les 5 heures, quel que soit l'appelant.
+    const { data: last } = await supabase.from("actualites").select("created_at")
+      .in("source", [SRC_CCJY, SRC_AI]).order("created_at", { ascending: false }).limit(1).maybeSingle();
+    if (last && Date.now() - new Date(last.created_at).getTime() < 5 * 3600 * 1000) {
+      return new Response(JSON.stringify({ skipped: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     // 1) Sources officielles : actualités réelles du CCJY (avec vraies images)
     const scraped = await scrapeCcjy();
     const enriched: Scraped[] = [];

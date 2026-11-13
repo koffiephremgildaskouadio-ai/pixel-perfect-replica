@@ -92,7 +92,9 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     // Garde un historique large pour des réponses contextuelles riches (≈ Claude/ChatGPT)
-    const safeMessages = Array.isArray(messages) ? messages.slice(-40) : [];
+    const safeMessages = (Array.isArray(messages) ? messages.slice(-40) : [])
+      .filter((m: any) => m && (m.role === "user" || m.role === "assistant"))
+      .map((m: any) => ({ role: m.role, content: m.content }));
 
     // Image generation mode
     if (generateImage && imagePrompt) {

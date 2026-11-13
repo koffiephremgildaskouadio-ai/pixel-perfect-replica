@@ -15,6 +15,13 @@
       "when": 1793821402551,
       "tag": "0001_expose_public_bureau_order",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794600028783,
+      "tag": "0002_bureau_publish_and_member_guard",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,20 @@
 // Génère un MP3 chaleureux pour une publication du fil d'actualité.
 // Utilise Lovable AI Gateway (openai/gpt-4o-mini-tts), voix humanisée.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "npm:@supabase/supabase-js@2";
+
+async function requireUser(req: Request, roles?: string[]) {
+  const auth = req.headers.get("Authorization") ?? "";
+  const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: auth } } });
+  const { data, error } = await sb.auth.getClaims(auth.replace(/^Bearer\s+/i, ""));
+  const uid = data?.claims?.sub;
+  if (error || !uid) return null;
+  if (!roles) return uid;
+  const { data: r } = await sb.from("user_roles").select("role").eq("user_id", uid);
+  if (r?.some((x: { role: string }) => roles.includes(x.role))) return uid;
+  const { data: ed } = await sb.rpc("is_bureau_editor", { _user_id: uid });
+  return ed ? uid : null;
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -30,12 +44,15 @@ function chunk(text: string, max = 1200): string[] {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  if (!(await requireUser(req))) {
+    return new Response(JSON.stringify({ error: "Connectez-vous pour écouter." }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
   try {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY manquant");
 
     const { title, content, voice } = await req.json();
-    const rawText = `${title ? title + ". " : ""}${content ?? ""}`.trim();
+    const rawText = `${title ? title + ". " : ""}${content ?? ""}`.trim().slice(0, 8000);
     if (!rawText) {
       return new Response(JSON.stringify({ error: "Texte vide" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
