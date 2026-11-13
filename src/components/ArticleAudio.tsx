@@ -6,6 +6,7 @@ import { toast } from "sonner";
 interface Props {
   title: string;
   content: string;
+  hideShare?: boolean;
 }
 
 /**
@@ -14,7 +15,7 @@ interface Props {
  * - Musique/pad d'ambiance mixée en fond via Web Audio pour un rendu "radio".
  * - Bouton "Partager" qui envoie l'audio en pièce jointe si le navigateur le permet.
  */
-export const ArticleAudio = ({ title, content }: Props) => {
+export const ArticleAudio = ({ title, content, hideShare = false }: Props) => {
   const [state, setState] = useState<"idle" | "loading" | "playing" | "paused">("idle");
   const [sharing, setSharing] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -244,14 +245,14 @@ export const ArticleAudio = ({ title, content }: Props) => {
           </button>
         </>
       )}
-      <button
+      {!hideShare && <button
         onClick={shareWithAudio}
         disabled={sharing}
         className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-60"
       >
         {sharing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Share2 className="w-3.5 h-3.5" />}
         Partager avec l'audio
-      </button>
+      </button>}
     </div>
   );
 };
