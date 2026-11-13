@@ -28,16 +28,13 @@ const Membres = () => {
   const queryClient = useQueryClient();
 
   const checkPermissions = async (userId: string) => {
-    const [{ data: roles }, { data: me }] = await Promise.all([
+    const [{ data: roles }, { data: editor }] = await Promise.all([
       supabase.from("user_roles").select("role").eq("user_id", userId),
-      supabase.from("members").select("poste").eq("user_id", userId).maybeSingle(),
+      supabase.rpc("is_bureau_editor", { _user_id: userId }),
     ]);
     setCanDownload(!!roles?.some((r) => r.role === "super_admin"));
     const isAdmin = !!roles?.some((r) => ["admin", "super_admin", "moderator"].includes(r.role));
-    const poste = (me?.poste ?? "").toLowerCase();
-    const isVP = poste.startsWith("vice-président") || poste.startsWith("vice-president") || poste.startsWith("vice président") || poste.startsWith("vice president");
-    const isSG = poste.startsWith("secrétaire général") || poste.startsWith("secretaire general") || poste.startsWith("secrétaire generale") || poste.startsWith("secretaire générale");
-    setCanAddMember(isAdmin || isVP || isSG);
+    setCanAddMember(isAdmin || !!editor);
   };
 
   useEffect(() => {
