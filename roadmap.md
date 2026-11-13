@@ -13,4 +13,4 @@
 - [x] Remplacer l’accueil miniature par une grande image professionnelle et le logo du District en véritable relief 3D.
 - [x] Corriger la conférence bloquée par le refus d’intégration du service externe.
 - [x] Vérifier le logo 3D, pause/reprise, le lien de conférence et l’affichage sur ordinateur et téléphone.
-- [ ] Tout le bureau (bureau_rank) peut publier des actualités et ajouter membres/partenaires
+- [x] Tout le bureau (bureau_rank) peut publier des actualités et ajouter membres/partenaires
