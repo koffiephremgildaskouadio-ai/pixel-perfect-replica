@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Bot, Send, Loader2, Paperclip, X, Square, WifiOff, RefreshCcw, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { ArticleAudio } from "@/components/ArticleAudio";
+import { VoiceInput } from "@/components/VoiceInput";
 
 type Msg = { role: "user" | "assistant"; content: string; images?: string[] };
 
@@ -54,6 +56,9 @@ const ChatBubble = ({ msg }: { msg: Msg }) => {
         >
           {msg.content}
         </div>
+        {!isUser && msg.content.trim().length > 0 && (
+          <div className="mt-1.5 ml-1"><ArticleAudio title="" content={msg.content} hideShare /></div>
+        )}
         {msg.images?.map((img, i) => (
           <img key={i} src={img} alt="Image générée" loading="lazy" className="mt-2 rounded-xl max-w-full max-h-80 border border-border/50" />
         ))}
@@ -383,6 +388,7 @@ const Chat = () => {
                 className="flex-1"
                 autoFocus
               />
+              <VoiceInput disabled={isLoading} onText={(t) => setInput((prev) => (prev ? prev + " " : "") + t)} />
               {isLoading && (
                 <Button type="button" variant="outline" size="icon" onClick={cancelRequest} title="Annuler">
                   <Square className="w-4 h-4" />

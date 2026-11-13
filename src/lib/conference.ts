@@ -8,6 +8,13 @@ export function conferenceMeetingUrl(room: string, audioOnly: boolean, displayNa
   const settings = [
     `config.startWithVideoMuted=${audioOnly}`,
     "config.prejoinPageEnabled=true",
+    "config.disableAP=false",
+    "config.disableAEC=false",
+    "config.disableNS=false",
+    "config.disableAGC=false",
+    "config.enableNoisyMicDetection=true",
+    "config.enableOpusRed=true",
+    "config.audioQuality.opusMaxAverageBitrate=64000",
     `userInfo.displayName=${encodeURIComponent(JSON.stringify(displayName || "Membre Novalim"))}`,
   ].join("&");
   return `${CONFERENCE_ORIGIN}/${encodeURIComponent(conferenceRoomName(room))}#${settings}`;
