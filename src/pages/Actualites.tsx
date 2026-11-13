@@ -8,7 +8,7 @@ import { ArrowLeft, Newspaper, Sparkles, Calendar, Share2, Users } from "lucide-
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { useEffect } from "react";
+import { BureauPublish } from "@/components/BureauPublish";
 import { Comments } from "@/components/Comments";
 import { PostReactions } from "@/components/PostReactions";
 import { ArticleAudio } from "@/components/ArticleAudio";
@@ -72,6 +72,7 @@ const Actualites = () => {
 
       <section className="py-12 lg:py-20">
         <div className="container max-w-3xl space-y-6">
+          <BureauPublish />
           {isLoading && (
             <>
               {[1, 2, 3].map((i) => (
