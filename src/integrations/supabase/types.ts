@@ -130,6 +130,21 @@ export type Database = {
         }
         Relationships: []
       }
+      internal_settings: {
+        Row: {
+          key: string
+          value: string
+        }
+        Insert: {
+          key: string
+          value: string
+        }
+        Update: {
+          key?: string
+          value?: string
+        }
+        Relationships: []
+      }
       members: {
         Row: {
           bio: string | null

@@ -6,3 +6,4 @@
 - Open FFMUC conferences in a separate tab, not an iframe, because the service blocks embedding via frame-ancestors and SAMEORIGIN; invitation links retain the application room name.
 
 - Keep homepage menu destinations in readable DOM links with a single lazy-loaded, visibility-gated React Three Fiber icon layer; automatic bounded sculpture motion makes depth visible on touch devices while static icons preserve no-WebGL and reduced-motion navigation.
+- Gate automatic news publishing behind a private cron token or an admin role, because the publisher deletes and replaces news with privileged access.
