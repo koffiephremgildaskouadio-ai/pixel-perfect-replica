@@ -22,6 +22,13 @@
       "when": 1794600028783,
       "tag": "0002_bureau_publish_and_member_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794745069218,
+      "tag": "0003_news_cron_token",
+      "breakpoints": true
     }
   ]
 }
