@@ -9,6 +9,48 @@ const corsHeaders = {
 const CCJY_BASE = "https://ccj-yop.org";
 const SRC_CCJY = "CCJY — ccj-yop.org";
 const SRC_AI = "IA District Novalim-CIE";
+const SRC_MAIRIE = "Mairie de Yopougon — yopougon.ci";
+const SRC_MIN = "Ministère de la Promotion de la Jeunesse — jeunesse.gouv.ci";
+const AUTO_SOURCES = [SRC_CCJY, SRC_AI, SRC_MAIRIE, SRC_MIN];
+const UA = { "User-Agent": "Mozilla/5.0 DistrictNovalimBot" };
+const get = (url: string, ms = 12000) => fetch(url, { headers: UA, signal: AbortSignal.timeout(ms) });
+
+// Lecture générique d'une page d'actualités officielle : liens d'articles + image og de chaque article.
+async function scrapeListing(listUrl: string, pathRe: RegExp, keyword?: RegExp, max = 3): Promise<Scraped[]> {
+  try {
+    const r = await get(listUrl);
+    if (!r.ok) return [];
+    const html = await r.text();
+    const base = new URL(listUrl);
+    const seen = new Set<string>();
+    const out: Scraped[] = [];
+    for (const m of html.matchAll(/<a[^>]+href="([^"#]+)"[^>]*>([\s\S]{0,400}?)<\/a>/g)) {
+      const title = decode(m[2]);
+      if (title.length < 25 || title.length > 220) continue;
+      let link: string;
+      try { link = new URL(m[1], base).href; } catch { continue; }
+      if (!link.startsWith(base.origin) || !pathRe.test(new URL(link).pathname) || seen.has(link)) continue;
+      if (keyword && !keyword.test(title)) continue;
+      seen.add(link);
+      out.push({ title, content: "", image: null, link });
+      if (out.length >= max) break;
+    }
+    for (const it of out) {
+      try {
+        const d = await (await get(it.link!, 10000)).text();
+        const og = d.match(/property="og:image"\s+content="([^"]+)"/)?.[1];
+        const desc = d.match(/(?:property="og:description"|name="description")\s+content="([^"]+)"/)?.[1];
+        const paras = [...d.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/g)].map((x) => decode(x[1])).filter((t) => t.length > 60);
+        it.image = og ? new URL(og, base).href : null;
+        it.content = (paras.join("\n\n") || decode(desc ?? "")).slice(0, 1800);
+      } catch { /* article illisible : ignoré */ }
+    }
+    return out.filter((o) => o.content.length > 40);
+  } catch (e) {
+    console.warn("source indisponible", listUrl, e instanceof Error ? e.message : e);
+    return [];
+  }
+}
 
 const decode = (s: string) =>
   s
@@ -26,7 +68,7 @@ const decode = (s: string) =>
 type Scraped = { title: string; content: string; image: string | null; link: string | null };
 
 async function scrapeCcjy(): Promise<Scraped[]> {
-  const res = await fetch(CCJY_BASE, { headers: { "User-Agent": "Mozilla/5.0 DistrictNovalimBot" } });
+  const res = await get(CCJY_BASE);
   if (!res.ok) return [];
   const html = await res.text();
   const section = html.split("<!-- ACTUALITÉS -->")[1] ?? html;
@@ -50,7 +92,7 @@ async function scrapeCcjy(): Promise<Scraped[]> {
 
 async function fetchDetail(url: string): Promise<string | null> {
   try {
-    const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 DistrictNovalimBot" } });
+    const r = await get(url);
     if (!r.ok) return null;
     const h = await r.text();
     const body = h.match(/<article[\s\S]*?<\/article>/)?.[0] ?? h.match(/<div class="card-body[\s\S]*?<\/div>/)?.[0];
@@ -101,17 +143,40 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // Seuls la planification (jeton secret) ou un administrateur peuvent publier/purger.
+    const token = req.headers.get("x-cron-token");
+    let allowed = false;
+    if (token) {
+      const { data } = await supabase.from("internal_settings").select("value").eq("key", "news_cron_token").maybeSingle();
+      allowed = !!data && data.value === token;
+    }
+    if (!allowed) {
+      const jwt = req.headers.get("Authorization")?.replace("Bearer ", "");
+      const { data: u } = jwt ? await supabase.auth.getUser(jwt) : { data: { user: null } };
+      if (u?.user) {
+        const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", u.user.id);
+        allowed = !!roles?.some((x: any) => ["admin", "super_admin"].includes(x.role));
+      }
+    }
+    if (!allowed) {
+      return new Response(JSON.stringify({ error: "Non autorisé" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     // Protection : au plus une publication automatique toutes les 5 heures, quel que soit l'appelant.
     const { data: last } = await supabase.from("actualites").select("created_at")
-      .in("source", [SRC_CCJY, SRC_AI]).order("created_at", { ascending: false }).limit(1).maybeSingle();
+      .in("source", AUTO_SOURCES).order("created_at", { ascending: false }).limit(1).maybeSingle();
     if (last && Date.now() - new Date(last.created_at).getTime() < 5 * 3600 * 1000) {
       return new Response(JSON.stringify({ skipped: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     // 1) Sources officielles : actualités réelles du CCJY (avec vraies images)
-    const scraped = await scrapeCcjy();
+    const [scraped, mairie, ministere] = await Promise.all([
+      scrapeCcjy().catch(() => [] as Scraped[]),
+      scrapeListing("https://www.yopougon.ci/", /\/(actualite|actualites|article|news|blog|\d{4}\/)/i),
+      scrapeListing("https://jeunesse.gouv.ci/actualites", /\/(actualites?|node|article)\//i),
+    ]);
     const enriched: Scraped[] = [];
-    for (const item of scraped.slice(0, 6)) {
+    for (const item of scraped.slice(0, 4)) {
       let content = item.content;
       if (item.link) {
         const full = await fetchDetail(item.link);
@@ -129,7 +194,7 @@ serve(async (req) => {
     const prompt = `Tu es le community manager du District Cité Novalim-CIE (CCJY, Yopougon, Côte d'Ivoire).
 Aujourd'hui : ${dateStr}.
 Contexte des actualités réelles du CCJY à ta disposition :
-${enriched.map((e, i) => `${i + 1}. ${e.title}`).join("\n") || "(aucune)"}
+${[...enriched, ...mairie, ...ministere].map((e, i) => `${i + 1}. ${e.title}`).join("\n") || "(aucune)"}
 
 Génère EXACTEMENT 1 publication COURTE et percutante pour la jeunesse du district, ancrée dans la vie locale de Yopougon : Mairie de Yopougon, CCJY, Ministère de la Promotion de la Jeunesse et de l'Emploi, Ministère de l'Hydraulique/Assainissement/Salubrité, Ministère de l'Intérieur (civisme, sécurité, état civil).
 N'invente JAMAIS de date précise, de communiqué officiel ni de nom de personne.
@@ -158,6 +223,15 @@ Réponds UNIQUEMENT avec le JSON.`;
         image_url: e.image,
         media: e.image ? [{ type: "image", url: e.image }] : [],
       })),
+      ...[[mairie, SRC_MAIRIE, "mairie"], [ministere, SRC_MIN, "ministere"]].flatMap(([list, src, type]) =>
+        (list as Scraped[]).map((e) => ({
+          title: e.title.slice(0, 200),
+          content: `${e.content}\n\n🔗 Source officielle : ${e.link}`,
+          source: src as string,
+          type: type as string,
+          image_url: e.image,
+          media: e.image ? [{ type: "image", url: e.image }] : [],
+        }))),
       ...aiPosts.slice(0, 1).map((a: any) => ({
         title: String(a.title || "").slice(0, 200),
         content: String(a.content || ""),
@@ -175,11 +249,11 @@ Réponds UNIQUEMENT avec le JSON.`;
     }
 
     // 3) Purge des anciennes publications automatiques AVANT insertion (évite doublons / surcharge serveur)
-    await supabase.from("actualites").delete().in("source", [SRC_CCJY, SRC_AI]);
+    await supabase.from("actualites").delete().in("source", AUTO_SOURCES);
 
     await supabase.from("actualites").insert(rows);
 
-    return new Response(JSON.stringify({ success: true, count: rows.length, ccjy: enriched.length }), {
+    return new Response(JSON.stringify({ success: true, count: rows.length, ccjy: enriched.length, mairie: mairie.length, ministere: ministere.length }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
